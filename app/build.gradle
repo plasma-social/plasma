@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'app.dexstr'
+    namespace 'social.plasma'
     compileSdk 33
 
     defaultConfig {
-        applicationId "app.dexstr"
+        applicationId "social.plasma"
         minSdk 24
         targetSdk 33
         versionCode 1

@@ -1,4 +1,4 @@
-package app.dexstr
+package social.plasma
 
 import org.junit.Test
 
