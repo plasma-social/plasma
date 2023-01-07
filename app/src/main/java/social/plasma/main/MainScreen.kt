@@ -1,4 +1,4 @@
-package app.dexstr.main
+package social.plasma.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding

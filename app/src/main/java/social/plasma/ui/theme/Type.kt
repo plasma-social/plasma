@@ -1,4 +1,4 @@
-package app.dexstr.ui.theme
+package social.plasma.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
