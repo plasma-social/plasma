@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import social.plasma.main.MainScreen
+import social.plasma.navigation.Screen
 
 @Composable
 fun PlasmaApp(
@@ -16,9 +17,9 @@ fun PlasmaApp(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = "main"
+        startDestination = Screen.Main.route
     ) {
-        composable("main") {
+        composable(Screen.Main.route) {
             MainScreen()
         }
     }

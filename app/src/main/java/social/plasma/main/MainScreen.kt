@@ -1,6 +1,6 @@
 package social.plasma.main
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -17,51 +17,79 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import social.plasma.R
+import social.plasma.navigation.Screen
+import social.plasma.navigation.isActiveScreen
+import social.plasma.ui.theme.PlasmaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    modifier: Modifier = Modifier,
+    navHostController: NavHostController = rememberNavController(),
 ) {
-    var selected by remember {
-        mutableStateOf(0)
-    }
+    val bottomNavItems = listOf(
+        NavigationBarScreen(Screen.Home, Icons.Outlined.Home),
+        NavigationBarScreen(Screen.Search, Icons.Outlined.Search),
+        NavigationBarScreen(Screen.Messages, Icons.Outlined.Message),
+        NavigationBarScreen(Screen.Notifications, Icons.Outlined.Notifications),
+    )
 
     Scaffold(
+        modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Default.Add, contentDescription = "")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
             }
         },
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(
-                    selected = selected == 0,
-                    onClick = { selected = 0 },
-                    icon = { Icon(Icons.Outlined.Home, "") },
-                )
-                NavigationBarItem(
-                    selected = selected == 1,
-                    onClick = { selected = 1 },
-                    icon = { Icon(Icons.Outlined.Message, "") },
-                )
-                NavigationBarItem(
-                    selected = selected == 2,
-                    onClick = { selected = 2 },
-                    icon = { Icon(Icons.Outlined.Search, "") },
-                )
-                NavigationBarItem(
-                    selected = selected == 3,
-                    onClick = { selected = 3 },
-                    icon = { Icon(Icons.Outlined.Notifications, "") },
-                )
+                val navBackStackEntry by navHostController.currentBackStackEntryAsState()
+
+                bottomNavItems.forEach { (screen, icon) ->
+                    NavigationBarItem(
+                        selected = navBackStackEntry?.isActiveScreen(screen) ?: false,
+                        onClick = { navHostController.navigate(screen.route) },
+                        icon = { Icon(icon, stringResource(screen.name)) },
+                    )
+                }
             }
         }) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            Text("Selected $selected")
+        NavHost(
+            navController = navHostController,
+            modifier = Modifier.padding(paddingValues),
+            startDestination = Screen.Home.route
+        ) {
+            bottomNavItems.forEach { (screen) ->
+                composable(screen.route) {
+                    Text(
+                        modifier = Modifier.fillMaxSize(),
+                        text = stringResource(screen.name),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
+    }
+}
+
+
+data class NavigationBarScreen(val screen: Screen, val icon: ImageVector)
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewMainScreen() {
+    PlasmaTheme {
+        MainScreen()
     }
 }
