@@ -1,5 +1,7 @@
 package app.dexstr
 
+import app.dexstr.relay.Spike
+import okhttp3.OkHttpClient
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -11,7 +13,9 @@ import org.junit.Assert.*
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun openWebSocket() {
+        val client = OkHttpClient()
+        Spike(client).doIt()
+        Thread.sleep(999_999)
     }
 }
