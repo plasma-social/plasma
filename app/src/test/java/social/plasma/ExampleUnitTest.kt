@@ -1,4 +1,4 @@
-package app.dexstr
+package social.plasma
 
 import app.dexstr.relay.Spike
 import okhttp3.OkHttpClient

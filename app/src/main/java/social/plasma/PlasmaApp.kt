@@ -1,4 +1,4 @@
-package app.dexstr
+package social.plasma
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -6,10 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import app.dexstr.main.MainScreen
+import social.plasma.main.MainScreen
 
 @Composable
-fun DexstrApp(
+fun PlasmaApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
