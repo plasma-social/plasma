@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">plasma</string>
+    <string name="add">Add</string>
+    <string name="home">Home</string>
+    <string name="messages">Messages</string>
+    <string name="search">Search</string>
+    <string name="notifications">Notifications</string>
+    <string name="main">Main</string>
 </resources>
