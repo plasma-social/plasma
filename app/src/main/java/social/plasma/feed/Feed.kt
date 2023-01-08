@@ -52,6 +52,7 @@ private fun Loading() {
 @Composable
 private fun FeedList(noteList: List<Note>) {
     LazyColumn {
+        // TODO add keys from Note ID
         items(noteList) { note ->
             ListItem(headlineText = {
                 Text(text = note.content)
