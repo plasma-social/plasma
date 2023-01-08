@@ -1,4 +1,4 @@
-package social.plasma.navigation
+package social.plasma.ui.navigation
 
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy

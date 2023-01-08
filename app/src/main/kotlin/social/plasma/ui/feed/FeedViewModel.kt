@@ -1,4 +1,4 @@
-package social.plasma.feed
+package social.plasma.ui.feed
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState

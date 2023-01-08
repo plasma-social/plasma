@@ -1,4 +1,4 @@
-package social.plasma
+package social.plasma.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import social.plasma.main.MainScreen
-import social.plasma.navigation.Screen
+import social.plasma.ui.main.MainScreen
+import social.plasma.ui.navigation.Screen
 
 @Composable
 fun PlasmaApp(
