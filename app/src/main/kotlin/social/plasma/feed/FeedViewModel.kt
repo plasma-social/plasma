@@ -39,7 +39,7 @@ class FeedViewModel @Inject constructor(
         LaunchedEffect(newMessage) {
             // TODO filter at repository level using strongly typed classes
             newMessage?.let {
-                messageList.add(Note(it))
+                messageList.add(0, Note(it))
             }
         }
 
