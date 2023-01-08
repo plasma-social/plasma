@@ -1,4 +1,4 @@
-package social.plasma
+package social.plasma.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

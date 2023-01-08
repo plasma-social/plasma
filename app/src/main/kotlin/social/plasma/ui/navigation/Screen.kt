@@ -1,4 +1,4 @@
-package social.plasma.navigation
+package social.plasma.ui.navigation
 
 import androidx.annotation.StringRes
 import social.plasma.R

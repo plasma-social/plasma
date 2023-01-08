@@ -1,19 +1,21 @@
-package social.plasma.main
+package social.plasma.ui.main
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Message
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Segment
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,9 +28,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import social.plasma.R
-import social.plasma.feed.Feed
-import social.plasma.navigation.Screen
-import social.plasma.navigation.isActiveScreen
+import social.plasma.ui.feed.Feed
+import social.plasma.ui.navigation.Screen
+import social.plasma.ui.navigation.isActiveScreen
 import social.plasma.ui.theme.PlasmaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,14 +40,19 @@ fun MainScreen(
     navHostController: NavHostController = rememberNavController(),
 ) {
     val bottomNavItems = listOf(
-        NavigationBarScreen(Screen.Home, Icons.Outlined.Home),
+        NavigationBarScreen(Screen.Home, Icons.Outlined.Segment),
         NavigationBarScreen(Screen.Search, Icons.Outlined.Search),
-        NavigationBarScreen(Screen.Messages, Icons.Outlined.Message),
+        NavigationBarScreen(Screen.Messages, Icons.Outlined.Forum),
         NavigationBarScreen(Screen.Notifications, Icons.Outlined.Notifications),
     )
 
     Scaffold(
         modifier = modifier,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(text = stringResource(R.string.app_name)) },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { /*TODO*/ }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
