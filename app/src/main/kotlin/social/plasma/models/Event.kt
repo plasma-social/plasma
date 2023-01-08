@@ -1,4 +1,4 @@
-package social.plasma.relay
+package social.plasma.models
 
 import com.squareup.moshi.Json
 import okio.ByteString
