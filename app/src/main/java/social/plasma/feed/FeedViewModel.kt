@@ -1,5 +1,6 @@
 package social.plasma.feed
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -12,7 +13,7 @@ import app.cash.molecule.launchMolecule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.filter
 import social.plasma.models.Note
 import social.plasma.relay.Relays
 import javax.inject.Inject
@@ -27,16 +28,19 @@ class FeedViewModel @Inject constructor(
 
     // TODO only subscribe to relays once during the entire app cycle
     // https://github.com/nostr-protocol/nips/blob/master/01.md#other-notes
-    private val relaySubscription = relays.subscribe("wss://relay.damus.io").take(5)
+    private val relaySubscription =
+        relays.subscribe("wss://relay.damus.io").filter { it.contains("kind\":1") }
 
     val uiState: StateFlow<FeedListUiState> = moleculeScope.launchMolecule(recompositionClock) {
         // TODO move this to some type of repository that can aggregate the list
         val messageList = remember { mutableStateListOf<Note>() }
-        val newMessage by relaySubscription.collectAsState(initial = "")
+        val newMessage by relaySubscription.collectAsState(initial = null)
 
-        // TODO filter at repository level using strongly typed classes
-        if (newMessage.isNotBlank() && newMessage.contains("kind\":1")) {
-            messageList.add(Note(newMessage))
+        LaunchedEffect(newMessage) {
+            // TODO filter at repository level using strongly typed classes
+            newMessage?.let {
+                messageList.add(Note(it))
+            }
         }
 
         if (messageList.isEmpty()) {
