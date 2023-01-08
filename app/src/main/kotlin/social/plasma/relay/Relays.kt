@@ -1,25 +1,31 @@
 package social.plasma.relay
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
+import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
+import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import kotlin.coroutines.CoroutineContext
+import social.plasma.relay.json.HexByteStringAdapter
+import social.plasma.relay.json.InstantAdapter
+import social.plasma.relay.json.RequestMessageAdapter
 
 class Relays(
     private val okHttpClient: OkHttpClient,
-    private val coroutineContext: CoroutineContext,
 ) {
 
-    fun subscribe(
-        url: String,
-    ): Flow<String> {
-        val messages = MutableSharedFlow<String>()
-        okHttpClient.newWebSocket(
-            request = Request.Builder().url(url).build(),
-            listener = RelayWebSocketListener(messages, coroutineContext)
-        )
-        return messages
-    }
+    private val moshi = Moshi.Builder()
+        .add(InstantAdapter())
+        .add(HexByteStringAdapter())
+        .add(RequestMessageAdapter())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
 
+    fun subscribe(url: String): RelayService = Scarlet.Builder()
+        .webSocketFactory(okHttpClient.newWebSocketFactory(url))
+        .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
+        .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
+        .build()
+        .create()
 }

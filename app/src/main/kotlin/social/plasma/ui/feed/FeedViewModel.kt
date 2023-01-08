@@ -29,12 +29,14 @@ class FeedViewModel @Inject constructor(
     // TODO only subscribe to relays once during the entire app cycle
     // https://github.com/nostr-protocol/nips/blob/master/01.md#other-notes
     private val relaySubscription =
-        relays.subscribe("wss://relay.damus.io").filter { it.contains("kind\":1") }
+        relays.subscribe("wss://relay.damus.io")
+        .observeEvents()
+        .filter { it.contains("kind\":1") }
 
     val uiState: StateFlow<FeedListUiState> = moleculeScope.launchMolecule(recompositionClock) {
         // TODO move this to some type of repository that can aggregate the list
         val messageList = remember { mutableStateListOf<Note>() }
-        val newMessage by relaySubscription.collectAsState(initial = null)
+        val newMessage by relaySubscription.blockingNext() // ???
 
         LaunchedEffect(newMessage) {
             // TODO filter at repository level using strongly typed classes
