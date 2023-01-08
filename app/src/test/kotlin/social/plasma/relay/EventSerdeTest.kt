@@ -9,16 +9,13 @@ import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import social.plasma.relay.json.HexByteStringAdapter
-import social.plasma.relay.json.InstantAdapter
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class EventSerdeTest : StringSpec({
 
     val subject = Moshi.Builder()
-        .add(InstantAdapter())
-        .add(HexByteStringAdapter())
+        .add(NostrMessageAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build().adapter(Event::class.java)
 
