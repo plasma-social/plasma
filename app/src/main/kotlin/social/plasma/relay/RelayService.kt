@@ -4,7 +4,8 @@ import com.tinder.scarlet.WebSocket
 import com.tinder.scarlet.ws.Receive
 import com.tinder.scarlet.ws.Send
 import io.reactivex.Flowable
-import kotlinx.coroutines.flow.Flow
+import social.plasma.relay.message.RelayMessage
+import social.plasma.relay.message.RequestMessage
 
 interface RelayService {
 

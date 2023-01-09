@@ -1,4 +1,4 @@
-package social.plasma
+package social.plasma.relay
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize

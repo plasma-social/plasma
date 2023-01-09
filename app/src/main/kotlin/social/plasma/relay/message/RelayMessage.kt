@@ -1,4 +1,6 @@
-package social.plasma.relay
+package social.plasma.relay.message
+
+import social.plasma.models.Event
 
 sealed class RelayMessage {
 

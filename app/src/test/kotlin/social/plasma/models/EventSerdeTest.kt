@@ -1,4 +1,4 @@
-package social.plasma.relay
+package social.plasma.models
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -9,6 +9,7 @@ import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import social.plasma.relay.message.NostrMessageAdapter
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -34,7 +35,7 @@ class EventSerdeTest : StringSpec({
         private val arbByteString64: Arb<ByteString> = Arb.list(Arb.byte(), 64..64)
             .map { it.toByteArray().toByteString() }
 
-        private val arbInstantSeconds: Arb<Instant> =
+        val arbInstantSeconds: Arb<Instant> =
             Arb.instant(Instant.EPOCH, Instant.now().plus(5000, ChronoUnit.DAYS))
                 .map { it.truncatedTo(ChronoUnit.SECONDS) }
 

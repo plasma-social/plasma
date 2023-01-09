@@ -1,4 +1,4 @@
-package social.plasma.relay
+package social.plasma.relay.message
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -7,9 +7,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
-import social.plasma.relay.EventSerdeTest.Companion.arbEvent
-import social.plasma.relay.RelayMessage.EventRelayMessage
-import social.plasma.relay.RelayMessage.NoticeRelayMessage
+import social.plasma.models.EventSerdeTest.Companion.arbEvent
+import social.plasma.relay.message.RelayMessage.EventRelayMessage
+import social.plasma.relay.message.RelayMessage.NoticeRelayMessage
 import java.util.*
 
 class RelayMessageAdapterTest : StringSpec({

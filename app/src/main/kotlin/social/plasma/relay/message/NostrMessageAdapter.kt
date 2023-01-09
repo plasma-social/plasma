@@ -1,21 +1,33 @@
-package social.plasma.relay
+package social.plasma.relay.message
 
 import com.squareup.moshi.*
 import okio.ByteString
 import okio.ByteString.Companion.decodeHex
-import social.plasma.relay.Filters
-import social.plasma.relay.RelayMessage.EventRelayMessage
-import social.plasma.relay.RelayMessage.NoticeRelayMessage
-import social.plasma.relay.RequestMessage
+import social.plasma.models.Event
+import social.plasma.relay.message.RelayMessage.EventRelayMessage
+import social.plasma.relay.message.RelayMessage.NoticeRelayMessage
 import java.time.Instant
-import java.util.*
 
 class NostrMessageAdapter {
 
     // RequestMessage
+    @FromJson
+    fun requestMessageFromJson(
+        reader: JsonReader,
+        filtersDelegate: JsonAdapter<Filters>
+    ): RequestMessage {
+        reader.beginArray()
+        reader.nextString()
+        val subscriptionId = reader.nextString()
+        val filters = filtersDelegate.fromJson(reader)!!
+        reader.endArray()
+        return RequestMessage(subscriptionId, filters)
+    }
+
     @ToJson
     fun requestMessageToJson(request: RequestMessage) =
-        listOf("REQ", request.subscriptionId, Filters(Instant.now()))
+        listOf("REQ", request.subscriptionId, request.filters)
+
 
     // RelayMessage
     @FromJson

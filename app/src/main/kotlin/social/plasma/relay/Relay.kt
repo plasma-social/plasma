@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.reactive.asFlow
 import social.plasma.models.Note
+import social.plasma.relay.message.Filters
+import social.plasma.relay.message.RelayMessage
+import social.plasma.relay.message.RequestMessage
 import java.time.Instant
 
 class Relay(private val service: RelayService) {
