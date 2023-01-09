@@ -8,6 +8,7 @@ import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
 import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
 import okhttp3.OkHttpClient
+import social.plasma.relay.message.NostrMessageAdapter
 
 class Relays(
     private val okHttpClient: OkHttpClient,

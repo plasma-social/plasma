@@ -1,4 +1,4 @@
-package social.plasma.relay
+package social.plasma.relay.message
 
 import java.time.Instant
 import java.util.*
