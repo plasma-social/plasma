@@ -15,6 +15,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRelays(): Relays {
-        return Relays(OkHttpClient(), Dispatchers.IO)
+        return Relays(OkHttpClient())
     }
 }

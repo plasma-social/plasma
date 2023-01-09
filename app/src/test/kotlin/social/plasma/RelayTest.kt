@@ -1,20 +1,23 @@
 package social.plasma
 
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.junit.Test
+import okhttp3.logging.HttpLoggingInterceptor
 import social.plasma.relay.Relays
 
-class RelayTest {
+class RelayTest : StringSpec({
 
-    @Test
-    fun openWebSocket() = runBlocking {
-        val relays = Relays(OkHttpClient(), coroutineContext)
-        val flow = relays.subscribe("wss://relay.damus.io")
-        val messages = flow.take(3).toList()
-        messages.forEach { println(it) }
-        assert(messages.size == 3)
+    "can get events from a relay" {
+        val relays = Relays(OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+            .build()
+        )
+        val relay = relays.relay("wss://relay.damus.io").connectAndSubscribe()
+        val events = relay.flowNotes().take(3).toList()
+        events.forEach { println(it) }
+        events shouldHaveSize 3
     }
-}
+})
