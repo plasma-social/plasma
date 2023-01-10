@@ -4,6 +4,10 @@ import com.squareup.moshi.Json
 import okio.ByteString
 import java.time.Instant
 
+/**
+ * An event is the only kind of object that exists in nostr.
+ * It can be further specialised by `kind`.
+ */
 data class Event(
     val id: ByteString,
     @Json(name = "pubkey")
@@ -14,4 +18,10 @@ data class Event(
     // TODO tags
     val content: String,
     val sig: ByteString,
-)
+) {
+
+    fun maybeToNote(): Note? =
+        if (kind == 1) Note(content = content, pubKey = pubKey.hex(), createdAt = createdAt)
+        else null
+
+}
