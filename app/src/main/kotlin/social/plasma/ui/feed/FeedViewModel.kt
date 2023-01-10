@@ -11,7 +11,9 @@ import app.cash.molecule.launchMolecule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import social.plasma.models.Note
 import social.plasma.repository.NoteRepository
+import social.plasma.ui.components.FeedCardUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,9 +24,21 @@ class FeedViewModel @Inject constructor(
     private val moleculeScope =
         CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
 
-    val uiState: StateFlow<FeedListUiState> = moleculeScope.launchMolecule(recompositionClock) {
-        val messageList by remember { noteRepository.observeNotes() }.collectAsState(initial = null)
+    val uiState: StateFlow<FeedUiState> = moleculeScope.launchMolecule(recompositionClock) {
+        val noteList by remember { noteRepository.observeNotes() }.collectAsState(initial = null)
 
-        messageList?.let { FeedListUiState.Loaded(it) } ?: FeedListUiState.Loading
+        noteList?.let { notes ->
+            val feedCardList = notes.map { it.toFeedUiModel() }
+            FeedUiState.Loaded(feedCardList)
+        } ?: FeedUiState.Loading
     }
 }
+
+private fun Note.toFeedUiModel(): FeedCardUiModel = FeedCardUiModel(
+    id = id,
+    name = "${pubKey.take(8)}...${pubKey.takeLast(8)}",
+    nip5 = "notrplebs.com",
+    content = content,
+    timePosted = "1m",
+    imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}"
+)
