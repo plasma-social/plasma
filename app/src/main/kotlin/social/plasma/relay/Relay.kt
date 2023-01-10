@@ -5,18 +5,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.reactive.asFlow
-import social.plasma.models.Note
 import social.plasma.relay.message.Filters
-import social.plasma.relay.message.RelayMessage
+import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.relay.message.RequestMessage
 import java.time.Instant
 
 class Relay(private val service: RelayService) {
 
-    fun flowNotes(): Flow<Note> = service.relayMessageFlow()
-        .filter { it is RelayMessage.EventRelayMessage && it.event.kind == 1 }
-        .map { it as RelayMessage.EventRelayMessage }
-        .map { Note(it.event.content) }
+    fun flowRelayMessages(): Flow<EventRelayMessage> = service.relayMessageFlow()
+        .filter { it is EventRelayMessage && it.event.kind == 1 }
+        .map { it as EventRelayMessage }
         .asFlow()
 
     suspend fun connectAndSubscribe(

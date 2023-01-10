@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import social.plasma.models.Note
 import social.plasma.ui.theme.PlasmaTheme
+import java.time.Instant
 
 @Composable
 fun Feed(
@@ -61,9 +62,13 @@ private fun FeedList(
     ) {
         // TODO add keys from Note ID
         items(noteList) { note ->
-            ListItem(headlineText = {
-                Text(text = note.content)
-            })
+            ListItem(
+                overlineText = { Text(note.pubKey) },
+                headlineText = {
+                    Text(text = note.content)
+                },
+                supportingText = { Text(text = "${note.createdAt}") }
+            )
         }
     }
 }
@@ -71,7 +76,14 @@ private fun FeedList(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun PreviewFeedList() {
-    val uiState = FeedListUiState.Loaded(noteList = (0..50).map { Note("Note $it") })
+    val uiState =
+        FeedListUiState.Loaded(noteList = (0..50).map {
+            Note(
+                "Note $it",
+                pubKey = "$it",
+                createdAt = Instant.now()
+            )
+        })
 
     PlasmaTheme {
         FeedContent(uiState = uiState)
