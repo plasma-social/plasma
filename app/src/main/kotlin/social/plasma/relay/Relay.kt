@@ -13,7 +13,7 @@ import java.time.Instant
 class Relay(private val service: RelayService) {
 
     fun flowRelayMessages(): Flow<EventRelayMessage> = service.relayMessageFlow()
-        .filter { it is EventRelayMessage && it.event.kind == 1 }
+        .filter { it is EventRelayMessage }
         .map { it as EventRelayMessage }
         .asFlow()
 

@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import social.plasma.models.Event
 import social.plasma.models.Note
 import social.plasma.relay.Relay
 import social.plasma.relay.Relays
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
+import java.util.TreeSet
 import javax.inject.Inject
 
 interface NoteRepository {
@@ -52,11 +52,12 @@ class RealNoteRepository @Inject constructor(
 
     private val notesSharedFlow: SharedFlow<List<Note>> =
         combine(relayFlows) { values ->
-            // TODO Find a more efficient way to keep this list flat and sorted
-            values.asList()
-                .flatten()
-                .sortedByDescending { it.event.createdAt }
-                .map { it.event.toNote() }
+            values.fold(TreeSet<Note> { l, r ->
+                r.createdAt.compareTo(l.createdAt)
+            }) { acc, list ->
+                acc.addAll(list.mapNotNull { it.event.maybeToNote() })
+                acc
+            }.toList()
         }.shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     init {
@@ -69,5 +70,3 @@ class RealNoteRepository @Inject constructor(
         return notesSharedFlow
     }
 }
-
-private fun Event.toNote() = Note(content = content, pubKey = pubKey.hex(), createdAt = createdAt)
