@@ -1,3 +1,9 @@
 package social.plasma.models
 
-data class Note(val content: String)
+import java.time.Instant
+
+data class Note(
+    val content: String,
+    val pubKey: String,
+    val createdAt: Instant,
+)

@@ -2,16 +2,15 @@ package social.plasma.repository
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import social.plasma.models.Event
 import social.plasma.models.Note
 import social.plasma.relay.Relay
 import social.plasma.relay.Relays
@@ -51,17 +50,14 @@ class RealNoteRepository @Inject constructor(
             }
     }
 
-    @OptIn(FlowPreview::class)
     private val notesSharedFlow: SharedFlow<List<Note>> =
         combine(relayFlows) { values ->
             // TODO Find a more efficient way to keep this list flat and sorted
             values.asList()
                 .flatten()
                 .sortedByDescending { it.event.createdAt }
-                .map { Note(it.event.content) }
-        }
-            .debounce(500L)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+                .map { it.event.toNote() }
+        }.shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     init {
         scope.launch {
@@ -73,3 +69,5 @@ class RealNoteRepository @Inject constructor(
         return notesSharedFlow
     }
 }
+
+private fun Event.toNote() = Note(content = content, pubKey = pubKey.hex(), createdAt = createdAt)
