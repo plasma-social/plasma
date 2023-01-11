@@ -6,4 +6,7 @@
     <string name="search">Search</string>
     <string name="notifications">Notifications</string>
     <string name="main">Main</string>
+    <string name="verified">verified</string>
+    <string name="posts">Posts</string>
+    <string name="posts_and_replies"><![CDATA[Posts & Replies]]></string>
 </resources>

@@ -77,10 +77,13 @@ fun PreviewFeedList() {
             FeedCardUiModel(
                 id = "id",
                 name = "$it",
-                nip5 = "notrplebs.com",
+                nip5 = "nostrplebs.com",
                 content = "Content $it",
                 timePosted = "1m",
-                imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$it"
+                imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$it",
+                likeCount = "490k",
+                replyCount = "25k",
+                shareCount = "1.5k"
             )
         })
 
