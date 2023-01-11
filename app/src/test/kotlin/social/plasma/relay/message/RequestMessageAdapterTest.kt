@@ -5,12 +5,11 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
-import io.kotest.property.arbitrary.arbitrary
-import io.kotest.property.arbitrary.bind
-import io.kotest.property.arbitrary.map
-import io.kotest.property.arbitrary.stringPattern
+import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
+import social.plasma.models.EventSerdeTest.Companion.arbByteString32
 import social.plasma.models.EventSerdeTest.Companion.arbInstantSeconds
+import social.plasma.models.EventSerdeTest.Companion.arbVanillaString
 
 class RequestMessageAdapterTest : StringSpec({
 
@@ -28,10 +27,14 @@ class RequestMessageAdapterTest : StringSpec({
     }
 }) {
     companion object {
-        private val arbFilters: Arb<Filters> = arbInstantSeconds.map { Filters(since = it) }
+        private val arbFilters: Arb<Filters> = Arb.bind(
+            arbInstantSeconds,
+            Arb.set(arbByteString32.map { it.hex() }, 0..10),
+            Arb.set(Arb.int(0..99), 0..10)
+        ) { since, authors, kinds -> Filters(since, authors, kinds) }
 
         val arbRequestMessage = Arb.bind(
-            Arb.stringPattern("[A-Za-z0-9 ]+"),
+            arbVanillaString,
             arbFilters
         ) { subId, filter -> RequestMessage(subId, filter) }
     }

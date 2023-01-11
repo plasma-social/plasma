@@ -8,6 +8,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
 import social.plasma.models.EventSerdeTest.Companion.arbEvent
+import social.plasma.models.EventSerdeTest.Companion.arbVanillaString
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.relay.message.RelayMessage.NoticeRelayMessage
 import java.util.*
@@ -29,11 +30,10 @@ class RelayMessageAdapterTest : StringSpec({
 }) {
     companion object {
 
-        val arbNoticeRelayMessage: Arb<NoticeRelayMessage> =
-            Arb.stringPattern("[A-Za-z0-9 ]+")
-                .map { NoticeRelayMessage(it) }
+        private val arbNoticeRelayMessage: Arb<NoticeRelayMessage> =
+            arbVanillaString.map { NoticeRelayMessage(it) }
 
-        val arbEventRelayMessage: Arb<EventRelayMessage> = Arb.bind(
+        private val arbEventRelayMessage: Arb<EventRelayMessage> = Arb.bind(
             arbitrary { UUID.randomUUID().toString() },
             arbEvent
         ) { subscriptionId, event ->
