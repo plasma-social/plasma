@@ -29,7 +29,7 @@ class EventSerdeTest : StringSpec({
 
 }) {
     companion object {
-        private val arbByteString32: Arb<ByteString> = Arb.list(Arb.byte(), 32..32)
+        val arbByteString32: Arb<ByteString> = Arb.list(Arb.byte(), 32..32)
             .map { it.toByteArray().toByteString() }
 
         private val arbByteString64: Arb<ByteString> = Arb.list(Arb.byte(), 64..64)
