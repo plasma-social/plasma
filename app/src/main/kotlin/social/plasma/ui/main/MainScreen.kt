@@ -1,11 +1,9 @@
 package social.plasma.ui.main
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Public
-import androidx.compose.material.icons.outlined.Segment
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -19,8 +17,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
@@ -75,7 +73,7 @@ fun MainScreen(
                         onClick = {
                             navHostController.navigate(screen.route)
                         },
-                        icon = { Icon(icon, stringResource(screen.name)) },
+                        icon = { Icon(painterResource(icon), stringResource(screen.name)) },
                     )
                 }
             }
@@ -98,12 +96,12 @@ fun MainScreen(
 }
 
 private val bottomNavItems = listOf(
-    NavigationBarTab(Screen.Home, Icons.Outlined.Segment),
-    NavigationBarTab(Screen.Search, Icons.Outlined.Public),
-    NavigationBarTab(Screen.Notifications, Icons.Outlined.Notifications),
+    NavigationBarTab(Screen.Home, R.drawable.ic_plasma_feed),
+    NavigationBarTab(Screen.Search, R.drawable.ic_plasma_global_outline),
+    NavigationBarTab(Screen.Notifications, R.drawable.ic_plasma_notifications_outline),
 )
 
-private data class NavigationBarTab(val screen: Screen, val icon: ImageVector)
+private data class NavigationBarTab(val screen: Screen, @DrawableRes val icon: Int)
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
