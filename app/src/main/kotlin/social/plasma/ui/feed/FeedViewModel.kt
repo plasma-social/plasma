@@ -37,8 +37,11 @@ class FeedViewModel @Inject constructor(
 private fun Note.toFeedUiModel(): FeedCardUiModel = FeedCardUiModel(
     id = id,
     name = "${pubKey.take(8)}...${pubKey.takeLast(8)}",
-    nip5 = "notrplebs.com",
+    nip5 = "nostrplebs.com",
     content = content,
     timePosted = "1m",
-    imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}"
+    imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}",
+    likeCount = "1.2k",
+    shareCount = "13",
+    replyCount = "50"
 )
