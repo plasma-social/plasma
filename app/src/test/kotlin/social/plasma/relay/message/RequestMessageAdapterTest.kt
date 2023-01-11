@@ -9,6 +9,7 @@ import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
 import social.plasma.models.EventSerdeTest.Companion.arbByteString32
 import social.plasma.models.EventSerdeTest.Companion.arbInstantSeconds
+import social.plasma.models.EventSerdeTest.Companion.arbVanillaString
 
 class RequestMessageAdapterTest : StringSpec({
 
@@ -33,7 +34,7 @@ class RequestMessageAdapterTest : StringSpec({
         ) { since, authors, kinds -> Filters(since, authors, kinds) }
 
         val arbRequestMessage = Arb.bind(
-            Arb.stringPattern("[A-Za-z0-9 ]+"),
+            arbVanillaString,
             arbFilters
         ) { subId, filter -> RequestMessage(subId, filter) }
     }

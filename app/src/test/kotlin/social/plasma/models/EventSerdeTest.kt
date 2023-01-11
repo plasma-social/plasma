@@ -29,6 +29,8 @@ class EventSerdeTest : StringSpec({
 
 }) {
     companion object {
+        val arbVanillaString: Arb<String> = Arb.stringPattern("[A-Za-z0-9 ]{1,24}")
+
         val arbByteString32: Arb<ByteString> = Arb.list(Arb.byte(), 32..32)
             .map { it.toByteArray().toByteString() }
 
@@ -43,10 +45,11 @@ class EventSerdeTest : StringSpec({
             arbByteString32,
             arbByteString32,
             arbInstantSeconds,
-            Arb.stringPattern("[A-Za-z0-9 ]+"),
+            Arb.list(Arb.list(arbVanillaString, 1..5), 0..10),
+            arbVanillaString,
             arbByteString64
-        ) { id, pubKey, createdAt, content, sig ->
-            Event(id, pubKey, createdAt, 1, content, sig)
+        ) { id, pubKey, createdAt, tags, content, sig ->
+            Event(id, pubKey, createdAt, 1, tags, content, sig)
         }
     }
 }
