@@ -15,7 +15,7 @@ data class Event(
     @Json(name = "created_at")
     val createdAt: Instant,
     val kind: Int,
-    // TODO tags
+    val tags: List<List<String>>,
     val content: String,
     val sig: ByteString,
 ) {
