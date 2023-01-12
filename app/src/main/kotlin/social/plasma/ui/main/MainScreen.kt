@@ -32,6 +32,7 @@ import social.plasma.ui.feed.Feed
 import social.plasma.ui.home.Home
 import social.plasma.ui.navigation.Screen
 import social.plasma.ui.navigation.isActiveTab
+import social.plasma.ui.profile.Profile
 import social.plasma.ui.theme.PlasmaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +79,7 @@ fun MainScreen(
                 }
             }
         }) { paddingValues ->
+        // TODO move to its own file
         NavHost(
             navController = navHostController,
             modifier = Modifier.padding(paddingValues),
@@ -87,6 +89,7 @@ fun MainScreen(
                 composable(screen.route) {
                     when (screen) {
                         is Screen.Home -> Home()
+                        is Screen.Global -> Profile()
                         else -> Feed()
                     }
                 }
@@ -97,7 +100,7 @@ fun MainScreen(
 
 private val bottomNavItems = listOf(
     NavigationBarTab(Screen.Home, R.drawable.ic_plasma_feed),
-    NavigationBarTab(Screen.Search, R.drawable.ic_plasma_global_outline),
+    NavigationBarTab(Screen.Global, R.drawable.ic_plasma_global_outline),
     NavigationBarTab(Screen.Notifications, R.drawable.ic_plasma_notifications_outline),
 )
 
@@ -105,7 +108,7 @@ private data class NavigationBarTab(val screen: Screen, @DrawableRes val icon: I
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewMainScreen() {
+private fun PreviewMainScreen() {
     PlasmaTheme {
         MainScreen()
     }

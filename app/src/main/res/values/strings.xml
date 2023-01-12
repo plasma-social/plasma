@@ -3,10 +3,10 @@
     <string name="add">Add</string>
     <string name="home">Home</string>
     <string name="messages">Messages</string>
-    <string name="search">Search</string>
+    <string name="global">Global</string>
     <string name="notifications">Notifications</string>
     <string name="main">Main</string>
     <string name="verified">verified</string>
-    <string name="posts">Posts</string>
-    <string name="posts_and_replies"><![CDATA[Posts & Replies]]></string>
+    <string name="following">Following</string>
+    <string name="posts_and_replies">Posts &amp; Replies</string>
 </resources>

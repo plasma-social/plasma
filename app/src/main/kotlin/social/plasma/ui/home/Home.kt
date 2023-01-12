@@ -20,7 +20,7 @@ import social.plasma.ui.feed.Feed
 fun Home(
     modifier: Modifier = Modifier,
 ) {
-    var selectedTab by remember { mutableStateOf(HomeTab.Posts) }
+    var selectedTab by remember { mutableStateOf(HomeTab.Following) }
     val tabs = remember { HomeTab.values() }
 
     Column(
@@ -42,13 +42,13 @@ fun Home(
             }
         }
         when (selectedTab) {
-            HomeTab.Posts -> Feed()
-            HomeTab.Replies -> Feed()
+            HomeTab.Following -> Feed()
+            HomeTab.Global -> Feed()
         }
     }
 }
 
 enum class HomeTab(@StringRes val title: Int) {
-    Posts(R.string.posts),
-    Replies(R.string.posts_and_replies)
+    Following(R.string.following),
+    Global(R.string.global)
 }

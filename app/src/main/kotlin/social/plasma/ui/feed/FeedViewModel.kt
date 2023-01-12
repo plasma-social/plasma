@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import social.plasma.models.Note
 import social.plasma.repository.NoteRepository
-import social.plasma.ui.components.FeedCardUiModel
+import social.plasma.ui.components.NoteCardUiModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,7 +34,7 @@ class FeedViewModel @Inject constructor(
     }
 }
 
-private fun Note.toFeedUiModel(): FeedCardUiModel = FeedCardUiModel(
+private fun Note.toFeedUiModel(): NoteCardUiModel = NoteCardUiModel(
     id = id,
     name = "${pubKey.take(8)}...${pubKey.takeLast(8)}",
     nip5 = "nostrplebs.com",

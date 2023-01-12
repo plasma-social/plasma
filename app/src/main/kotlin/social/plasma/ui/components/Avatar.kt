@@ -14,15 +14,18 @@ import coil.request.ImageRequest
 @Composable
 fun Avatar(
     imageUrl: String,
-    contentDescription: String,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
 ) {
     AsyncImage(
-        modifier = Modifier
-            .size(52.dp)
+        modifier = modifier
+            .size(44.dp)
             .clip(CircleShape),
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
             .crossfade(true)
+            // TODO .error()
+            // TODO .placeholder()
             .build(),
         contentScale = ContentScale.Crop,
         contentDescription = contentDescription
