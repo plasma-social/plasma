@@ -8,5 +8,5 @@
     <string name="main">Main</string>
     <string name="verified">verified</string>
     <string name="following">Following</string>
-    <string name="posts_and_replies">Posts &amp; Replies</string>
+    <string name="profile">Profile</string>
 </resources>

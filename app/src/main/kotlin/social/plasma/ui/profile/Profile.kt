@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import social.plasma.R
+import social.plasma.models.PubKey
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.NoteCard
@@ -59,6 +60,8 @@ private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = 
     LazyColumn(
         modifier = modifier.padding(horizontal = 16.dp)
     ) {
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
         item { ProfileBio(uiState.userData) }
         item { Spacer(modifier = Modifier.height(32.dp)) }
 
@@ -66,7 +69,7 @@ private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = 
         item { Spacer(modifier = Modifier.height(32.dp)) }
 
         items(uiState.feedNoteList) { cardUiModel ->
-            NoteCard(uiModel = cardUiModel)
+            NoteCard(uiModel = cardUiModel, onAvatarClick = {})
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -147,10 +150,11 @@ val FAKE_PROFILE = ProfileUiState.Loaded(
             nip5 = "bitcoin.com",
             content = "Joplin and other markdown editors have pretty great UX these days \uD83E\uDD19",
             timePosted = "19m",
-            imageUrl = null,
+            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
             replyCount = "352k",
             likeCount = "2.9M",
-            shareCount = "509k"
+            shareCount = "509k",
+            userPubkey = PubKey("fdf")
         )
     },
     statCards = listOf(

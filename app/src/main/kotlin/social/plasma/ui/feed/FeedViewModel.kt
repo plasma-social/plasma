@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import social.plasma.models.Note
+import social.plasma.models.PubKey
 import social.plasma.repository.NoteRepository
 import social.plasma.ui.components.NoteCardUiModel
 import javax.inject.Inject
@@ -40,8 +41,9 @@ private fun Note.toFeedUiModel(): NoteCardUiModel = NoteCardUiModel(
     nip5 = "nostrplebs.com",
     content = content,
     timePosted = "1m",
-    imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}",
+    avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}",
     likeCount = "1.2k",
     shareCount = "13",
-    replyCount = "50"
+    replyCount = "50",
+    userPubkey = PubKey(this.pubKey)
 )

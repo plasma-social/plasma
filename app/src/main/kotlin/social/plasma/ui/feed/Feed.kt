@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import social.plasma.models.PubKey
 import social.plasma.ui.components.NoteCard
 import social.plasma.ui.components.NoteCardUiModel
 import social.plasma.ui.components.ProgressIndicator
@@ -19,21 +20,31 @@ import social.plasma.ui.theme.PlasmaTheme
 @Composable
 fun Feed(
     modifier: Modifier = Modifier,
-    viewModel: FeedViewModel = hiltViewModel()
+    viewModel: FeedViewModel = hiltViewModel(),
+    onNavigateToProfile: (PubKey) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    FeedContent(modifier = modifier, uiState = uiState)
+    FeedContent(
+        modifier = modifier,
+        uiState = uiState,
+        onNavigateToProfile = onNavigateToProfile,
+    )
 }
 
 @Composable
 private fun FeedContent(
     modifier: Modifier = Modifier,
     uiState: FeedUiState,
+    onNavigateToProfile: (PubKey) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
-        is FeedUiState.Loaded -> FeedList(modifier = modifier, noteList = uiState.cardList)
+        is FeedUiState.Loaded -> FeedList(
+            modifier = modifier,
+            noteList = uiState.cardList,
+            onNavigateToProfile = onNavigateToProfile
+        )
     }
 }
 
@@ -41,6 +52,7 @@ private fun FeedContent(
 private fun FeedList(
     noteList: List<NoteCardUiModel>,
     modifier: Modifier = Modifier,
+    onNavigateToProfile: (PubKey) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -50,7 +62,8 @@ private fun FeedList(
         items(noteList) { note ->
             NoteCard(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                uiModel = note
+                uiModel = note,
+                onAvatarClick = { onNavigateToProfile(note.userPubkey) },
             )
         }
     }
@@ -67,14 +80,15 @@ private fun PreviewFeedList() {
                 nip5 = "nostrplebs.com",
                 content = "Content $it",
                 timePosted = "1m",
-                imageUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$it",
+                avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$it",
                 likeCount = "490k",
                 replyCount = "25k",
-                shareCount = "1.5k"
+                shareCount = "1.5k",
+                userPubkey = PubKey("fsdf")
             )
         })
 
     PlasmaTheme {
-        FeedContent(uiState = uiState)
+        FeedContent(uiState = uiState, onNavigateToProfile = { })
     }
 }

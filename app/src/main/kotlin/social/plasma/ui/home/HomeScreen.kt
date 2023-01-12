@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import social.plasma.R
+import social.plasma.models.PubKey
 import social.plasma.ui.feed.Feed
 
 @Composable
-fun Home(
+fun HomeScreen(
+    onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedTab by remember { mutableStateOf(HomeTab.Following) }
@@ -42,8 +44,8 @@ fun Home(
             }
         }
         when (selectedTab) {
-            HomeTab.Following -> Feed()
-            HomeTab.Global -> Feed()
+            HomeTab.Following -> Feed(onNavigateToProfile = onNavigateToProfile)
+            HomeTab.Global -> Feed(onNavigateToProfile = onNavigateToProfile)
         }
     }
 }
