@@ -59,6 +59,6 @@ fun MainScreen(
 
 private val bottomNavItems = listOf(
     BottomNavRoute(Screen.Home, R.drawable.ic_plasma_feed),
-    BottomNavRoute(Screen.Global, R.drawable.ic_plasma_global_outline),
+    BottomNavRoute(Screen.Messages, R.drawable.ic_plasma_messages_outline),
     BottomNavRoute(Screen.Notifications, R.drawable.ic_plasma_notifications_outline),
 )

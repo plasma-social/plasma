@@ -7,16 +7,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,22 +62,41 @@ private fun Profile(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier.padding(horizontal = 16.dp)
-    ) {
-        item { Spacer(modifier = Modifier.height(16.dp)) }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                },
+                title = { },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+        ) {
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        item { ProfileBio(uiState.userData) }
-        item { Spacer(modifier = Modifier.height(32.dp)) }
+            item { ProfileBio(uiState.userData) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
 
-        item { ProfileStatsRow(uiState.statCards) }
-        item { Spacer(modifier = Modifier.height(32.dp)) }
+            item { ProfileStatsRow(uiState.statCards) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
 
-        items(uiState.feedNoteList) { cardUiModel ->
-            NoteCard(uiModel = cardUiModel, onAvatarClick = {})
-            Spacer(modifier = Modifier.height(16.dp))
+            itemsIndexed(uiState.feedNoteList) { index, cardUiModel ->
+                NoteCard(uiModel = cardUiModel, onAvatarClick = {})
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }
@@ -113,15 +139,19 @@ private fun ProfileBio(
         userData.bio?.let {
             Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+
     }
 }
 
 @Composable
 private fun ProfileStatsRow(statCards: List<ProfileStat>) {
     Row {
-        statCards.forEach { (label, value) ->
+        statCards.forEachIndexed { index, (label, value) ->
             StatCard(modifier = Modifier.weight(1f), label = label, value = value)
-            Spacer(modifier = Modifier.width(16.dp))
+
+            if (index != statCards.lastIndex) {
+                Spacer(modifier = Modifier.width(16.dp))
+            }
         }
     }
 }
