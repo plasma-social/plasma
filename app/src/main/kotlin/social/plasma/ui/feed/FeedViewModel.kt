@@ -1,5 +1,6 @@
 package social.plasma.ui.feed
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -14,21 +15,21 @@ import kotlinx.coroutines.flow.StateFlow
 import social.plasma.models.Note
 import social.plasma.models.PubKey
 import social.plasma.repository.NoteRepository
+import social.plasma.ui.base.MoleculeViewModel
 import social.plasma.ui.components.NoteCardUiModel
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
-    noteRepository: NoteRepository,
-) : ViewModel() {
-    private val moleculeScope =
-        CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
+    private val noteRepository: NoteRepository,
+) : MoleculeViewModel<FeedUiState>(recompositionClock) {
 
-    val uiState: StateFlow<FeedUiState> = moleculeScope.launchMolecule(recompositionClock) {
+    @Composable
+    override fun models(): FeedUiState {
         val noteList by remember { noteRepository.observeNotes() }.collectAsState(initial = null)
 
-        noteList?.let { notes ->
+        return noteList?.let { notes ->
             val feedCardList = notes.map { it.toFeedUiModel() }
             FeedUiState.Loaded(feedCardList)
         } ?: FeedUiState.Loading

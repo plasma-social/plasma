@@ -23,7 +23,7 @@ fun Feed(
     viewModel: FeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState().collectAsState()
 
     FeedContent(
         modifier = modifier,
