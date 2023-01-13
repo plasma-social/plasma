@@ -14,7 +14,7 @@ sealed class Screen(
 
     object Home : Screen(route = "home", name = R.string.home)
 
-    object Global : Screen(route = "global", name = R.string.global)
+    object Messages : Screen(route = "messages", name = R.string.messages)
 
     object Notifications : Screen(
         route = "notifications",
