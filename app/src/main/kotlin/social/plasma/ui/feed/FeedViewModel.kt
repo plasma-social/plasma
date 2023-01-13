@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import app.cash.molecule.RecompositionClock
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import social.plasma.models.Note
 import social.plasma.models.PubKey
 import social.plasma.models.TypedEvent
@@ -17,17 +18,18 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
-    private val noteRepository: NoteRepository,
+    noteRepository: NoteRepository,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
+
+    private val noteObserver = noteRepository.observeGlobalNotes().map { noteList ->
+        noteList.map { it.toFeedUiModel() }
+    }
 
     @Composable
     override fun models(): FeedUiState {
-        val noteList by remember { noteRepository.observeGlobalNotes() }.collectAsState(initial = null)
+        val noteList by remember { noteObserver }.collectAsState(initial = null)
 
-        return noteList?.let { notes ->
-            val feedCardList = remember { notes.map { it.toFeedUiModel() } }
-            FeedUiState.Loaded(feedCardList)
-        } ?: FeedUiState.Loading
+        return noteList?.let { FeedUiState.Loaded(it) } ?: FeedUiState.Loading
     }
 }
 
