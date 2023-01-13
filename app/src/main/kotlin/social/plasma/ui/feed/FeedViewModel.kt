@@ -11,8 +11,10 @@ import app.cash.molecule.launchMolecule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import okio.ByteString
 import social.plasma.models.Note
 import social.plasma.models.PubKey
+import social.plasma.models.TypedEvent
 import social.plasma.repository.NoteRepository
 import social.plasma.ui.components.NoteCardUiModel
 import javax.inject.Inject
@@ -35,15 +37,18 @@ class FeedViewModel @Inject constructor(
     }
 }
 
-private fun Note.toFeedUiModel(): NoteCardUiModel = NoteCardUiModel(
-    id = id,
-    name = "${pubKey.take(8)}...${pubKey.takeLast(8)}",
-    nip5 = "nostrplebs.com",
-    content = content,
-    timePosted = "1m",
-    avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${pubKey}",
-    likeCount = "1.2k",
-    shareCount = "13",
-    replyCount = "50",
-    userPubkey = PubKey(this.pubKey)
-)
+private fun TypedEvent<Note>.toFeedUiModel(): NoteCardUiModel {
+    val pubKeyHex = pubKey.hex()
+    return NoteCardUiModel(
+        id = id.hex(),
+        name = "${pubKeyHex.take(8)}...${pubKeyHex.drop(48)}",
+        nip5 = "nostrplebs.com",
+        content = content.text,
+        timePosted = "1m",
+        avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$pubKeyHex",
+        likeCount = "1.2k",
+        shareCount = "13",
+        replyCount = "50",
+        userPubkey = PubKey(pubKeyHex)
+    )
+}

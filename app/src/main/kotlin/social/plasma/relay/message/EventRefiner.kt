@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import social.plasma.models.Event
+import social.plasma.models.Note
 import social.plasma.models.TypedEvent
 import social.plasma.models.UserMetaData
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
@@ -28,5 +29,10 @@ class EventRefiner @Inject constructor(
                 if (data == null) null
                 else event.typed(data)
             }
+
+    fun toNote(message: EventRelayMessage): TypedEvent<Note>? =
+        if (message.event.kind == Event.Kind.Note) {
+            message.event.typed(Note(message.event.content))
+        } else null
 
 }
