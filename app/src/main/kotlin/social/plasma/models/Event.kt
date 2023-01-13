@@ -28,4 +28,12 @@ data class Event(
         )
         else null
 
+    fun <T : Any> typed(data: T) = TypedEvent(id, pubKey, createdAt, kind, tags, data, sig)
+
+    object Kind {
+        const val MetaData = 0
+        const val Note = 1
+        const val RecommendServer = 2
+        const val ContactList = 3
+    }
 }
