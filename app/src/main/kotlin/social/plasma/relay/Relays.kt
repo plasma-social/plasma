@@ -20,4 +20,19 @@ class Relays @Inject constructor(
             .create(),
         eventRefiner
     )
+
+    companion object {
+        val relayUrlList = listOf(
+            "wss://brb.io",
+            "wss://relay.damus.io",
+            "wss://relay.nostr.bg",
+            "wss://nostr.oxtr.dev",
+            "wss://nostr.v0l.io",
+            "wss://nostr-pub.semisol.dev",
+            "wss://relay.kronkltd.net",
+            "wss://nostr.zebedee.cloud",
+            "wss://no.str.cr",
+            "wss://relay.nostr.info",
+        )
+    }
 }
