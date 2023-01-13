@@ -19,14 +19,6 @@ data class Event(
     val content: String,
     val sig: ByteString,
 ) {
-    fun maybeToNote(): Note? =
-        if (kind == 1) Note(
-            id = id.hex(),
-            content = content,
-            pubKey = pubKey.hex(),
-            createdAt = createdAt
-        )
-        else null
 
     fun <T : Any> typed(data: T) = TypedEvent(id, pubKey, createdAt, kind, tags, data, sig)
 

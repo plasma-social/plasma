@@ -6,19 +6,22 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import social.plasma.models.Note
+import social.plasma.models.TypedEvent
 import social.plasma.relay.Relay
 import social.plasma.relay.Relays
 import social.plasma.relay.Relays.Companion.relayUrlList
+import social.plasma.relay.message.EventRefiner
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import java.util.*
 import javax.inject.Inject
 
 interface NoteRepository {
-    fun observeNotes(): Flow<List<Note>>
+    fun observeNotes(): Flow<List<TypedEvent<Note>>>
 }
 
 class RealNoteRepository @Inject constructor(
     private val relays: Relays,
+    private val eventRefiner: EventRefiner,
 ) : NoteRepository {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
@@ -33,15 +36,21 @@ class RealNoteRepository @Inject constructor(
             }
     }
 
-    private val notesSharedFlow: SharedFlow<List<Note>> =
-        combine(relayFlows) { values ->
-            values.fold(TreeSet<Note> { l, r ->
+    private fun <T> sharedFlow(
+        f: (EventRelayMessage) -> TypedEvent<T>?
+    ): SharedFlow<List<TypedEvent<T>>> =
+        combine(relayFlows.map { it.map { xs -> xs.mapNotNull(f) } }) { values ->
+            values.fold(TreeSet<TypedEvent<T>> { l, r ->
                 r.createdAt.compareTo(l.createdAt)
             }) { acc, list ->
-                acc.addAll(list.mapNotNull { it.event.maybeToNote() })
+                acc.addAll(list)
                 acc
             }.toList()
         }.shareIn(scope, SharingStarted.Eagerly, replay = 1)
+
+    private val notesSharedFlow: SharedFlow<List<TypedEvent<Note>>> = sharedFlow {
+        eventRefiner.toNote(it)
+    }
 
     init {
         scope.launch {
@@ -49,7 +58,7 @@ class RealNoteRepository @Inject constructor(
         }
     }
 
-    override fun observeNotes(): Flow<List<Note>> {
+    override fun observeNotes(): Flow<List<TypedEvent<Note>>> {
         return notesSharedFlow
     }
 }
