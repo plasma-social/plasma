@@ -105,6 +105,9 @@ kapt {
 
 android.testOptions {
     unitTests.all {
+        testLogging {
+            showStandardStreams = true
+        }
         it.useJUnitPlatform()
     }
 }

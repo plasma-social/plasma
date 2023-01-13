@@ -28,6 +28,22 @@ class NostrMessageAdapter {
     fun requestMessageToJson(request: RequestMessage) =
         listOf("REQ", request.subscriptionId, request.filters)
 
+    // CloseMessage
+    @FromJson
+    fun closeMessageFromJson(
+        reader: JsonReader
+    ): CloseMessage {
+        reader.beginArray()
+        reader.nextString()
+        val subscriptionId = reader.nextString()
+        reader.endArray()
+        return CloseMessage(subscriptionId)
+    }
+
+    @ToJson
+    fun closeMessageToJson(request: CloseMessage) =
+        listOf("CLOSE", request.subscriptionId)
+
 
     // RelayMessage
     @FromJson
