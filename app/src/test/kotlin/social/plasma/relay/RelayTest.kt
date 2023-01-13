@@ -31,7 +31,7 @@ class RelayTest : StringSpec({
                 .addStreamAdapterFactory(CoroutinesStreamAdapterFactory()),
             EventRefiner(moshi)
         )
-        val relay = relays.relay("wss://brb.io").connectAndSubscribe(
+        val relay = relays.createRelay("wss://brb.io").connectAndSubscribe(
             filters = Filters.contactList("8366029071b385def2e4fb964d2d73e6f4246131ac1ff7608bbcb1971c5081d2")
         )
 

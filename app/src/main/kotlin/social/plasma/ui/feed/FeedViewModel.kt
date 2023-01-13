@@ -4,15 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import app.cash.molecule.AndroidUiDispatcher
 import app.cash.molecule.RecompositionClock
-import app.cash.molecule.launchMolecule
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-import okio.ByteString
 import social.plasma.models.Note
 import social.plasma.models.PubKey
 import social.plasma.models.TypedEvent
@@ -29,10 +22,10 @@ class FeedViewModel @Inject constructor(
 
     @Composable
     override fun models(): FeedUiState {
-        val noteList by remember { noteRepository.observeNotes() }.collectAsState(initial = null)
+        val noteList by remember { noteRepository.observeGlobalNotes() }.collectAsState(initial = null)
 
         return noteList?.let { notes ->
-            val feedCardList = notes.map { it.toFeedUiModel() }
+            val feedCardList = remember { notes.map { it.toFeedUiModel() } }
             FeedUiState.Loaded(feedCardList)
         } ?: FeedUiState.Loading
     }
