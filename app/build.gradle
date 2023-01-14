@@ -78,6 +78,7 @@ dependencies {
     implementation 'com.tinder.scarlet:stream-adapter-coroutines:0.1.12'
     implementation 'com.tinder.scarlet:stream-adapter-rxjava2:0.1.12'
     implementation 'com.tinder.scarlet:websocket-okhttp:0.1.12'
+    implementation 'com.tinder.scarlet:lifecycle-android:0.1.12'
 
     implementation "com.google.dagger:hilt-android:2.44"
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
