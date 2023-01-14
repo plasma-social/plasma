@@ -7,6 +7,7 @@ import io.kotest.property.arbitrary.bind
 import io.kotest.property.arbitrary.orNull
 import io.kotest.property.checkAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import social.plasma.models.Event
@@ -21,7 +22,7 @@ class EventRefinerTest: StringSpec({
     "converts a flow of type 0 into user meta data" {
         checkAll(arbTestData) { (event, userMetaData) ->
             val flow = flow { emit(event) }
-            val refined = EventRefiner(moshi).toUserMetaData(flow).take(1).toList()
+            val refined = flow.map { EventRefiner(moshi).toUserMetaData(it) }.take(1).toList()
             refined shouldContainExactly listOf(
                 with(event.event) {
                     TypedEvent(id, pubKey, createdAt, Event.Kind.MetaData, tags, userMetaData, sig)
