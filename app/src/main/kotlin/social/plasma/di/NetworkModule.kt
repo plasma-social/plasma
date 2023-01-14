@@ -1,8 +1,10 @@
 package social.plasma.di
 
+import android.app.Application
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
 import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
 import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
@@ -34,8 +36,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providesScarletBuilder(moshi: Moshi): Scarlet.Builder = Scarlet.Builder()
-        .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
-        .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
-        .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
+    fun providesScarletBuilder(application: Application, moshi: Moshi): Scarlet.Builder =
+        Scarlet.Builder()
+            .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
+            .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
+            .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
+            .lifecycle(AndroidLifecycle.ofApplicationForeground(application))
 }
