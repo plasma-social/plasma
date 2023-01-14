@@ -4,11 +4,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
-import social.plasma.models.EventSerdeTest.Companion.arbByteString32
-import social.plasma.models.EventSerdeTest.Companion.arbInstantSeconds
 import social.plasma.models.EventSerdeTest.Companion.arbVanillaString
 
 class CloseMessageAdapterTest : StringSpec({
@@ -17,7 +14,7 @@ class CloseMessageAdapterTest : StringSpec({
         .add(NostrMessageAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
-    val adapter = moshi.adapter(CloseMessage::class.java)
+    val adapter = moshi.adapter(UnsubscribeMessage::class.java)
 
     "can serde requests" {
         checkAll(arbCloseMessage) { request ->
@@ -27,6 +24,6 @@ class CloseMessageAdapterTest : StringSpec({
     }
 }) {
     companion object {
-        val arbCloseMessage = arbVanillaString.map { CloseMessage(it) }
+        val arbCloseMessage = arbVanillaString.map { UnsubscribeMessage(it) }
     }
 }
