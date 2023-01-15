@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -89,6 +93,16 @@ fun LoginScreen(
                     autoCorrect = false,
                     imeAction = ImeAction.Go
                 ),
+                trailingIcon = if (uiState.clearInputButtonVisible) {
+                    {
+                        IconButton(onClick = { onKeyInputChanged("") }) {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.clear)
+                            )
+                        }
+                    }
+                } else null,
                 singleLine = true,
                 value = uiState.keyInput,
                 placeholder = { Text(stringResource(R.string.private_or_public_key)) },
@@ -122,6 +136,7 @@ private fun PreviewLoginScreen() {
             uiState = LoginState.LoggedOut(
                 keyInput = "",
                 loginButtonVisible = true,
+                clearInputButtonVisible = true,
             ),
             onLoginButtonClick = {},
             onKeyInputChanged = {},

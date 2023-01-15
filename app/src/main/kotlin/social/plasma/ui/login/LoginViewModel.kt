@@ -7,29 +7,49 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import social.plasma.prefs.UserKeyPreference
+import org.komputing.kbech32.AddressFormatException
+import org.komputing.kbech32.Bech32
+import social.plasma.di.UserKey
+import social.plasma.prefs.Preference
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userKeyPref: UserKeyPreference,
+    @UserKey
+    private val userKeyPref: Preference<String>,
+    @Named("default")
+    defaultDispatcher: CoroutineContext,
 ) : ViewModel() {
     private val keyInput: MutableStateFlow<String> = MutableStateFlow("")
     private val isLoggedIn: MutableStateFlow<Boolean> = MutableStateFlow(userKeyPref.isSet())
-
-    val uiState: StateFlow<LoginState> = combine(keyInput, isLoggedIn) { keyInput, loggedIn ->
-        if (loggedIn) {
-            LoginState.LoggedIn
-        } else {
-            LoginState.LoggedOut(
-                keyInput = keyInput,
-                loginButtonVisible = keyInput.isNotBlank(),
-            )
+    private val decodedKey = keyInput.map { bech32 ->
+        try {
+            Bech32.decode(bech32)
+        } catch (e: AddressFormatException) {
+            null
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LoginState.Loading)
+    }.flowOn(defaultDispatcher)
+
+    val uiState: StateFlow<LoginState> =
+        combine(keyInput, decodedKey, isLoggedIn) { key, decodedKey, loggedIn ->
+            if (loggedIn) {
+                LoginState.LoggedIn
+            } else {
+                LoginState.LoggedOut(
+                    keyInput = key,
+                    loginButtonVisible = decodedKey != null,
+                    clearInputButtonVisible = key.isNotEmpty(),
+                )
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LoginState.Loading)
+
 
     fun onKeyChanged(value: String) {
         keyInput.tryEmit(value)
@@ -37,7 +57,6 @@ class LoginViewModel @Inject constructor(
 
     fun login() {
         viewModelScope.launch {
-            // TODO check that key is a valid pub or priv key
             userKeyPref.set(keyInput.value)
             isLoggedIn.emit(userKeyPref.isSet())
         }
