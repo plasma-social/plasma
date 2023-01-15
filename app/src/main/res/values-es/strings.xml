@@ -10,7 +10,8 @@
     <string name="following">Seguidos</string>
     <string name="profile">Perfil</string>
     <string name="login">Acceder</string>
-    <string name="private_or_public_key">Llave pública o privada</string>
+    <string name="private_or_public_key">nsec o pubsec</string>
     <string name="login_tagline">Un cliente de nostr</string>
     <string name="coming_soon">Disponible Pronto</string>
+    <string name="clear">Borrar</string>
 </resources>

@@ -6,6 +6,7 @@ sealed interface LoginState {
     data class LoggedOut(
         val keyInput: String,
         val loginButtonVisible: Boolean,
+        val clearInputButtonVisible: Boolean,
     ) : LoginState
 
     object LoggedIn : LoginState

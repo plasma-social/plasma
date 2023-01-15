@@ -68,7 +68,9 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
 
+    implementation 'com.github.komputing.KBech32:core-jvm:03dd082ce7'
     implementation "io.coil-kt:coil-compose:2.2.2"
+
     implementation 'com.squareup.moshi:moshi:1.14.0'
     implementation 'com.squareup.moshi:moshi-kotlin:1.14.0'
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
@@ -88,6 +90,7 @@ dependencies {
     testImplementation 'io.kotest:kotest-runner-junit5:5.5.4'
     testImplementation 'io.kotest:kotest-assertions-core:5.5.4'
     testImplementation 'io.kotest:kotest-property:5.5.4'
+    testImplementation 'app.cash.turbine:turbine:0.12.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
