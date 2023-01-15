@@ -4,7 +4,6 @@ import android.app.Application
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinder.scarlet.Scarlet
-import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
 import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
 import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
@@ -41,5 +40,5 @@ object NetworkModule {
             .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
             .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
             .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
-            .lifecycle(AndroidLifecycle.ofApplicationForeground(application))
+//            .lifecycle(AndroidLifecycle.ofApplicationForeground(application))
 }
