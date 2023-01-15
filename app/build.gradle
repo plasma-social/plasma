@@ -51,6 +51,8 @@ android {
 }
 
 dependencies {
+    def room_version = "2.5.0"
+    def paging_version = "3.1.1"
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
@@ -68,6 +70,10 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
 
+    implementation "androidx.paging:paging-runtime:$paging_version"
+    // optional - Jetpack Compose integration
+    implementation "androidx.paging:paging-compose:1.0.0-alpha17"
+
     implementation 'com.github.komputing.KBech32:core-jvm:03dd082ce7'
     implementation "fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.7.1"
     implementation "io.coil-kt:coil-compose:2.2.2"
@@ -83,6 +89,13 @@ dependencies {
     implementation 'com.tinder.scarlet:websocket-okhttp:0.1.12'
     implementation 'com.tinder.scarlet:lifecycle-android:0.1.12'
 
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.room:room-paging:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    // To use Kotlin annotation processing tool (kapt)
+    kapt "androidx.room:room-compiler:$room_version"
+
     implementation "com.google.dagger:hilt-android:2.44"
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
     kapt "com.google.dagger:hilt-compiler:2.44"
@@ -92,6 +105,7 @@ dependencies {
     testImplementation 'io.kotest:kotest-assertions-core:5.5.4'
     testImplementation 'io.kotest:kotest-property:5.5.4'
     testImplementation 'app.cash.turbine:turbine:0.12.1'
+    testImplementation "androidx.paging:paging-common:$paging_version"
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

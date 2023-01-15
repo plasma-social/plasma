@@ -1,34 +1,31 @@
 package social.plasma.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import social.plasma.models.TypedEvent
-import social.plasma.models.UserMetaData
+import social.plasma.db.usermetadata.UserMetadataDao
+import social.plasma.db.usermetadata.UserMetadataEntity
 import social.plasma.relay.Relays
-import social.plasma.relay.message.EventRefiner
 import social.plasma.relay.message.Filters
 import social.plasma.relay.message.SubscribeMessage
 import social.plasma.relay.message.UnsubscribeMessage
 import javax.inject.Inject
 
 interface UserMetaDataRepository {
-    fun observeUserMetaData(): Flow<List<TypedEvent<UserMetaData>>>
+    fun observeUserMetaData(pubKey: String): Flow<UserMetadataEntity>
 }
 
 class RealUserMetaDataRepository @Inject constructor(
     private val relays: Relays,
-    private val eventRefiner: EventRefiner,
+    private val metadataDao: UserMetadataDao,
 ) : UserMetaDataRepository {
 
     fun requestUserMetaData(pubKey: String): List<UnsubscribeMessage> =
-        relays.subscribe(SubscribeMessage(
-            filters = Filters.userMetaData(pubKey)
-        ))
+        relays.subscribe(
+            SubscribeMessage(
+                filters = Filters.userMetaData(pubKey)
+            )
+        )
 
-    private val userMetaDataSharedFlow: SharedFlow<List<TypedEvent<UserMetaData>>> =
-        relays.sharedFlow { eventRefiner.toUserMetaData(it) }
-
-    override fun observeUserMetaData(): Flow<List<TypedEvent<UserMetaData>>> {
-        return userMetaDataSharedFlow
+    override fun observeUserMetaData(pubKey: String): Flow<UserMetadataEntity> {
+        return metadataDao.observeUserMetadata(pubKey)
     }
 }

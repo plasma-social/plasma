@@ -1,50 +1,36 @@
 package social.plasma.ui.feed
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import app.cash.molecule.RecompositionClock
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.map
-import social.plasma.models.Note
-import social.plasma.models.PubKey
-import social.plasma.models.TypedEvent
-import social.plasma.repository.NoteRepository
+import social.plasma.db.notes.NoteDao
+import social.plasma.relay.Relays
+import social.plasma.relay.message.Filters
+import social.plasma.relay.message.SubscribeMessage
 import social.plasma.ui.base.MoleculeViewModel
-import social.plasma.ui.components.NoteCardUiModel
+import social.plasma.ui.ext.noteCardsPagingFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
-    noteRepository: NoteRepository,
+    private val noteDao: NoteDao,
+    private val relays: Relays,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
 
-    private val noteObserver = noteRepository.observeGlobalNotes().map { noteList ->
-        noteList.map { it.toFeedUiModel() }
-    }
+    private val feedPagingFlow = noteCardsPagingFlow { noteDao.allNotesWithUsersPagingSource() }
+    private val unsubscribeMessage =
+        relays.subscribe(SubscribeMessage(filters = Filters.globalFeedNotes))
 
     @Composable
     override fun models(): FeedUiState {
-        val noteList by remember { noteObserver }.collectAsState(initial = null)
-
-        return noteList?.let { FeedUiState.Loaded(it) } ?: FeedUiState.Loading
+        return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
     }
-}
 
-private fun TypedEvent<Note>.toFeedUiModel(): NoteCardUiModel {
-    val pubKeyHex = pubKey.hex()
-    return NoteCardUiModel(
-        id = id.hex(),
-        name = "${pubKeyHex.take(8)}...${pubKeyHex.drop(48)}",
-        nip5 = "nostrplebs.com",
-        content = content.text,
-        timePosted = "1m",
-        avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$pubKeyHex",
-        likeCount = "1.2k",
-        shareCount = "13",
-        replyCount = "50",
-        userPubkey = PubKey(pubKeyHex)
-    )
+    override fun onCleared() {
+        super.onCleared()
+        unsubscribeMessage.forEach {
+            relays.unsubscribe(it)
+        }
+    }
 }

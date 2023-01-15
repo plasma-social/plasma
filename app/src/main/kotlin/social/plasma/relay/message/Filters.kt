@@ -15,6 +15,12 @@ data class Filters(
             kinds = setOf(Event.Kind.Note)
         )
 
+        fun userNotes(pubKey: String) = Filters(
+            since = Instant.EPOCH,
+            authors = setOf(pubKey),
+            kinds = setOf(Event.Kind.Note),
+        )
+
         fun contactList(pubKey: String) = Filters(
             since = Instant.EPOCH,
             authors = setOf(pubKey),

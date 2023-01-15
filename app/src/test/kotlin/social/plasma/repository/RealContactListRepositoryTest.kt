@@ -1,9 +1,9 @@
 package social.plasma.repository
 
+import fakes.FakeNoteDao
+import fakes.FakeUserMetadataDao
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.should
-import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.take
 import okio.ByteString.Companion.decodeHex
@@ -18,17 +18,22 @@ import social.plasma.relay.message.EventRefiner
 class RealContactListRepositoryTest : StringSpec({
 
     val repo = RealContactListRepository(
-        Relays(client, scarlet, listOf("wss://nostr.satsophone.tk")),
-        EventRefiner(moshi)
+        Relays(
+            client,
+            scarlet,
+            listOf("wss://nostr.satsophone.tk"),
+            FakeNoteDao(),
+            FakeUserMetadataDao(),
+            EventRefiner(
+                moshi
+            )
+        )
     )
 
     "repository can be used to find user data" {
         repo.requestContactLists(JemPubKey)
-        repo.observeContactLists().filterNot { it.isEmpty() }.take(1).collect {
-            it.first().content.should { set ->
-                set.map { contact -> contact.pubKey } shouldContain JackPubKey.decodeHex()
-            }
+        repo.observeContactLists().filterNot { it.isEmpty() }.take(1).collect { set ->
+            set.map { contact -> contact.pubKey } shouldContain JackPubKey.decodeHex()
         }
     }
-
 })

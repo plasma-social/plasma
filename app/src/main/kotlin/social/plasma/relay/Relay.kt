@@ -2,8 +2,13 @@ package social.plasma.relay
 
 import android.util.Log
 import com.tinder.scarlet.WebSocket
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.relay.message.SubscribeMessage
@@ -46,15 +51,19 @@ class Relay(
                     Log.d(tag, "connection opened: $it")
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }
+
                 is WebSocket.Event.OnConnectionClosing -> {
                     Log.d(tag, "connection closing: ${it.shutdownReason}")
                 }
+
                 is WebSocket.Event.OnConnectionClosed -> {
                     Log.d(tag, "connection closed: ${it.shutdownReason}")
                 }
+
                 is WebSocket.Event.OnConnectionFailed -> {
                     Log.d(tag, "connection failed", it.throwable)
                 }
+
                 else -> {}
             }
         }.launchIn(scope)
