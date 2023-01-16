@@ -216,6 +216,7 @@ public object Bech32 {
     fun String.bechToBytes(hrp: String? = null): ByteArray {
 
         val decodedForm = decodeBytes(this)
+
         hrp?.also {
             if (it != decodedForm.first) {
                 throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")
