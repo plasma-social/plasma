@@ -69,6 +69,7 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
 
     implementation 'com.github.komputing.KBech32:core-jvm:03dd082ce7'
+    implementation "fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.7.1"
     implementation "io.coil-kt:coil-compose:2.2.2"
 
     implementation 'com.squareup.moshi:moshi:1.14.0'
