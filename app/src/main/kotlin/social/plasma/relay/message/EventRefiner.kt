@@ -1,10 +1,6 @@
 package social.plasma.relay.message
 
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import social.plasma.models.Event
 import social.plasma.models.Note
 import social.plasma.models.TypedEvent
@@ -22,17 +18,13 @@ class EventRefiner @Inject constructor(
 
     private val userMetaDataAdapter = moshi.adapter(UserMetaData::class.java)
 
-    fun toUserMetaData(messages: Flow<EventRelayMessage>): Flow<TypedEvent<UserMetaData>> =
-        messages.filter { it.event.kind == Event.Kind.MetaData }
-            .map { it.event to userMetaDataAdapter.fromJson(it.event.content) }
-            .mapNotNull { (event, data) ->
-                if (data == null) null
-                else event.typed(data)
-            }
+    fun toUserMetaData(message: EventRelayMessage): TypedEvent<UserMetaData>? =
+        message.event.takeIf { it.kind == Event.Kind.MetaData }
+            ?.let { userMetaDataAdapter.fromJson(it.content) }
+            ?.let { message.event.typed(it) }
 
     fun toNote(message: EventRelayMessage): TypedEvent<Note>? =
-        if (message.event.kind == Event.Kind.Note) {
-            message.event.typed(Note(message.event.content))
-        } else null
+        message.event.takeIf { it.kind == Event.Kind.Note }
+            ?.let { it.typed(Note(it.content)) }
 
 }

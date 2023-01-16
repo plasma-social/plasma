@@ -5,19 +5,15 @@ import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.runningFold
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import social.plasma.models.TypedEvent
-import social.plasma.relay.message.EventRefiner
+import social.plasma.relay.message.Filters
 import social.plasma.relay.message.RelayMessage
-import java.util.TreeSet
+import social.plasma.relay.message.SubscribeMessage
+import social.plasma.relay.message.UnsubscribeMessage
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,12 +21,11 @@ import javax.inject.Singleton
 class Relays @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val scarletBuilder: Scarlet.Builder,
-    private val eventRefiner: EventRefiner,
 ) {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
-    private val relayList: List<Relay> = relayUrlList.map { createRelay(it) }
+    private val relayList: List<Relay> = relayUrlList.map { createRelay(it, scope) }
 
     private val relayFlows: List<Flow<List<RelayMessage.EventRelayMessage>>> =
         relayList.map { relay ->
@@ -41,9 +36,15 @@ class Relays @Inject constructor(
 
     init {
         scope.launch {
-            relayList.forEach { it.connectAndSubscribe() }
+            relayList.forEach {
+                it.subscribe(SubscribeMessage(filters = Filters.globalFeedNotes))
+                it.connect()
+            }
         }
     }
+
+    fun subscribe(request: SubscribeMessage): List<UnsubscribeMessage> =
+        relayList.map { it.subscribe(request) }
 
     // TODO purge this list to prevent Out of Memory errors
     fun <T> sharedFlow(
@@ -58,12 +59,13 @@ class Relays @Inject constructor(
             }.toList()
         }.shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
-    fun createRelay(url: String): Relay = Relay(
+    private fun createRelay(url: String, scope: CoroutineScope): Relay = Relay(
+        url,
         scarletBuilder
             .webSocketFactory(okHttpClient.newWebSocketFactory(url))
             .build()
             .create(),
-        eventRefiner
+        scope
     )
 
     companion object {

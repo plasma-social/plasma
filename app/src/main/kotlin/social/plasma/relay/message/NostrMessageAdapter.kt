@@ -15,33 +15,33 @@ class NostrMessageAdapter {
     fun requestMessageFromJson(
         reader: JsonReader,
         filtersDelegate: JsonAdapter<Filters>
-    ): RequestMessage {
+    ): SubscribeMessage {
         reader.beginArray()
         reader.nextString()
         val subscriptionId = reader.nextString()
         val filters = filtersDelegate.fromJson(reader)!!
         reader.endArray()
-        return RequestMessage(subscriptionId, filters)
+        return SubscribeMessage(subscriptionId, filters)
     }
 
     @ToJson
-    fun requestMessageToJson(request: RequestMessage) =
+    fun requestMessageToJson(request: SubscribeMessage) =
         listOf("REQ", request.subscriptionId, request.filters)
 
     // CloseMessage
     @FromJson
     fun closeMessageFromJson(
         reader: JsonReader
-    ): CloseMessage {
+    ): UnsubscribeMessage {
         reader.beginArray()
         reader.nextString()
         val subscriptionId = reader.nextString()
         reader.endArray()
-        return CloseMessage(subscriptionId)
+        return UnsubscribeMessage(subscriptionId)
     }
 
     @ToJson
-    fun closeMessageToJson(request: CloseMessage) =
+    fun closeMessageToJson(request: UnsubscribeMessage) =
         listOf("CLOSE", request.subscriptionId)
 
 

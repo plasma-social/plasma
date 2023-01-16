@@ -17,7 +17,7 @@ class RequestMessageAdapterTest : StringSpec({
         .add(NostrMessageAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
-    val adapter = moshi.adapter(RequestMessage::class.java)
+    val adapter = moshi.adapter(SubscribeMessage::class.java)
 
     "can serde requests" {
         checkAll(arbRequestMessage) { request ->
@@ -36,6 +36,6 @@ class RequestMessageAdapterTest : StringSpec({
         val arbRequestMessage = Arb.bind(
             arbVanillaString,
             arbFilters
-        ) { subId, filter -> RequestMessage(subId, filter) }
+        ) { subId, filter -> SubscribeMessage(subId, filter) }
     }
 }
