@@ -211,11 +211,12 @@ public object Bech32 {
         return output.toByteArray()
     }
 
-    fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
+    fun ByteArray.toNpub() = encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
 
     fun String.bechToBytes(hrp: String? = null): ByteArray {
 
-        val decodedForm = Bech32.decodeBytes(this)
+        val decodedForm = decodeBytes(this)
+
         hrp?.also {
             if (it != decodedForm.first) {
                 throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")

@@ -9,7 +9,7 @@ class StringPreference @AssistedInject constructor(
     @Assisted private val key: String,
     private val sharedPreferences: SharedPreferences,
 ) : Preference<String> {
-    override fun get(default: String): String? = sharedPreferences.getString(key, default)
+    override fun get(default: String?): String? = sharedPreferences.getString(key, default)
 
     override fun isSet(): Boolean = sharedPreferences.contains(key)
 
