@@ -11,10 +11,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.komputing.kbech32.AddressFormatException
-import org.komputing.kbech32.Bech32
-import social.plasma.di.UserKey
-import social.plasma.prefs.Preference
+import social.plasma.crypto.Bech32.bechToBytes
+import social.plasma.repository.AccountStateRepository
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -22,23 +20,22 @@ import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    @UserKey
-    private val userKeyPref: Preference<String>,
+    private val accountStateRepo: AccountStateRepository,
     @Named("default")
     defaultDispatcher: CoroutineContext,
 ) : ViewModel() {
     private val keyInput: MutableStateFlow<String> = MutableStateFlow("")
-    private val isLoggedIn: MutableStateFlow<Boolean> = MutableStateFlow(userKeyPref.isSet())
     private val decodedKey = keyInput.map { bech32 ->
         try {
-            Bech32.decode(bech32)
-        } catch (e: AddressFormatException) {
+            bech32.bechToBytes()
+        } catch (e: IllegalArgumentException) {
             null
         }
     }.flowOn(defaultDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val uiState: StateFlow<LoginState> =
-        combine(keyInput, decodedKey, isLoggedIn) { key, decodedKey, loggedIn ->
+        combine(keyInput, decodedKey, accountStateRepo.isLoggedIn) { key, decodedKey, loggedIn ->
             if (loggedIn) {
                 LoginState.LoggedIn
             } else {
@@ -57,8 +54,13 @@ class LoginViewModel @Inject constructor(
 
     fun login() {
         viewModelScope.launch {
-            userKeyPref.set(keyInput.value)
-            isLoggedIn.emit(userKeyPref.isSet())
+            val decodedKey = decodedKey.value ?: return@launch
+
+            if (keyInput.value.startsWith("npub")) {
+                accountStateRepo.setPublicKey(decodedKey)
+            } else if (keyInput.value.startsWith("nsec")) {
+                accountStateRepo.setSecretKey(decodedKey)
+            }
         }
     }
 }

@@ -1,17 +1,23 @@
 package social.plasma.di
 
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import social.plasma.prefs.ByteArrayPreference.ByteArrayPreferenceFactory
 import social.plasma.prefs.Preference
-import social.plasma.prefs.UserKeyPreference
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AccountModule {
+object AccountModule {
 
-    @Binds
-    @UserKey
-    abstract fun providesUserKeyPref(userKeyPreference: UserKeyPreference): Preference<String>
+    @Provides
+    @UserKey(KeyType.Secret)
+    fun providesSecretKey(factory: ByteArrayPreferenceFactory): Preference<ByteArray> =
+        factory.create("secret_key")
+
+    @Provides
+    @UserKey(KeyType.Public)
+    fun providesPublicKey(factory: ByteArrayPreferenceFactory): Preference<ByteArray> =
+        factory.create("public_key")
 }
