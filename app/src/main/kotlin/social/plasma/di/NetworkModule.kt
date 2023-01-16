@@ -14,11 +14,28 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import social.plasma.relay.message.NostrMessageAdapter
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    @Provides
+    @Singleton
+    @Named("default-relay-list")
+    fun provideDefaultRelayList(): List<String> = listOf(
+        "wss://brb.io",
+        "wss://relay.damus.io",
+        "wss://relay.nostr.bg",
+        "wss://nostr.oxtr.dev",
+        "wss://nostr.v0l.io",
+        "wss://nostr-pub.semisol.dev",
+        "wss://relay.kronkltd.net",
+        "wss://nostr.zebedee.cloud",
+        "wss://no.str.cr",
+        "wss://relay.nostr.info",
+    )
 
     @Provides
     @Singleton

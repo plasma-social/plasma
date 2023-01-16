@@ -15,12 +15,14 @@ import social.plasma.relay.message.SubscribeMessage
 import social.plasma.relay.message.UnsubscribeMessage
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class Relays @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val scarletBuilder: Scarlet.Builder,
+    @Named("default-relay-list") relayUrlList: List<String>,
 ) {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
@@ -67,19 +69,4 @@ class Relays @Inject constructor(
             .create(),
         scope
     )
-
-    companion object {
-        val relayUrlList = listOf(
-            "wss://brb.io",
-            "wss://relay.damus.io",
-            "wss://relay.nostr.bg",
-            "wss://nostr.oxtr.dev",
-            "wss://nostr.v0l.io",
-            "wss://nostr-pub.semisol.dev",
-            "wss://relay.kronkltd.net",
-            "wss://nostr.zebedee.cloud",
-            "wss://no.str.cr",
-            "wss://relay.nostr.info",
-        )
-    }
 }
