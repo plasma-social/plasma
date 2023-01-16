@@ -1,7 +1,5 @@
 package social.plasma.relay
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinder.scarlet.Scarlet
 import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
@@ -11,13 +9,16 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import social.plasma.models.UserMetaData
+import social.plasma.relay.BuildingBlocks.JemPubKey
+import social.plasma.relay.BuildingBlocks.moshi
 import social.plasma.relay.message.Filters
-import social.plasma.relay.message.NostrMessageAdapter
 import social.plasma.relay.message.SubscribeMessage
 
 class RelayTest : StringSpec({
@@ -29,7 +30,6 @@ class RelayTest : StringSpec({
         .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
         .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
         .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
-
 
     // TODO - a deterministic test using a mock webserver
     "can get events from a relay" {
@@ -46,7 +46,7 @@ class RelayTest : StringSpec({
             val events = relay.flowRelayMessages()
             relay.subscribe(
                 SubscribeMessage(
-                    filters = Filters.contactList("8366029071b385def2e4fb964d2d73e6f4246131ac1ff7608bbcb1971c5081d2")
+                    filters = Filters.contactList(JemPubKey)
                 )
             )
             events.first().event.content shouldContain "nostr.satsophone.tk"
@@ -66,7 +66,7 @@ class RelayTest : StringSpec({
         relay.connect()
         relay.subscribe(
             SubscribeMessage(
-                filters = Filters.contactList("8366029071b385def2e4fb964d2d73e6f4246131ac1ff7608bbcb1971c5081d2")
+                filters = Filters.contactList(JemPubKey)
             )
         )
 
@@ -96,9 +96,5 @@ class RelayTest : StringSpec({
     }
 }) {
     companion object {
-        val moshi = Moshi.Builder()
-            .add(NostrMessageAdapter())
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
     }
 }

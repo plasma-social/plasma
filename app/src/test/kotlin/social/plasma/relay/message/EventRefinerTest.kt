@@ -15,7 +15,7 @@ import social.plasma.models.EventSerdeTest.Companion.arbEvent
 import social.plasma.models.EventSerdeTest.Companion.arbVanillaString
 import social.plasma.models.TypedEvent
 import social.plasma.models.UserMetaData
-import social.plasma.relay.RelayTest.Companion.moshi
+import social.plasma.relay.BuildingBlocks.moshi
 
 class EventRefinerTest: StringSpec({
 
