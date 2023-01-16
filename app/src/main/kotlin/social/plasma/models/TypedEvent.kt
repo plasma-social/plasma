@@ -15,4 +15,8 @@ data class TypedEvent<T>(
     val tags: List<List<String>>,
     val content: T,
     val sig: ByteString,
-)
+) {
+
+    fun contacts(): List<Contact> = tags.mapNotNull { Contact.fromTag(it) }
+
+}
