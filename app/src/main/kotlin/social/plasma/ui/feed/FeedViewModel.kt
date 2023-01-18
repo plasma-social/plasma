@@ -1,50 +1,65 @@
 package social.plasma.ui.feed
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.lifecycle.viewModelScope
 import app.cash.molecule.RecompositionClock
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.map
-import social.plasma.models.Note
-import social.plasma.models.PubKey
-import social.plasma.models.TypedEvent
-import social.plasma.repository.NoteRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import social.plasma.db.notes.NoteDao
+import social.plasma.relay.Relays
+import social.plasma.relay.message.Filters
+import social.plasma.relay.message.SubscribeMessage
+import social.plasma.relay.message.UnsubscribeMessage
 import social.plasma.ui.base.MoleculeViewModel
-import social.plasma.ui.components.NoteCardUiModel
+import social.plasma.ui.ext.noteCardsPagingFlow
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
-    noteRepository: NoteRepository,
+    private val noteDao: NoteDao,
+    private val relays: Relays,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
+    private val feedReactionsSubscriptions: AtomicReference<Map<String, List<UnsubscribeMessage>>> =
+        AtomicReference(
+            mapOf()
+        )
 
-    private val noteObserver = noteRepository.observeGlobalNotes().map { noteList ->
-        noteList.map { it.toFeedUiModel() }
-    }
+    private val feedPagingFlow = noteCardsPagingFlow { noteDao.allNotesWithUsersPagingSource() }
+    private val globalFeedSubscription =
+        relays.subscribe(SubscribeMessage(filters = Filters.globalFeedNotes))
 
     @Composable
     override fun models(): FeedUiState {
-        val noteList by remember { noteObserver }.collectAsState(initial = null)
-
-        return noteList?.let { FeedUiState.Loaded(it) } ?: FeedUiState.Loading
+        return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
     }
-}
 
-private fun TypedEvent<Note>.toFeedUiModel(): NoteCardUiModel {
-    val pubKeyHex = pubKey.hex()
-    return NoteCardUiModel(
-        id = id.hex(),
-        name = "${pubKeyHex.take(8)}...${pubKeyHex.drop(48)}",
-        nip5 = "nostrplebs.com",
-        content = content.text,
-        timePosted = "1m",
-        avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=$pubKeyHex",
-        likeCount = "1.2k",
-        shareCount = "13",
-        replyCount = "50",
-        userPubkey = PubKey(pubKeyHex)
-    )
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch(Dispatchers.Default) {
+            globalFeedSubscription.forEach { relays.unsubscribe(it) }
+            feedReactionsSubscriptions.get().forEach {
+                it.value.forEach { relays.unsubscribe(it) }
+            }
+        }
+    }
+
+    fun onNoteDisposed(id: String) {
+        viewModelScope.launch(Dispatchers.Default) {
+            feedReactionsSubscriptions.updateAndGet { currentMap ->
+                currentMap[id]?.let { it.forEach { relays.unsubscribe(it) } }
+                currentMap - id
+            }
+        }
+    }
+
+    fun onNoteDisplayed(id: String) {
+        viewModelScope.launch(Dispatchers.Default) {
+            feedReactionsSubscriptions.updateAndGet {
+                it + (id to relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id))))
+            }
+        }
+    }
 }

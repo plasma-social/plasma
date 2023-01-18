@@ -27,5 +27,6 @@ data class Event(
         const val Note = 1
         const val RecommendServer = 2
         const val ContactList = 3
+        const val Reaction = 7
     }
 }

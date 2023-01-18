@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,12 +29,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
+import kotlinx.coroutines.flow.flowOf
 import social.plasma.R
-import social.plasma.models.PubKey
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.NoteCard
-import social.plasma.ui.components.NoteCardUiModel
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
@@ -48,24 +50,43 @@ fun Profile(
 ) {
     val uiState by profileViewModel.uiState.collectAsState(ProfileUiState.Loading)
 
-    Profile(uiState = uiState, modifier = modifier)
+    Profile(
+        uiState = uiState,
+        modifier = modifier,
+        onNoteDisposed = profileViewModel::onNoteDisposed,
+        onNoteDisplayed = profileViewModel::onNoteDisplayed,
+    )
 }
 
 @Composable
 private fun Profile(
     uiState: ProfileUiState,
     modifier: Modifier = Modifier,
+    onNoteDisposed: (String) -> Unit,
+    onNoteDisplayed: (String) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
-        is ProfileUiState.Loaded -> ProfileContent(uiState, modifier)
+        is ProfileUiState.Loaded -> ProfileContent(
+            uiState = uiState,
+            onNoteDisplayed = onNoteDisplayed,
+            onNoteDisposed = onNoteDisposed,
+            modifier = modifier
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = Modifier) {
+private fun ProfileContent(
+    uiState: ProfileUiState.Loaded,
+    onNoteDisplayed: (String) -> Unit,
+    onNoteDisposed: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -93,9 +114,21 @@ private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = 
             item { ProfileStatsRow(uiState.statCards) }
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            itemsIndexed(uiState.feedNoteList) { index, cardUiModel ->
-                NoteCard(uiModel = cardUiModel, onAvatarClick = {})
-                Spacer(modifier = Modifier.height(16.dp))
+
+            items(lazyPagingItems) { cardUiModel ->
+
+                cardUiModel?.let {
+                    LaunchedEffect(Unit) {
+                        onNoteDisplayed(cardUiModel.id)
+                    }
+                    NoteCard(uiModel = it, onAvatarClick = {})
+                    Spacer(modifier = Modifier.height(16.dp))
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            onNoteDisposed(cardUiModel.id)
+                        }
+                    }
+                }
             }
         }
     }
@@ -117,7 +150,9 @@ private fun ProfileBio(
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(painterResource(R.drawable.ic_plasma_follow), contentDescription = null)
                 }
-                Text(userData.username, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                userData.username?.let {
+                    Text(userData.username, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -160,7 +195,7 @@ private fun ProfileStatsRow(statCards: List<ProfileStat>) {
 @Composable
 private fun PreviewProfile() {
     PlasmaTheme {
-        Profile(FAKE_PROFILE)
+        Profile(uiState = FAKE_PROFILE, onNoteDisplayed = {}, onNoteDisposed = {})
     }
 }
 
@@ -173,20 +208,7 @@ val FAKE_PROFILE = ProfileUiState.Loaded(
         bio = "Developer @ a peer-to-peer electronic cash system",
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg"
     ),
-    feedNoteList = (0..20).map {
-        NoteCardUiModel(
-            id = "$it",
-            name = "Satoshi",
-            nip5 = "bitcoin.com",
-            content = "Joplin and other markdown editors have pretty great UX these days \uD83E\uDD19",
-            timePosted = "19m",
-            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
-            replyCount = "352k",
-            likeCount = "2.9M",
-            shareCount = "509k",
-            userPubkey = PubKey("fdf")
-        )
-    },
+    userNotesPagingFlow = flowOf(),
     statCards = listOf(
         ProfileStat(
             label = "Followers",
