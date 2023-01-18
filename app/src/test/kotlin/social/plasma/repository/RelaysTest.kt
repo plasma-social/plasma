@@ -16,11 +16,13 @@ import social.plasma.relay.message.SubscribeMessage
 class RelaysTest : StringSpec({
     val metadataDao = FakeUserMetadataDao()
     val noteDao = FakeNoteDao()
+    val reactionDao = FakeReactionDao()
 
     val relays = Relays(
         okHttpClient = client,
         eventRefiner = EventRefiner(moshi),
         noteDao = noteDao,
+        reactionDao = reactionDao,
         userMetadataDao = metadataDao,
         scarletBuilder = scarlet,
         relayUrlList = listOf("wss://brb.io")
@@ -36,6 +38,6 @@ class RelaysTest : StringSpec({
     "notes get saved to db" {
         relays.subscribe(SubscribeMessage(filters = Filters.userNotes(JemPubKey)))
 
-        noteDao.inserts.awaitItem().pubKey shouldBe JemPubKey
+        noteDao.inserts.awaitItem().pubkey shouldBe JemPubKey
     }
 })

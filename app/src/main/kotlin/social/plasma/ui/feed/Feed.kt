@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,6 +32,8 @@ fun Feed(
         modifier = modifier,
         uiState = uiState,
         onNavigateToProfile = onNavigateToProfile,
+        onNoteDisposed = viewModel::onNoteDisposed,
+        onNoteDisplayed = viewModel::onNoteDisplayed,
     )
 }
 
@@ -38,13 +42,17 @@ private fun FeedContent(
     modifier: Modifier = Modifier,
     uiState: FeedUiState,
     onNavigateToProfile: (PubKey) -> Unit,
+    onNoteDisposed: (String) -> Unit,
+    onNoteDisplayed: (String) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
         is FeedUiState.Loaded -> FeedList(
             modifier = modifier,
             noteList = uiState.feedPagingFlow,
-            onNavigateToProfile = onNavigateToProfile
+            onNavigateToProfile = onNavigateToProfile,
+            onNoteDisplayed = onNoteDisplayed,
+            onNoteDisposed = onNoteDisposed,
         )
     }
 }
@@ -54,6 +62,8 @@ private fun FeedList(
     noteList: Flow<PagingData<NoteCardUiModel>>,
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
+    onNoteDisplayed: (String) -> Unit,
+    onNoteDisposed: (String) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -63,11 +73,20 @@ private fun FeedList(
     ) {
         items(pagingLazyItems) { note ->
             note?.let {
+                LaunchedEffect(Unit) {
+                    onNoteDisplayed(note.id)
+                }
                 NoteCard(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     uiModel = it,
                     onAvatarClick = { onNavigateToProfile(note.userPubkey) },
                 )
+
+                DisposableEffect(Unit) {
+                    onDispose {
+                        onNoteDisposed(note.id)
+                    }
+                }
             }
         }
     }

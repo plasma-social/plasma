@@ -13,11 +13,12 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(noteEntity: NoteEntity)
 
-    @Query("SELECT * FROM notes WHERE pubkey = :pubKey ORDER BY created_at DESC")
+    @Transaction
+    @Query("SELECT * FROM noteview WHERE pubkey = :pubKey")
     fun userNotesPagingSource(pubKey: String): PagingSource<Int, NoteWithUserEntity>
 
     @Transaction
-    @Query("SELECT * FROM notes ORDER BY created_at DESC")
+    @Query("SELECT * FROM noteview")
     fun allNotesWithUsersPagingSource(): PagingSource<Int, NoteWithUserEntity>
 
     @Query("SELECT * FROM notes ORDER BY created_at DESC")

@@ -6,7 +6,7 @@ import social.plasma.db.usermetadata.UserMetadataEntity
 
 data class NoteWithUserEntity(
     @Embedded
-    val noteEntity: NoteEntity,
+    val noteEntity: NoteView,
 
     @Relation(
         parentColumn = "pubkey",

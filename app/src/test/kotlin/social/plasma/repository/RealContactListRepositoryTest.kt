@@ -24,6 +24,7 @@ class RealContactListRepositoryTest : StringSpec({
             listOf("wss://nostr.satsophone.tk"),
             FakeNoteDao(),
             FakeUserMetadataDao(),
+            FakeReactionDao(),
             EventRefiner(
                 moshi
             )
