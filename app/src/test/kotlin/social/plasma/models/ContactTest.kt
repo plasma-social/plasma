@@ -1,6 +1,5 @@
 package social.plasma.models
 
-import androidx.compose.ui.text.toUpperCase
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe

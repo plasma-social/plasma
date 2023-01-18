@@ -17,6 +17,6 @@ data class TypedEvent<T>(
     val sig: ByteString,
 ) {
 
-    fun contacts(): List<Contact> = tags.mapNotNull { Contact.fromTag(it) }
+    fun contacts(): Set<Contact> = tags.mapNotNull { Contact.fromTag(it) }.toSet()
 
 }
