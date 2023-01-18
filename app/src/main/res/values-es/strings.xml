@@ -14,4 +14,5 @@
     <string name="login_tagline">Un cliente de nostr</string>
     <string name="coming_soon">Disponible Pronto</string>
     <string name="clear">Borrar</string>
+    <string name="sign_in_with_a_public_or_secret_key">Inicie sesión con una clave pública o secreta</string>
 </resources>
