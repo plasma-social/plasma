@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.db.PlasmaDb
 import social.plasma.db.notes.NoteDao
+import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.usermetadata.UserMetadataDao
 import javax.inject.Singleton
 
@@ -29,4 +30,7 @@ object DatabaseModule {
 
     @Provides
     fun providesUserMetadataDao(db: PlasmaDb): UserMetadataDao = db.userMetadataDao()
+
+    @Provides
+    fun providesReactionsDao(db: PlasmaDb): ReactionDao = db.reactionsDao()
 }

@@ -29,20 +29,21 @@ fun ViewModel.noteCardsPagingFlow(
         pagingSourceFactory = pagingSourceFactory
     ).flow.distinctUntilChanged().map { pagingData ->
         pagingData.map {
-            val user = it.userMetadataEntity
+
             val note = it.noteEntity
+            val user = it.userMetadataEntity
 
             NoteCardUiModel(
                 id = note.id,
-                name = user?.name ?: note.pubKey,
+                name = user?.name ?: user?.displayName ?: note.pubkey,
                 content = note.content,
                 avatarUrl = user?.picture
-                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${note.pubKey}",
+                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${note.pubkey}",
                 timePosted = Instant.ofEpochMilli(note.createdAt).relativeTime(),
-                replyCount = "5",
-                shareCount = "10",
-                likeCount = "1323",
-                userPubkey = PubKey(note.pubKey),
+                replyCount = "",
+                shareCount = "",
+                likeCount = "${if (note.reactionCount > 0) note.reactionCount else ""}",
+                userPubkey = PubKey(note.pubkey),
                 nip5 = null,
             )
         }

@@ -19,6 +19,7 @@ class RealUserMetaDataRepositoryTest : StringSpec({
         Relays(
             client, scarlet, listOf("wss://brb.io"), FakeNoteDao(),
             userMetadataDao,
+            FakeReactionDao(),
             EventRefiner(
                 moshi
             )

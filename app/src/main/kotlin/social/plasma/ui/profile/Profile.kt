@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,23 +50,40 @@ fun Profile(
 ) {
     val uiState by profileViewModel.uiState.collectAsState(ProfileUiState.Loading)
 
-    Profile(uiState = uiState, modifier = modifier)
+    Profile(
+        uiState = uiState,
+        modifier = modifier,
+        onNoteDisposed = profileViewModel::onNoteDisposed,
+        onNoteDisplayed = profileViewModel::onNoteDisplayed,
+    )
 }
 
 @Composable
 private fun Profile(
     uiState: ProfileUiState,
     modifier: Modifier = Modifier,
+    onNoteDisposed: (String) -> Unit,
+    onNoteDisplayed: (String) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
-        is ProfileUiState.Loaded -> ProfileContent(uiState, modifier)
+        is ProfileUiState.Loaded -> ProfileContent(
+            uiState = uiState,
+            onNoteDisplayed = onNoteDisplayed,
+            onNoteDisposed = onNoteDisposed,
+            modifier = modifier
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = Modifier) {
+private fun ProfileContent(
+    uiState: ProfileUiState.Loaded,
+    onNoteDisplayed: (String) -> Unit,
+    onNoteDisposed: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
 
@@ -97,9 +116,18 @@ private fun ProfileContent(uiState: ProfileUiState.Loaded, modifier: Modifier = 
 
 
             items(lazyPagingItems) { cardUiModel ->
+
                 cardUiModel?.let {
+                    LaunchedEffect(Unit) {
+                        onNoteDisplayed(cardUiModel.id)
+                    }
                     NoteCard(uiModel = it, onAvatarClick = {})
                     Spacer(modifier = Modifier.height(16.dp))
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            onNoteDisposed(cardUiModel.id)
+                        }
+                    }
                 }
             }
         }
@@ -167,7 +195,7 @@ private fun ProfileStatsRow(statCards: List<ProfileStat>) {
 @Composable
 private fun PreviewProfile() {
     PlasmaTheme {
-        Profile(FAKE_PROFILE)
+        Profile(uiState = FAKE_PROFILE, onNoteDisplayed = {}, onNoteDisposed = {})
     }
 }
 
