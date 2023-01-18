@@ -12,7 +12,7 @@ import social.plasma.relay.message.UnsubscribeMessage
 import javax.inject.Inject
 
 interface UserMetaDataRepository {
-    fun observeGlobalUserMetaData(): Flow<List<TypedEvent<UserMetaData>>>
+    fun observeUserMetaData(): Flow<List<TypedEvent<UserMetaData>>>
 }
 
 class RealUserMetaDataRepository @Inject constructor(
@@ -28,7 +28,7 @@ class RealUserMetaDataRepository @Inject constructor(
     private val userMetaDataSharedFlow: SharedFlow<List<TypedEvent<UserMetaData>>> =
         relays.sharedFlow { eventRefiner.toUserMetaData(it) }
 
-    override fun observeGlobalUserMetaData(): Flow<List<TypedEvent<UserMetaData>>> {
+    override fun observeUserMetaData(): Flow<List<TypedEvent<UserMetaData>>> {
         return userMetaDataSharedFlow
     }
 }
