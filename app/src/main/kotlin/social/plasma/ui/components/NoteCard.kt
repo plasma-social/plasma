@@ -1,6 +1,5 @@
 package social.plasma.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +15,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,14 +34,14 @@ data class NoteCardUiModel(
     val replyCount: String,
     val shareCount: String,
     val likeCount: String,
-    val userPubkey: PubKey
+    val userPubkey: PubKey,
 )
 
 @Composable
 fun NoteCard(
     uiModel: NoteCardUiModel,
     modifier: Modifier = Modifier,
-    onAvatarClick: (PubKey) -> Unit,
+    onAvatarClick: ((PubKey) -> Unit)?,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -110,18 +107,16 @@ private fun NoteCardActionsRow(
 }
 
 @Composable
-private fun NoteCardHeader(uiModel: NoteCardUiModel, onAvatarClick: (PubKey) -> Unit) {
+private fun NoteCardHeader(uiModel: NoteCardUiModel, onAvatarClick: ((PubKey) -> Unit)?) {
     Row(
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
     ) {
         uiModel.avatarUrl?.let {
             Avatar(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clip(CircleShape)
-                    .clickable { onAvatarClick(PubKey(uiModel.id)) },
+                modifier = Modifier.padding(end = 16.dp),
                 imageUrl = it,
-                contentDescription = uiModel.name
+                contentDescription = uiModel.name,
+                onClick = onAvatarClick?.let { { onAvatarClick(uiModel.userPubkey) } }
             )
         }
         Column(
