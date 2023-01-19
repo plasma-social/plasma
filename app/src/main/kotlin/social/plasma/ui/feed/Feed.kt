@@ -1,5 +1,6 @@
 package social.plasma.ui.feed
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,8 @@ import social.plasma.models.PubKey
 import social.plasma.ui.components.NoteCard
 import social.plasma.ui.components.NoteCardUiModel
 import social.plasma.ui.components.ProgressIndicator
+
+typealias NoteId = String
 
 @Composable
 fun Feed(
@@ -43,7 +46,7 @@ private fun FeedContent(
     uiState: FeedUiState,
     onNavigateToProfile: (PubKey) -> Unit,
     onNoteDisposed: (String) -> Unit,
-    onNoteDisplayed: (String) -> Unit,
+    onNoteDisplayed: (NoteId, PubKey) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -62,29 +65,31 @@ private fun FeedList(
     noteList: Flow<PagingData<NoteCardUiModel>>,
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
-    onNoteDisplayed: (String) -> Unit,
+    onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteDisposed: (String) -> Unit,
 ) {
-    val pagingLazyItems = noteList.collectAsLazyPagingItems()
+    Column {
+        val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(pagingLazyItems) { note ->
-            note?.let {
-                LaunchedEffect(Unit) {
-                    onNoteDisplayed(note.id)
-                }
-                NoteCard(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    uiModel = it,
-                    onAvatarClick = { onNavigateToProfile(note.userPubkey) },
-                )
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(vertical = 8.dp)
+        ) {
+            items(pagingLazyItems) { note ->
+                note?.let {
+                    LaunchedEffect(Unit) {
+                        onNoteDisplayed(note.id, note.userPubkey)
+                    }
+                    NoteCard(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        uiModel = it,
+                        onAvatarClick = { onNavigateToProfile(note.userPubkey) },
+                    )
 
-                DisposableEffect(Unit) {
-                    onDispose {
-                        onNoteDisposed(note.id)
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            onNoteDisposed(note.id)
+                        }
                     }
                 }
             }
