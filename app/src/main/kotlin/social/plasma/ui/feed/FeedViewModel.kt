@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import social.plasma.db.notes.NoteDao
+import social.plasma.models.PubKey
 import social.plasma.relay.Relays
 import social.plasma.relay.message.Filters
 import social.plasma.relay.message.SubscribeMessage
@@ -55,10 +56,15 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    fun onNoteDisplayed(id: String) {
+    fun onNoteDisplayed(id: String, pubkey: PubKey) {
         viewModelScope.launch(Dispatchers.Default) {
             feedReactionsSubscriptions.updateAndGet {
-                it + (id to relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id))))
+                val newSubscriptions =
+                    relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id))) +
+                            relays.subscribe(
+                                SubscribeMessage(filters = Filters.userMetaData(pubkey.value))
+                            )
+                it + (id to newSubscriptions)
             }
         }
     }
