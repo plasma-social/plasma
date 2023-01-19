@@ -113,7 +113,6 @@ private fun NoteCardActionsRow(
 private fun NoteCardHeader(uiModel: NoteCardUiModel, onAvatarClick: (PubKey) -> Unit) {
     Row(
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
-        verticalAlignment = Alignment.Top,
     ) {
         uiModel.avatarUrl?.let {
             Avatar(
@@ -128,6 +127,7 @@ private fun NoteCardHeader(uiModel: NoteCardUiModel, onAvatarClick: (PubKey) -> 
         Column(
             modifier = Modifier
                 .weight(1f)
+                .align(Alignment.CenterVertically)
                 .padding(end = 16.dp)
         ) {
             Text(

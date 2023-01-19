@@ -12,6 +12,6 @@ abstract class ReactionDao {
     @Query("SELECT COUNT(id) FROM reactions WHERE noteId = :noteId")
     abstract fun observeNoteReactionCount(noteId: String): Flow<Int>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun insert(entity: ReactionEntity)
 }

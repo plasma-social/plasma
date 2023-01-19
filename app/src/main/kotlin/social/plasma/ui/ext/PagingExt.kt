@@ -25,7 +25,7 @@ fun ViewModel.noteCardsPagingFlow(
     pagingSourceFactory: () -> PagingSource<Int, NoteWithUserEntity>,
 ): Flow<PagingData<NoteCardUiModel>> {
     return Pager(
-        config = PagingConfig(pageSize = 25),
+        config = PagingConfig(pageSize = 25, maxSize = 500),
         pagingSourceFactory = pagingSourceFactory
     ).flow.distinctUntilChanged().map { pagingData ->
         pagingData.map {
@@ -47,7 +47,7 @@ fun ViewModel.noteCardsPagingFlow(
                 nip5 = null,
             )
         }
-    }.cachedIn(viewModelScope)
+    }.distinctUntilChanged().cachedIn(viewModelScope)
 }
 
 private fun Instant.relativeTime(): String {

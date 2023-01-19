@@ -29,9 +29,8 @@ class Relay(
     private var connectionLoop: Job? = null
 
     fun subscribe(request: SubscribeMessage): UnsubscribeMessage {
-        Log.d(tag, "adding sub $request. subscriptions now: ${
-            subscriptions.getAndUpdate { it.plus(request) }
-        }")
+        subscriptions.getAndUpdate { it.plus(request) }
+        Log.d(tag, "adding sub $request")
         service.sendSubscribe(request) // no-op if not connected
         return UnsubscribeMessage(request.subscriptionId)
     }
@@ -41,7 +40,7 @@ class Relay(
         subscriptions.getAndUpdate { set ->
             set.filterNot { it.subscriptionId == request.subscriptionId }.toSet()
         }
-        Log.d(tag, "unsubscribed. subs now ${subscriptions.get()}")
+        Log.d(tag, "removing sub $request")
     }
 
     fun connect(): Relay {
