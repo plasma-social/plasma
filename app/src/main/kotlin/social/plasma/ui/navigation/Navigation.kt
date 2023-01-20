@@ -21,11 +21,10 @@ fun Navigation(
 ) {
     NavHost(
         navController = navHostController,
-        modifier = modifier,
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(onNavigateToProfile = { pubKey ->
+            HomeScreen(modifier = modifier, onNavigateToProfile = { pubKey ->
                 navHostController.navigate(
                     Screen.Profile.buildRoute(pubKey)
                 )
@@ -41,7 +40,7 @@ fun Navigation(
         }
 
         composable(Screen.Profile.route) {
-            Profile()
+            Profile(onNavigateBack = { navHostController.popBackStack() })
         }
     }
 }

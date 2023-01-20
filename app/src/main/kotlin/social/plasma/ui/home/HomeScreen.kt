@@ -1,7 +1,12 @@
 package social.plasma.ui.home
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -17,6 +22,7 @@ import social.plasma.R
 import social.plasma.models.PubKey
 import social.plasma.ui.feed.Feed
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
@@ -24,28 +30,38 @@ fun HomeScreen(
 ) {
     var selectedTab by remember { mutableStateOf(HomeTab.Following) }
     val tabs = remember { HomeTab.values() }
-
-    Column(
+    Scaffold(
         modifier = modifier,
-    ) {
-        TabRow(selectedTabIndex = selectedTab.ordinal) {
-            tabs.forEach { tab ->
-                Tab(
-                    selected = selectedTab == tab,
-                    onClick = { selectedTab = tab },
-                    text = {
-                        Text(
-                            text = stringResource(tab.title),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                )
+        contentWindowInsets = WindowInsets.statusBars,
+        topBar = {
+            TabRow(
+                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                selectedTabIndex = selectedTab.ordinal) {
+                tabs.forEach { tab ->
+                    Tab(
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        text = {
+                            Text(
+                                text = stringResource(tab.title),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    )
+                }
             }
-        }
+        }) { paddingValues ->
         when (selectedTab) {
-            HomeTab.Following -> Feed(onNavigateToProfile = onNavigateToProfile)
-            HomeTab.Global -> Feed(onNavigateToProfile = onNavigateToProfile)
+            HomeTab.Following -> Feed(
+                modifier = Modifier.padding(paddingValues),
+                onNavigateToProfile = onNavigateToProfile
+            )
+
+            HomeTab.Global -> Feed(
+                modifier = Modifier.padding(paddingValues),
+                onNavigateToProfile = onNavigateToProfile
+            )
         }
     }
 }

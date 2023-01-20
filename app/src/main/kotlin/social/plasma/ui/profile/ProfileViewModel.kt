@@ -16,9 +16,7 @@ import social.plasma.models.PubKey
 import social.plasma.relay.Relays
 import social.plasma.relay.message.Filters
 import social.plasma.relay.message.SubscribeMessage
-import social.plasma.relay.message.UnsubscribeMessage
 import social.plasma.ui.ext.noteCardsPagingFlow
-import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +26,9 @@ class ProfileViewModel @Inject constructor(
     userMetadataDao: UserMetadataDao,
     private val relays: Relays,
 ) : ViewModel() {
+    private val fakeProfile =
+        ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
+
     private val profilePubKey: PubKey = PubKey(checkNotNull(savedStateHandle["pubkey"]))
 
     private val userNotesPagingFlow =
@@ -38,39 +39,35 @@ class ProfileViewModel @Inject constructor(
         relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(profilePubKey.value))) +
                 relays.subscribe(SubscribeMessage(filters = Filters.userNotes(profilePubKey.value)))
 
-    private val feedReactionsSubscriptions: AtomicReference<Map<String, List<UnsubscribeMessage>>> =
-        AtomicReference(
-            mapOf()
-        )
-
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
         userData = ProfileUiState.Loaded.UserData(
-            petName = "${profilePubKey.value.take(8)}...",
+            petName = profilePubKey.shortBech32,
             username = null,
-            bio = null,
+            about = null,
             nip5 = null,
             avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.value}",
-            publicKey = profilePubKey.value,
+            publicKey = profilePubKey,
         ),
-        statCards = FAKE_PROFILE.statCards,
+        statCards = fakeProfile.statCards,
     )
 
     val uiState =
         userMetadataDao.observeUserMetadata(profilePubKey.value)
             .filterNotNull()
             .map {
+                val publicKey = PubKey(it.pubkey)
                 ProfileUiState.Loaded(
                     userNotesPagingFlow = userNotesPagingFlow,
                     userData = ProfileUiState.Loaded.UserData(
-                        petName = it.displayName ?: "",
-                        username = it.name ?: it.pubkey,
-                        bio = it.about,
+                        petName = it.displayName ?: publicKey.shortBech32,
+                        username = it.name?.let { "@$it" },
+                        about = it.about,
                         nip5 = null,
                         avatarUrl = it.picture ?: "",
-                        publicKey = it.pubkey,
+                        publicKey = publicKey,
                     ),
-                    statCards = FAKE_PROFILE.statCards,
+                    statCards = fakeProfile.statCards,
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 
@@ -81,28 +78,17 @@ class ProfileViewModel @Inject constructor(
             profileSubscriptions.forEach {
                 relays.unsubscribe(it)
             }
-            feedReactionsSubscriptions.get().forEach {
-                it.value.forEach { relays.unsubscribe(it) }
-            }
         }
     }
 
     fun onNoteDisposed(id: String) {
-        viewModelScope.launch(Dispatchers.Default) {
-            feedReactionsSubscriptions.updateAndGet { currentMap ->
-                currentMap[id]?.let {
-                    it.forEach { relays.unsubscribe(it) }
-                }
-                currentMap - id
-            }
-        }
+        // TODO dispose subscriptions
     }
 
     fun onNoteDisplayed(id: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            feedReactionsSubscriptions.updateAndGet {
-                it + (id to relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id))))
-            }
+            id to relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id)))
         }
     }
 }
+

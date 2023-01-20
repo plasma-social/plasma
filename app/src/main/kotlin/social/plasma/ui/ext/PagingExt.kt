@@ -32,18 +32,19 @@ fun ViewModel.noteCardsPagingFlow(
 
             val note = it.noteEntity
             val user = it.userMetadataEntity
+            val userPubkey = PubKey(note.pubkey)
 
             NoteCardUiModel(
                 id = note.id,
-                name = user?.name ?: user?.displayName ?: note.pubkey,
+                name = user?.displayName ?: user?.name ?: userPubkey.shortBech32,
                 content = note.content,
                 avatarUrl = user?.picture
-                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${note.pubkey}",
+                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${userPubkey.value}",
                 timePosted = Instant.ofEpochMilli(note.createdAt).relativeTime(),
                 replyCount = "",
                 shareCount = "",
                 likeCount = "${if (note.reactionCount > 0) note.reactionCount else ""}",
-                userPubkey = PubKey(note.pubkey),
+                userPubkey = userPubkey,
                 nip5 = null,
             )
         }

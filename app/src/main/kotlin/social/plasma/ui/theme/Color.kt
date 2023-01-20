@@ -11,3 +11,4 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val PlasmaPurple = Color(0xFF5F01B8)
+val ProfileAvatarStroke = Color(0xFF141316)

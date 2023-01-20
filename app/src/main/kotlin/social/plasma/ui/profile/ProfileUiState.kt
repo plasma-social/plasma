@@ -2,6 +2,7 @@ package social.plasma.ui.profile
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import social.plasma.models.PubKey
 import social.plasma.ui.components.NoteCardUiModel
 
 sealed interface ProfileUiState {
@@ -19,8 +20,8 @@ sealed interface ProfileUiState {
         data class UserData(
             val petName: String,
             val username: String?,
-            val publicKey: String,
-            val bio: String?,
+            val publicKey: PubKey,
+            val about: String?,
             val avatarUrl: String,
             val nip5: String?,
         )
