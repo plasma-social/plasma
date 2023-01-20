@@ -7,29 +7,22 @@ import android.text.format.DateUtils.FORMAT_SHOW_YEAR
 import android.text.format.DateUtils.SECOND_IN_MILLIS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import androidx.paging.cachedIn
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import social.plasma.db.notes.NoteWithUserEntity
+import social.plasma.db.notes.NoteWithUser
 import social.plasma.models.PubKey
 import social.plasma.ui.components.NoteCardUiModel
 import java.time.Instant
 
 fun ViewModel.noteCardsPagingFlow(
-    pagingSourceFactory: () -> PagingSource<Int, NoteWithUserEntity>,
+    pagingFlow: Flow<PagingData<NoteWithUser>>,
 ): Flow<PagingData<NoteCardUiModel>> {
-    return Pager(
-        config = PagingConfig(pageSize = 25, maxSize = 500),
-        pagingSourceFactory = pagingSourceFactory
-    ).flow.distinctUntilChanged().map { pagingData ->
+    return pagingFlow.distinctUntilChanged().map { pagingData ->
         pagingData.map {
-
             val note = it.noteEntity
             val user = it.userMetadataEntity
             val userPubkey = PubKey(note.pubkey)

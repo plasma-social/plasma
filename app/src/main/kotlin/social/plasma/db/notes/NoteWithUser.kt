@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import social.plasma.db.usermetadata.UserMetadataEntity
 
-data class NoteWithUserEntity(
+data class NoteWithUser(
     @Embedded
     val noteEntity: NoteView,
 

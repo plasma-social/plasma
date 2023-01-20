@@ -1,87 +1,37 @@
 package social.plasma.relay
 
-import android.util.Log
-import com.tinder.scarlet.WebSocket
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.reactive.asFlow
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.relay.message.SubscribeMessage
-import social.plasma.relay.message.UnsubscribeMessage
-import java.util.concurrent.atomic.AtomicReference
 
-class Relay(
-    url: String,
-    private val service: RelayService,
-    private val scope: CoroutineScope,
-) {
+interface Relay {
+    val connectionStatus: Flow<RelayStatus>
 
-    private val connectionStatus = service.webSocketEventFlow().asFlow()
-        .filterNot { it is WebSocket.Event.OnMessageReceived }
+    fun connect()
 
-    private val tag = "relay-$url"
-    private val subscriptions: AtomicReference<Set<SubscribeMessage>> = AtomicReference(setOf())
-    private var connectionLoop: Job? = null
+    fun disconnect()
 
-    fun subscribe(request: SubscribeMessage): UnsubscribeMessage {
-        subscriptions.getAndUpdate { it.plus(request) }
-        Log.d(tag, "adding sub $request")
-        service.sendSubscribe(request) // no-op if not connected
-        return UnsubscribeMessage(request.subscriptionId)
+    fun subscribe(subscribeMessage: SubscribeMessage): Flow<EventRelayMessage>
+
+    data class RelayStatus(
+        val url: String,
+        val status: Status,
+    )
+
+    sealed interface Status {
+        object Connected : Status
+
+        data class ConnectionClosing(val shutdownReason: ShutdownReason) : Status
+
+        data class ConnectionClosed(val shutdownReason: ShutdownReason) : Status
+
+        data class ConnectionFailed(val throwable: Throwable) : Status
+
+        data class ShutdownReason(
+            val code: Int,
+            val reason: String,
+        )
     }
-
-    fun unsubscribe(request: UnsubscribeMessage) {
-        service.sendUnsubscribe(request)
-        subscriptions.getAndUpdate { set ->
-            set.filterNot { it.subscriptionId == request.subscriptionId }.toSet()
-        }
-        Log.d(tag, "removing sub $request")
-    }
-
-    fun connect(): Relay {
-        connectionLoop = connectionStatus.onEach {
-            when (it) {
-                is WebSocket.Event.OnConnectionOpened<*> -> {
-                    Log.d(tag, "connection opened: $it")
-                    reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
-                }
-
-                is WebSocket.Event.OnConnectionClosing -> {
-                    Log.d(tag, "connection closing: ${it.shutdownReason}")
-                }
-
-                is WebSocket.Event.OnConnectionClosed -> {
-                    Log.d(tag, "connection closed: ${it.shutdownReason}")
-                }
-
-                is WebSocket.Event.OnConnectionFailed -> {
-                    Log.d(tag, "connection failed", it.throwable)
-                }
-
-                else -> {}
-            }
-        }.launchIn(scope)
-        Log.d(tag, "Launched")
-        return this
-    }
-
-    fun disconnect() {
-        connectionLoop?.cancel()
-    }
-
-    private fun reSubscribeAll() {
-        Log.d(tag, "Resubscribing to ${subscriptions.get()}")
-        subscriptions.get().parallelStream().forEach { service.sendSubscribe(it) }
-    }
-
-    /** All events sent by the relay to the client */
-    fun flowRelayMessages(): Flow<EventRelayMessage> = service.relayMessageFlow()
-        .asFlow()
-        .filterIsInstance()
-
 }
+
+

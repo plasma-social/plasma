@@ -4,27 +4,22 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import social.plasma.db.notes.NoteDao
-import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.models.PubKey
-import social.plasma.relay.Relays
-import social.plasma.relay.message.Filters
-import social.plasma.relay.message.SubscribeMessage
+import social.plasma.repository.NoteRepository
+import social.plasma.repository.RealUserMetaDataRepository
 import social.plasma.ui.ext.noteCardsPagingFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    noteDao: NoteDao,
-    userMetadataDao: UserMetadataDao,
-    private val relays: Relays,
+    private val noteRepository: NoteRepository,
+    userMetaDataRepository: RealUserMetaDataRepository,
 ) : ViewModel() {
     private val fakeProfile =
         ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
@@ -32,12 +27,7 @@ class ProfileViewModel @Inject constructor(
     private val profilePubKey: PubKey = PubKey(checkNotNull(savedStateHandle["pubkey"]))
 
     private val userNotesPagingFlow =
-        noteCardsPagingFlow { noteDao.userNotesPagingSource(profilePubKey.value) }
-
-
-    private val profileSubscriptions =
-        relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(profilePubKey.value))) +
-                relays.subscribe(SubscribeMessage(filters = Filters.userNotes(profilePubKey.value)))
+        noteCardsPagingFlow(noteRepository.observeProfileNotes(profilePubKey.value))
 
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
@@ -53,42 +43,31 @@ class ProfileViewModel @Inject constructor(
     )
 
     val uiState =
-        userMetadataDao.observeUserMetadata(profilePubKey.value)
+        userMetaDataRepository.observeUserMetaData(profilePubKey.value)
             .filterNotNull()
             .map {
-                val publicKey = PubKey(it.pubkey)
                 ProfileUiState.Loaded(
                     userNotesPagingFlow = userNotesPagingFlow,
                     userData = ProfileUiState.Loaded.UserData(
-                        petName = it.displayName ?: publicKey.shortBech32,
+                        petName = it.displayName ?: profilePubKey.shortBech32,
                         username = it.name?.let { "@$it" },
                         about = it.about,
                         nip5 = null,
                         avatarUrl = it.picture ?: "",
-                        publicKey = publicKey,
+                        publicKey = profilePubKey,
                     ),
                     statCards = fakeProfile.statCards,
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 
 
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch(Dispatchers.Default) {
-            profileSubscriptions.forEach {
-                relays.unsubscribe(it)
-            }
-        }
-    }
-
     fun onNoteDisposed(id: String) {
-        // TODO dispose subscriptions
+        // TODO cancel coroutine
     }
 
     fun onNoteDisplayed(id: String) {
-        viewModelScope.launch(Dispatchers.Default) {
-            id to relays.subscribe(SubscribeMessage(filters = Filters.noteReactions(id)))
-        }
+        // TODO  move to repo
+        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
     }
 }
 

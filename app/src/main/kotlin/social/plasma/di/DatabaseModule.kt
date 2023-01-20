@@ -26,11 +26,14 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun providesNotesDao(db: PlasmaDb): NoteDao = db.noteDao()
 
     @Provides
+    @Singleton
     fun providesUserMetadataDao(db: PlasmaDb): UserMetadataDao = db.userMetadataDao()
 
     @Provides
+    @Singleton
     fun providesReactionsDao(db: PlasmaDb): ReactionDao = db.reactionsDao()
 }

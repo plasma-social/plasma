@@ -3,6 +3,7 @@ package social.plasma.relay.message
 import com.squareup.moshi.Json
 import social.plasma.models.Event
 import java.time.Instant
+import kotlin.time.Duration.Companion.hours
 
 data class Filters(
     val since: Instant = Instant.now(),
@@ -10,16 +11,18 @@ data class Filters(
     val kinds: Set<Int> = emptySet(),
     @Json(name = "#e")
     val eTags: Set<String> = emptySet(),
+    val limit: Int? = null,
 ) {
     companion object {
 
         val globalFeedNotes = Filters(
-            since = Instant.now().minusSeconds(600),
-            kinds = setOf(Event.Kind.Note)
+            since = Instant.now().minusSeconds(12.hours.inWholeSeconds),
+            kinds = setOf(Event.Kind.Note),
+            limit = 500,
         )
 
-        fun userNotes(pubKey: String) = Filters(
-            since = Instant.EPOCH,
+        fun userNotes(pubKey: String, since: Instant = Instant.EPOCH) = Filters(
+            since = since,
             authors = setOf(pubKey),
             kinds = setOf(Event.Kind.Note),
         )
@@ -28,12 +31,14 @@ data class Filters(
             since = Instant.EPOCH,
             authors = setOf(pubKey),
             kinds = setOf(Event.Kind.ContactList),
+            limit = 1,
         )
 
         fun userMetaData(pubKey: String) = Filters(
             since = Instant.EPOCH,
             authors = setOf(pubKey),
             kinds = setOf(Event.Kind.MetaData),
+            limit = 1,
         )
 
         fun noteReactions(id: String): Filters = Filters(
