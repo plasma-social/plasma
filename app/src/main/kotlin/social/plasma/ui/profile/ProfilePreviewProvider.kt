@@ -18,14 +18,6 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
         nip5: String? = "plasma.social",
         username: String? = "@satoshi",
     ): ProfileUiState.Loaded = ProfileUiState.Loaded(
-        userData = ProfileUiState.Loaded.UserData(
-            nip5 = nip5,
-            petName = "Satoshi",
-            username = username,
-            publicKey = PubKey(UUID.randomUUID().toString()),
-            about = "Developer @ a peer-to-peer electronic cash system",
-            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg"
-        ),
         userNotesPagingFlow = flowOf(),
         statCards = listOf(
             ProfileUiState.Loaded.ProfileStat(
@@ -40,6 +32,14 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
                 label = "Relays",
                 value = "11",
             ),
+        ),
+        userData = ProfileUiState.Loaded.UserData(
+            nip5 = nip5,
+            petName = "Satoshi",
+            username = username,
+            publicKey = PubKey(UUID.randomUUID().toString()),
+            about = "Developer @ a peer-to-peer electronic cash system",
+            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg"
         )
     )
 }

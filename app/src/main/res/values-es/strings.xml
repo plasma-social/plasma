@@ -7,7 +7,7 @@
     <string name="notifications">Notificationes</string>
     <string name="main">Principal</string>
     <string name="verified">verificado</string>
-    <string name="following">Seguidos</string>
+    <string name="following">Siguiendo</string>
     <string name="profile">Perfil</string>
     <string name="login">Acceder</string>
     <string name="private_or_public_key">nsec o pubsec</string>
@@ -17,4 +17,5 @@
     <string name="sign_in_with_a_public_or_secret_key">Inicie sesión con una clave pública o secreta</string>
     <string name="copy_public_key_to_clipboard">Copiar clave pública al portapapeles</string>
     <string name="back">Regresar</string>
+    <string name="follow">Seguir</string>
 </resources>

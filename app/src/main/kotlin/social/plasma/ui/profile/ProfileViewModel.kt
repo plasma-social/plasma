@@ -5,11 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import social.plasma.di.KeyType
+import social.plasma.di.UserKey
 import social.plasma.models.PubKey
+import social.plasma.prefs.Preference
+import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.RealUserMetaDataRepository
 import social.plasma.ui.ext.noteCardsPagingFlow
@@ -20,6 +25,8 @@ class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val noteRepository: NoteRepository,
     userMetaDataRepository: RealUserMetaDataRepository,
+    @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
+    contactListRepository: ContactListRepository,
 ) : ViewModel() {
     private val fakeProfile =
         ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
@@ -29,8 +36,17 @@ class ProfileViewModel @Inject constructor(
     private val userNotesPagingFlow =
         noteCardsPagingFlow(noteRepository.observeProfileNotes(profilePubKey.hex))
 
+    private val myPubkey = PubKey.of(pubkeyPref.get(null)!!)
+    
+    private val followingState =
+        contactListRepository.observeContactLists(myPubkey.hex)
+            .map { it.map { it.pubKey.hex() } }
+            .map { it.contains(profilePubKey.hex) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
+        statCards = fakeProfile.statCards,
         userData = ProfileUiState.Loaded.UserData(
             petName = profilePubKey.shortBech32,
             username = null,
@@ -39,26 +55,27 @@ class ProfileViewModel @Inject constructor(
             avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
             publicKey = profilePubKey,
         ),
-        statCards = fakeProfile.statCards,
     )
 
-    val uiState =
-        userMetaDataRepository.observeUserMetaData(profilePubKey.hex)
-            .filterNotNull()
-            .map {
-                ProfileUiState.Loaded(
-                    userNotesPagingFlow = userNotesPagingFlow,
-                    userData = ProfileUiState.Loaded.UserData(
-                        petName = it.displayName ?: profilePubKey.shortBech32,
-                        username = it.name?.let { "@$it" },
-                        about = it.about,
-                        nip5 = null,
-                        avatarUrl = it.picture ?: "",
-                        publicKey = profilePubKey,
-                    ),
-                    statCards = fakeProfile.statCards,
-                )
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
+    val uiState = combine(
+        followingState,
+        userMetaDataRepository.observeUserMetaData(profilePubKey.hex).filterNotNull()
+    ) { followState, metadata ->
+
+        ProfileUiState.Loaded(
+            userNotesPagingFlow = userNotesPagingFlow,
+            userData = ProfileUiState.Loaded.UserData(
+                petName = metadata.displayName ?: profilePubKey.shortBech32,
+                username = metadata.name?.let { "@$it" },
+                about = metadata.about,
+                nip5 = null,
+                avatarUrl = metadata.picture ?: "",
+                publicKey = profilePubKey,
+            ),
+            following = followState,
+            statCards = fakeProfile.statCards,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 
 
     fun onNoteDisposed(id: String) {

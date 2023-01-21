@@ -11,6 +11,7 @@ sealed interface ProfileUiState {
         val userNotesPagingFlow: Flow<PagingData<NoteCardUiModel>>,
         val statCards: List<ProfileStat>,
         val userData: UserData,
+        val following: Boolean? = false,
     ) : ProfileUiState {
         data class ProfileStat(
             val label: String,
