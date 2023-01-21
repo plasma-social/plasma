@@ -21,9 +21,14 @@ data class Filters(
             limit = 500,
         )
 
-        fun userNotes(pubKey: String, since: Instant = Instant.EPOCH) = Filters(
+        fun userNotes(pubKey: String, since: Instant = Instant.EPOCH) = userNotes(
+            pubKeys = setOf(pubKey),
             since = since,
-            authors = setOf(pubKey),
+        )
+
+        fun userNotes(pubKeys: Set<String>, since: Instant = Instant.EPOCH) = Filters(
+            since = since,
+            authors = pubKeys,
             kinds = setOf(Event.Kind.Note),
         )
 

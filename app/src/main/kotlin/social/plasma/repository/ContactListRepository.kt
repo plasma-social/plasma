@@ -1,26 +1,30 @@
 package social.plasma.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import social.plasma.models.Contact
-import social.plasma.relay.Relays
-import social.plasma.relay.message.UnsubscribeMessage
+import social.plasma.relay.Relay
+import social.plasma.relay.message.EventRefiner
+import social.plasma.relay.message.Filters
+import social.plasma.relay.message.SubscribeMessage
 import javax.inject.Inject
 
 interface ContactListRepository {
-    fun observeContactLists(): Flow<Set<Contact>>
+    fun observeContactLists(pubkey: String): Flow<Set<Contact>>
 }
 
 class RealContactListRepository @Inject constructor(
-    private val relays: Relays,
+    private val relay: Relay,
+    private val eventRefiner: EventRefiner,
 ) : ContactListRepository {
 
-    // TODO connect to relay
-    fun requestContactLists(pubKey: String): List<UnsubscribeMessage> = TODO()
-
-    private val contactListFlow: Flow<Set<Contact>> = flowOf()
-
-    override fun observeContactLists(): Flow<Set<Contact>> = contactListFlow
-
+    override fun observeContactLists(pubkey: String): Flow<Set<Contact>> {
+        return relay.subscribe(SubscribeMessage(filters = Filters.contactList(pubkey)))
+            .map { eventRefiner.toContacts(it) }
+            .filterNotNull()
+            .map {
+                it.contacts()
+            }
+    }
 }
-

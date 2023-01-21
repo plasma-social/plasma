@@ -9,7 +9,7 @@ sealed class Screen(
     @StringRes val name: Int,
 ) {
     object Profile : Screen(route = "profile/{pubkey}", name = R.string.profile) {
-        fun buildRoute(pubKey: PubKey): String = route.replace("{pubkey}", pubKey.value)
+        fun buildRoute(pubKey: PubKey): String = route.replace("{pubkey}", pubKey.hex)
     }
 
     object Home : Screen(route = "home", name = R.string.home)

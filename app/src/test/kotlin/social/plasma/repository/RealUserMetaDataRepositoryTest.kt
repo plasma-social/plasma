@@ -2,6 +2,7 @@ package social.plasma.repository
 
 import fakes.FakeUserMetadataDao
 import io.kotest.core.spec.style.StringSpec
+import kotlinx.coroutines.test.StandardTestDispatcher
 import social.plasma.relay.BuildingBlocks.client
 import social.plasma.relay.BuildingBlocks.moshi
 import social.plasma.relay.BuildingBlocks.scarlet
@@ -16,7 +17,8 @@ class RealUserMetaDataRepositoryTest : StringSpec({
         userMetadataDao,
         EventRefiner(
             moshi
-        )
+        ),
+        ioDispatcher = StandardTestDispatcher(),
     )
 
     "repository can be used to find user data" {
@@ -26,5 +28,4 @@ class RealUserMetaDataRepositoryTest : StringSpec({
 //            it.pubkey shouldBe JemPubKey
 //        }
     }
-
 })

@@ -27,7 +27,7 @@ class ProfileViewModel @Inject constructor(
     private val profilePubKey: PubKey = PubKey(checkNotNull(savedStateHandle["pubkey"]))
 
     private val userNotesPagingFlow =
-        noteCardsPagingFlow(noteRepository.observeProfileNotes(profilePubKey.value))
+        noteCardsPagingFlow(noteRepository.observeProfileNotes(profilePubKey.hex))
 
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
@@ -36,14 +36,14 @@ class ProfileViewModel @Inject constructor(
             username = null,
             about = null,
             nip5 = null,
-            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.value}",
+            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
             publicKey = profilePubKey,
         ),
         statCards = fakeProfile.statCards,
     )
 
     val uiState =
-        userMetaDataRepository.observeUserMetaData(profilePubKey.value)
+        userMetaDataRepository.observeUserMetaData(profilePubKey.hex)
             .filterNotNull()
             .map {
                 ProfileUiState.Loaded(
