@@ -32,7 +32,7 @@ fun ViewModel.noteCardsPagingFlow(
                 name = user?.displayName ?: user?.name ?: userPubkey.shortBech32,
                 content = note.content,
                 avatarUrl = user?.picture
-                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${userPubkey.value}",
+                    ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${userPubkey.hex}",
                 timePosted = Instant.ofEpochMilli(note.createdAt).relativeTime(),
                 replyCount = "",
                 shareCount = "",

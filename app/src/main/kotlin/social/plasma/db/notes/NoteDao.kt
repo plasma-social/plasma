@@ -19,8 +19,8 @@ interface NoteDao {
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey = :pubkey")
-    fun userNotesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser>
+    @Query("SELECT * FROM noteview WHERE pubkey IN (:pubkey)")
+    fun userNotesPagingSource(pubkey: List<String>): PagingSource<Int, NoteWithUser>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns

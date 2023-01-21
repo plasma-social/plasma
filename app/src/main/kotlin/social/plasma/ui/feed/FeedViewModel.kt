@@ -18,7 +18,7 @@ class FeedViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val userMetaDataRepository: UserMetaDataRepository,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
-    private val feedPagingFlow = noteCardsPagingFlow(noteRepository.observeGlobalNotes())
+    private val feedPagingFlow = noteCardsPagingFlow(noteRepository.observeContactsNotes())
 
     @Composable
     override fun models(): FeedUiState {
@@ -33,7 +33,7 @@ class FeedViewModel @Inject constructor(
         noteRepository.observeNoteReactionCount(id)
             .launchIn(viewModelScope)
 
-        userMetaDataRepository.observeUserMetaData(pubkey.value)
+        userMetaDataRepository.observeUserMetaData(pubkey.hex)
             .launchIn(viewModelScope)
     }
 }

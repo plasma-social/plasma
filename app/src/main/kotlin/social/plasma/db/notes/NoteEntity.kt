@@ -23,5 +23,5 @@ data class NoteEntity(
 )
 
 enum class NoteSource {
-    Global, Profile,
+    Global, Profile, Contacts
 }

@@ -21,9 +21,9 @@ class KeyConversionTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidKey() {
-        val privateKeyButes = INVALID_KEY.bechToBytes()
+        val privateKeyBytes = INVALID_KEY.bechToBytes()
 
-        pubkeyCreate(privateKeyButes).toNpub()
+        pubkeyCreate(privateKeyBytes).toNpub()
     }
 
     companion object {
