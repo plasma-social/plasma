@@ -15,4 +15,8 @@ object CoroutinesModule {
     @Provides
     @Named("default")
     fun providesDefaultDispatcher(): CoroutineContext = Dispatchers.Default
+
+    @Provides
+    @Named("io")
+    fun providesIODispatcher(): CoroutineContext = Dispatchers.IO
 }

@@ -19,4 +19,9 @@ data class NoteEntity(
     val createdAt: Long,
     val content: String,
     val sig: String,
+    val source: NoteSource,
 )
+
+enum class NoteSource {
+    Global, Profile,
+}

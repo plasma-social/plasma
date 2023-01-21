@@ -1,12 +1,12 @@
 package social.plasma.relay.message
 
 import com.squareup.moshi.Moshi
+import social.plasma.models.Contact
 import social.plasma.models.Event
 import social.plasma.models.Note
 import social.plasma.models.Reaction
 import social.plasma.models.TypedEvent
 import social.plasma.models.UserMetaData
-import social.plasma.models.Contact
 import social.plasma.relay.message.RelayMessage.EventRelayMessage
 import javax.inject.Inject
 import javax.inject.Singleton

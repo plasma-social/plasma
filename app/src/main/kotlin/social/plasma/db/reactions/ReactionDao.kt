@@ -14,4 +14,7 @@ abstract class ReactionDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun insert(entity: ReactionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun insert(list: Iterable<ReactionEntity>)
 }

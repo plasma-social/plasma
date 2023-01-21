@@ -14,17 +14,19 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(noteEntity: NoteEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(noteEntity: Iterable<NoteEntity>)
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey = :pubKey")
-    fun userNotesPagingSource(pubKey: String): PagingSource<Int, NoteWithUserEntity>
+    @Query("SELECT * FROM noteview WHERE pubkey = :pubkey")
+    fun userNotesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview")
-    fun allNotesWithUsersPagingSource(): PagingSource<Int, NoteWithUserEntity>
+    fun allNotesWithUsersPagingSource(): PagingSource<Int, NoteWithUser>
 
-    @Query("SELECT * FROM notes ORDER BY created_at DESC")
-    @RewriteQueriesToDropUnusedColumns
-    fun observeAllNotes(): Flow<NoteEntity>
+    @Query("SELECT created_at FROM notes WHERE pubkey = :pubkey AND source = :source ORDER BY created_at DESC")
+    fun getLatestNoteEpoch(pubkey: String, source: NoteSource = NoteSource.Profile): Flow<Long?>
 }
