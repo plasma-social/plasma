@@ -13,8 +13,8 @@ import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import social.plasma.PubKey
 import social.plasma.db.notes.NoteWithUser
-import social.plasma.models.PubKey
 import social.plasma.ui.components.NoteCardUiModel
 import java.time.Instant
 

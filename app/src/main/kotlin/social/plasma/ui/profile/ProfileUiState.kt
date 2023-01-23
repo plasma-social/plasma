@@ -2,7 +2,7 @@ package social.plasma.ui.profile
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import social.plasma.models.PubKey
+import social.plasma.PubKey
 import social.plasma.ui.components.NoteCardUiModel
 
 sealed interface ProfileUiState {
