@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -42,7 +44,9 @@ interface NoteRepository {
     fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>>
     fun observeProfileNotes(pubkey: String): Flow<PagingData<NoteWithUser>>
     fun observeNoteReactionCount(id: String): Flow<Unit>
-    fun observeContactsNotes(): Flow<PagingData<NoteWithUser>>
+    fun observeContactsNotesPaging(): Flow<PagingData<NoteWithUser>>
+
+    suspend fun refreshContactsNotes(): List<NoteEntity>
 }
 
 class RealNoteRepository @Inject constructor(
@@ -96,7 +100,7 @@ class RealNoteRepository @Inject constructor(
     }
 
 
-    override fun observeContactsNotes(): Flow<PagingData<NoteWithUser>> {
+    override fun observeContactsNotesPaging(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
         return contactListRepository.observeContactLists(myPubkey)
@@ -115,6 +119,25 @@ class RealNoteRepository @Inject constructor(
                     )
                 ).filterIsInstance()
             }
+    }
+
+    override suspend fun refreshContactsNotes(): List<NoteEntity> {
+        val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
+
+        val latestRefresh = noteDao.getLatestNoteEpoch(myPubkey, NoteSource.Contacts)
+            .firstOrNull()
+        val since = latestRefresh?.let { Instant.ofEpochMilli(it) } ?: Instant.EPOCH
+        val contacts = contactListRepository.syncContactList(pubkey = myPubkey).first()
+        val contactNpubList = contacts.map { it.pubKey.hex() }
+        return fetchWithNoteDbSync(
+            SubscribeMessage(
+                filters = Filters.userNotes(
+                    pubKeys = contactNpubList.toSet(),
+                    since = since,
+                )
+            ),
+            NoteSource.Contacts
+        ).first()
     }
 
     override fun observeNoteReactionCount(id: String): Flow<Unit> {
