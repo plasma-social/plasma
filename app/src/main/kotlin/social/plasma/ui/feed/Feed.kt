@@ -16,7 +16,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
-import social.plasma.models.PubKey
+import social.plasma.PubKey
 import social.plasma.ui.components.NoteCard
 import social.plasma.ui.components.NoteCardUiModel
 import social.plasma.ui.components.ProgressIndicator

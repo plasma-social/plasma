@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import social.plasma.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
-import social.plasma.models.PubKey
 import social.plasma.prefs.Preference
 import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
@@ -37,7 +37,7 @@ class ProfileViewModel @Inject constructor(
         noteCardsPagingFlow(noteRepository.observeProfileNotes(profilePubKey.hex))
 
     private val myPubkey = PubKey.of(pubkeyPref.get(null)!!)
-    
+
     private val followingState =
         contactListRepository.observeContactLists(myPubkey.hex)
             .map { it.map { it.pubKey.hex() } }

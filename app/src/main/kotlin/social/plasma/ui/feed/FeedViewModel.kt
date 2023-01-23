@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.molecule.RecompositionClock
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
-import social.plasma.models.PubKey
+import social.plasma.PubKey
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.base.MoleculeViewModel

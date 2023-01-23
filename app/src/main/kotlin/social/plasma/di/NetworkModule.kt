@@ -13,9 +13,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import social.plasma.relay.Relay
-import social.plasma.relay.Relays
-import social.plasma.relay.message.NostrMessageAdapter
+import social.plasma.nostr.relay.message.NostrMessageAdapter
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -60,17 +58,4 @@ object NetworkModule {
             .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
             .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
 //            .lifecycle(AndroidLifecycle.ofApplicationForeground(application))
-
-    @Provides
-    @Singleton
-    fun providesRelays(
-        okHttpClient: OkHttpClient,
-        scarletBuilder: Scarlet.Builder,
-        @Named("default-relay-list")
-        defaultRelays: List<String>,
-    ): Relay = Relays(
-        okHttpClient = okHttpClient,
-        scarletBuilder = scarletBuilder,
-        relayUrlList = defaultRelays,
-    )
 }

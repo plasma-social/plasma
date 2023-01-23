@@ -53,8 +53,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
+import social.plasma.PubKey
 import social.plasma.R
-import social.plasma.models.PubKey
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.NoteCard

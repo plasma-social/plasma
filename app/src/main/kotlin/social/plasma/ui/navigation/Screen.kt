@@ -1,8 +1,8 @@
 package social.plasma.ui.navigation
 
 import androidx.annotation.StringRes
+import social.plasma.PubKey
 import social.plasma.R
-import social.plasma.models.PubKey
 
 sealed class Screen(
     val route: String,
