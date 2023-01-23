@@ -48,10 +48,11 @@ fun LoginScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    Surface(modifier = modifier.safeDrawingPadding()) {
+    Surface(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .safeDrawingPadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

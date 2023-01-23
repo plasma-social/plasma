@@ -137,7 +137,7 @@ private fun ProfileContent(
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            item { ProfileBio(uiState.userData) }
+            item { ProfileBio(uiState.userData, following = uiState.following) }
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
@@ -247,6 +247,7 @@ fun ProfileAppBar(
 @Composable
 private fun ProfileBio(
     userData: UserData,
+    following: Boolean?,
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -272,12 +273,17 @@ private fun ProfileBio(
 
             OutlinedButton(
                 onClick = { /*TODO*/ },
+                enabled = following != null,
                 border = ButtonDefaults.outlinedButtonBorder
                     .copy(brush = SolidColor(MaterialTheme.colorScheme.primary))
             ) {
                 Icon(painterResource(R.drawable.ic_plasma_follow), null)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Follow")
+                Text(
+                    if (following == true) stringResource(id = R.string.following) else stringResource(
+                        R.string.follow
+                    )
+                )
             }
         }
 
