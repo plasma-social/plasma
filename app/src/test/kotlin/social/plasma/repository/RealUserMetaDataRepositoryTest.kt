@@ -1,31 +1,24 @@
 package social.plasma.repository
 
-import fakes.FakeUserMetadataDao
-import io.kotest.core.spec.style.StringSpec
-import kotlinx.coroutines.test.StandardTestDispatcher
-import social.plasma.relay.BuildingBlocks.client
-import social.plasma.relay.BuildingBlocks.moshi
-import social.plasma.relay.BuildingBlocks.scarlet
-import social.plasma.relay.Relays
-import social.plasma.relay.message.EventRefiner
+// TODO test with fake relays
 
-class RealUserMetaDataRepositoryTest : StringSpec({
-
-    val userMetadataDao = FakeUserMetadataDao()
-    val repo = RealUserMetaDataRepository(
-        Relays(client, scarlet, listOf("wss://brb.io")),
-        userMetadataDao,
-        EventRefiner(
-            moshi
-        ),
-        ioDispatcher = StandardTestDispatcher(),
-    )
-
-    "repository can be used to find user data" {
-        // TODO - have this return subscriptions that can be used to unsubscribe
+//class RealUserMetaDataRepositoryTest : StringSpec({
+//
+//    val userMetadataDao = FakeUserMetadataDao()
+//    val repo = RealUserMetaDataRepository(
+//        Relays(client, scarlet, listOf("wss://brb.io")),
+//        userMetadataDao,
+//        EventRefiner(
+//            moshi
+//        ),
+//        ioDispatcher = StandardTestDispatcher(),
+//    )
+//
+//    "repository can be used to find user data" {
+//        // TODO - have this return subscriptions that can be used to unsubscribe
 //        repo.requestUserMetaData(JemPubKey)
 //        repo.observeUserMetaData(JemPubKey).take(1).collect {
 //            it.pubkey shouldBe JemPubKey
 //        }
-    }
-})
+//    }
+//})

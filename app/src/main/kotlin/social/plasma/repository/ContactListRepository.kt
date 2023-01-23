@@ -3,11 +3,11 @@ package social.plasma.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import social.plasma.models.Contact
-import social.plasma.relay.Relay
-import social.plasma.relay.message.EventRefiner
-import social.plasma.relay.message.Filters
-import social.plasma.relay.message.SubscribeMessage
+import social.plasma.nostr.models.Contact
+import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.message.EventRefiner
+import social.plasma.nostr.relay.message.Filters
+import social.plasma.nostr.relay.message.SubscribeMessage
 import javax.inject.Inject
 
 interface ContactListRepository {

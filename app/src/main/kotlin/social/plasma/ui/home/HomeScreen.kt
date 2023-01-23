@@ -18,8 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import social.plasma.PubKey
 import social.plasma.R
-import social.plasma.models.PubKey
 import social.plasma.ui.feed.Feed
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +36,8 @@ fun HomeScreen(
         topBar = {
             TabRow(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
-                selectedTabIndex = selectedTab.ordinal) {
+                selectedTabIndex = selectedTab.ordinal
+            ) {
                 tabs.forEach { tab ->
                     Tab(
                         selected = selectedTab == tab,
