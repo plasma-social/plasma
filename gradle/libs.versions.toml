@@ -91,4 +91,5 @@ scarlet-streamadapter-rxjava = { module = "com.tinder.scarlet:stream-adapter-rxj
 scarlet-websocket-okhttp = { module = "com.tinder.scarlet:websocket-okhttp", version.ref = "scarlet" }
 
 secp256k1 = "fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.7.1"
+timber = "com.jakewharton.timber:timber:5.0.1"
 turbine = "app.cash.turbine:turbine:0.12.1"

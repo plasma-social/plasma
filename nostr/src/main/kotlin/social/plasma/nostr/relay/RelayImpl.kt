@@ -1,6 +1,5 @@
 package social.plasma.nostr.relay
 
-import android.util.Log
 import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,6 +16,7 @@ import kotlinx.coroutines.reactive.asFlow
 import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.nostr.relay.message.SubscribeMessage
 import social.plasma.nostr.relay.message.UnsubscribeMessage
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
 class RelayImpl(
@@ -25,7 +25,8 @@ class RelayImpl(
     private val scope: CoroutineScope,
 ) : Relay {
     private val tag = "relay-$url"
-
+    private val logger get() = Timber.tag(tag)
+    
     override val connectionStatus: Flow<Relay.RelayStatus> =
         service.webSocketEventFlow().asFlow()
             .filterNot { it is WebSocket.Event.OnMessageReceived }
@@ -41,7 +42,7 @@ class RelayImpl(
         subscriptions.getAndUpdate { it.plus(subscribeMessage) }
 
         service.sendSubscribe(subscribeMessage)
-        Log.d(tag, "adding sub $subscribeMessage")
+        logger.d("adding sub %s", subscribeMessage)
 
         return relayMessages.asFlow()
             .filterIsInstance<RelayMessage.EventRelayMessage>()
@@ -56,31 +57,31 @@ class RelayImpl(
         subscriptions.getAndUpdate { set ->
             set.filterNot { it.subscriptionId == request.subscriptionId }.toSet()
         }
-        Log.d(tag, "removing sub $request")
+        logger.d( "removing sub %s", request)
     }
 
     override fun connect() {
         connectionLoop = connectionStatus.distinctUntilChanged().onEach {
             when (it.status) {
                 is Relay.Status.Connected -> {
-                    Log.d(tag, "connection opened: $it")
+                    logger.d("connection opened: %s", it)
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }
 
                 is Relay.Status.ConnectionClosing -> {
-                    Log.d(tag, "connection closing: ${it.status.shutdownReason}")
+                    logger.d("connection closing: %s", it.status.shutdownReason)
                 }
 
                 is Relay.Status.ConnectionClosed -> {
-                    Log.d(tag, "connection closed: ${it.status.shutdownReason}")
+                    logger.d("connection closed: %s", it.status.shutdownReason)
                 }
 
                 is Relay.Status.ConnectionFailed -> {
-                    Log.d(tag, "connection failed", it.status.throwable)
+                    logger.d(it.status.throwable, "connection failed")
                 }
             }
         }.launchIn(scope)
-        Log.d(tag, "Launched")
+        logger.d("Launched")
     }
 
     override fun disconnect() {
@@ -88,7 +89,7 @@ class RelayImpl(
     }
 
     private fun reSubscribeAll() {
-        Log.d(tag, "Resubscribing to ${subscriptions.get()}")
+        logger.d("Resubscribing to %s", subscriptions.get())
         subscriptions.get().parallelStream().forEach { service.sendSubscribe(it) }
     }
 

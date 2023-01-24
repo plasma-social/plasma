@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.scarlet.streamadapter.coroutines)
     implementation(libs.scarlet.streamadapter.rxjava)
 
+    implementation(libs.timber)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotest.property)

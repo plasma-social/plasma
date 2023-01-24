@@ -77,10 +77,11 @@ dependencies {
     implementation(libs.lifecycle.viewmodelcompose)
 
     implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.ui)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.materialicons)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.ui)
+    implementation(libs.compose.ui.uitoolingpreview)
 
     implementation(libs.dagger.hilt.android)
     kapt(libs.dagger.hilt.compiler)
@@ -100,9 +101,10 @@ dependencies {
     implementation(libs.scarlet.streamadapter.rxjava)
     implementation(libs.scarlet.websocket.okhttp)
 
-    debugImplementation(libs.compose.ui.uitooling)
-    implementation(libs.compose.ui.uitoolingpreview)
+    implementation(libs.timber)
+
     debugImplementation(libs.compose.ui.test.manifest)
+    debugImplementation(libs.compose.ui.uitooling)
 
     testImplementation(libs.androidx.paging.common)
     testImplementation(libs.androidx.room.testing)
