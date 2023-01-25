@@ -2,6 +2,8 @@ package social.plasma.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import social.plasma.db.contacts.ContactEntity
+import social.plasma.db.contacts.ContactsDao
 import social.plasma.db.notes.NoteDao
 import social.plasma.db.notes.NoteEntity
 import social.plasma.db.notes.NoteView
@@ -14,7 +16,8 @@ import social.plasma.db.usermetadata.UserMetadataEntity
     entities = [
         NoteEntity::class,
         UserMetadataEntity::class,
-        ReactionEntity::class
+        ReactionEntity::class,
+        ContactEntity::class,
     ],
     views = [
         NoteView::class,
@@ -26,4 +29,6 @@ abstract class PlasmaDb : RoomDatabase() {
 
     abstract fun userMetadataDao(): UserMetadataDao
     abstract fun reactionsDao(): ReactionDao
+
+    abstract fun contactsDao(): ContactsDao
 }
