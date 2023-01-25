@@ -18,4 +18,5 @@
     <string name="copy_public_key_to_clipboard">Copy public key to clipboard</string>
     <string name="back">Back</string>
     <string name="follow">Follow</string>
+    <string name="feed">Feed</string>
 </resources>
