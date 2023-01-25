@@ -26,6 +26,13 @@ val Typography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
     ),
+    // This is the style that toolbar titles use by default
+    // It's the same as AG: Title
+    titleLarge = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+    ),
     // AG: Title
     titleMedium = TextStyle(
         fontWeight = FontWeight.Bold,
