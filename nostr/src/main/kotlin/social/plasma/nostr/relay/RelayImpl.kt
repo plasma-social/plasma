@@ -24,6 +24,7 @@ class RelayImpl(
     private val service: RelayService,
     private val scope: CoroutineScope,
 ) : Relay {
+
     private val tag = "relay-$url"
     private val logger get() = Timber.tag(tag)
 
