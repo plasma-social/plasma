@@ -28,6 +28,7 @@ object NetworkModule {
         "wss://brb.io",
         "wss://relay.damus.io",
         "wss://relay.nostr.bg",
+        "wss://eden.nostr.land",
         "wss://nostr.oxtr.dev",
         "wss://nostr.v0l.io",
         "wss://nostr-pub.semisol.dev",
