@@ -7,20 +7,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import social.plasma.R
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun RootScreenToolbar() {
+fun RootScreenToolbar(
+    title: String,
+    avatarUrl: String,
+    onAvatarClick: () -> Unit,
+) {
     CenterAlignedTopAppBar(
-        title = { Text(stringResource(R.string.feed)) },
+        title = { Text(title) },
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onAvatarClick) {
                 Avatar(
                     size = 30.dp,
-                    imageUrl = "https://api.dicebear.com/5.x/bottts/jpg",
+                    imageUrl = avatarUrl,
                     contentDescription = null,
                 )
             }
