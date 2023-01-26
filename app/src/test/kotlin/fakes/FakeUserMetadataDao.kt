@@ -15,4 +15,10 @@ class FakeUserMetadataDao : UserMetadataDao {
     override fun insert(userMetadataEntity: UserMetadataEntity) {
         inserts.add(userMetadataEntity)
     }
+
+    override fun insert(userMetadata: Iterable<UserMetadataEntity>) {
+        userMetadata.forEach {
+            inserts.add(it)
+        }
+    }
 }

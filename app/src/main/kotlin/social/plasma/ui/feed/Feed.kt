@@ -27,9 +27,26 @@ import social.plasma.ui.components.ProgressIndicator
 typealias NoteId = String
 
 @Composable
-fun Feed(
+fun GlobalFeed(
     modifier: Modifier = Modifier,
-    viewModel: FeedViewModel = hiltViewModel(),
+    viewModel: GlobalFeedViewModel = hiltViewModel(),
+    onNavigateToProfile: (PubKey) -> Unit,
+) {
+    val uiState by viewModel.uiState().collectAsState()
+
+    FeedContent(
+        modifier = modifier,
+        uiState = uiState,
+        onNavigateToProfile = onNavigateToProfile,
+        onNoteDisposed = viewModel::onNoteDisposed,
+        onNoteDisplayed = viewModel::onNoteDisplayed,
+    )
+}
+
+@Composable
+fun ContactsFeed(
+    modifier: Modifier = Modifier,
+    viewModel: FollowingFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()

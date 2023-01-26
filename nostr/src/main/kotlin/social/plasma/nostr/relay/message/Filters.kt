@@ -40,6 +40,8 @@ data class Filters(
             limit = 1,
         )
 
+        fun userMetaData(pubKey: String) = userMetaData(pubKeys = setOf(pubKey))
+        
         fun userMetaData(pubKeys: Set<String>) = Filters(
             since = Instant.EPOCH,
             authors = pubKeys,
