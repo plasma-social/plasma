@@ -7,10 +7,10 @@ import kotlin.time.Duration.Companion.hours
 
 data class Filters(
     val since: Instant = Instant.now(),
-    val authors: Set<String> = emptySet(),
-    val kinds: Set<Int> = emptySet(),
+    val authors: Set<String>? = null,
+    val kinds: Set<Int>? = null,
     @Json(name = "#e")
-    val eTags: Set<String> = emptySet(),
+    val eTags: Set<String>? = null,
     val limit: Int? = null,
 ) {
     companion object {
@@ -41,7 +41,7 @@ data class Filters(
         )
 
         fun userMetaData(pubKey: String) = userMetaData(pubKeys = setOf(pubKey))
-        
+
         fun userMetaData(pubKeys: Set<String>) = Filters(
             since = Instant.EPOCH,
             authors = pubKeys,
