@@ -5,6 +5,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -97,21 +99,22 @@ class RealNoteRepository @Inject constructor(
     override fun observeContactsNotes(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
-        return contactListRepository.observeContactLists(myPubkey).take(1).flatMapLatest {
-            val contactNpubList = it.map { it.pubKey.hex() }
+        return contactListRepository.observeContactLists(myPubkey)
+            .filter { it.isNotEmpty() }.distinctUntilChanged().flatMapLatest {
+                val contactNpubList = it.map { it.pubKey.hex() }
 
-            merge(
-                Pager(
-                    config = PagingConfig(pageSize = 25, maxSize = 500),
-                    pagingSourceFactory = { noteDao.userNotesPagingSource(contactNpubList) }
-                ).flow,
+                merge(
+                    Pager(
+                        config = PagingConfig(pageSize = 25, maxSize = 500),
+                        pagingSourceFactory = { noteDao.userNotesPagingSource(contactNpubList) }
+                    ).flow,
 
-                fetchWithNoteDbSync(
-                    SubscribeMessage(filters = Filters.userNotes(contactNpubList.toSet())),
-                    NoteSource.Contacts
-                )
-            ).filterIsInstance()
-        }
+                    fetchWithNoteDbSync(
+                        SubscribeMessage(filters = Filters.userNotes(contactNpubList.toSet())),
+                        NoteSource.Contacts
+                    )
+                ).filterIsInstance()
+            }
     }
 
     override fun observeNoteReactionCount(id: String): Flow<Unit> {

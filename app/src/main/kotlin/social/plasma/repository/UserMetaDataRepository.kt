@@ -5,8 +5,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onEach
 import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.db.usermetadata.UserMetadataEntity
 import social.plasma.nostr.models.TypedEvent
@@ -15,12 +13,17 @@ import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filters
 import social.plasma.nostr.relay.message.SubscribeMessage
+import social.plasma.utils.chunked
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 interface UserMetaDataRepository {
     fun observeUserMetaData(pubKey: String): Flow<UserMetaData>
+
+    fun syncUserMetadata(pubKey: String): Flow<Unit>
+
+    fun syncUserMetadata(pubKeys: Set<String>): Flow<Unit>
 }
 
 class RealUserMetaDataRepository @Inject constructor(
@@ -30,30 +33,37 @@ class RealUserMetaDataRepository @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : UserMetaDataRepository {
     override fun observeUserMetaData(pubKey: String): Flow<UserMetaData> =
-        merge(
-            metadataDao.observeUserMetadata(pubKey)
-                .map {
-                    it?.let {
-                        UserMetaData(
-                            name = it.name,
-                            displayName = it.displayName,
-                            about = it.about,
-                            picture = it.picture,
-                        )
-                    }
-                },
-
-            relays.subscribe(
-                SubscribeMessage(filters = Filters.userMetaData(pubKey))
-            )
-                .map { eventRefiner.toUserMetaData(it) }
-                .filterNotNull()
-                .onEach {
-                    metadataDao.insert(it.toUserMetadataEntity())
+        metadataDao.observeUserMetadata(pubKey)
+            .distinctUntilChanged()
+            .map {
+                it?.let {
+                    UserMetaData(
+                        name = it.name,
+                        displayName = it.displayName,
+                        about = it.about,
+                        picture = it.picture,
+                    )
                 }
-                .flowOn(ioDispatcher)
-                .map { it.content }
-        ).filterNotNull().distinctUntilChanged()
+            }
+            .filterNotNull()
+
+    override fun syncUserMetadata(pubKey: String): Flow<Unit> {
+        return syncUserMetadata(setOf(pubKey))
+    }
+
+    override fun syncUserMetadata(pubKeys: Set<String>): Flow<Unit> {
+        return relays.subscribe(
+            SubscribeMessage(filters = Filters.userMetaData(pubKeys))
+        )
+            .distinctUntilChanged()
+            .map { eventRefiner.toUserMetaData(it) }
+            .filterNotNull()
+            .chunked(pubKeys.size, 200)
+            .map { metadataList ->
+                metadataDao.insert(metadataList.map { it.toUserMetadataEntity() })
+            }
+            .flowOn(ioDispatcher)
+    }
 
 }
 

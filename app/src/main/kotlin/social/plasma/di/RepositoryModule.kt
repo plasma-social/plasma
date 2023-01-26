@@ -12,19 +12,24 @@ import social.plasma.repository.RealContactListRepository
 import social.plasma.repository.RealNoteRepository
 import social.plasma.repository.RealUserMetaDataRepository
 import social.plasma.repository.UserMetaDataRepository
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds
+    @Singleton
     abstract fun bindAccountStateRepo(impl: RealAccountRepository): AccountStateRepository
 
     @Binds
+    @Singleton
     abstract fun bindNoteRepository(impl: RealNoteRepository): NoteRepository
 
     @Binds
+    @Singleton
     abstract fun bindUserMetadataRepository(impl: RealUserMetaDataRepository): UserMetaDataRepository
 
     @Binds
+    @Singleton
     abstract fun bindContactListRepository(impl: RealContactListRepository): ContactListRepository
 }

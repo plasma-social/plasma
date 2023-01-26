@@ -30,6 +30,7 @@ data class Filters(
             since = since,
             authors = pubKeys,
             kinds = setOf(Event.Kind.Note),
+            limit = 500,
         )
 
         fun contactList(pubKey: String) = Filters(
@@ -39,11 +40,10 @@ data class Filters(
             limit = 1,
         )
 
-        fun userMetaData(pubKey: String) = Filters(
+        fun userMetaData(pubKeys: Set<String>) = Filters(
             since = Instant.EPOCH,
-            authors = setOf(pubKey),
+            authors = pubKeys,
             kinds = setOf(Event.Kind.MetaData),
-            limit = 1,
         )
 
         fun noteReactions(id: String): Filters = Filters(

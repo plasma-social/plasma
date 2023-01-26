@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import social.plasma.PubKey
@@ -84,7 +83,7 @@ class ProfileViewModel @Inject constructor(
 
     fun onNoteDisplayed(id: String) {
         // TODO  move to repo
-        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
+//        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
     }
 }
 

@@ -13,4 +13,7 @@ interface UserMetadataDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(userMetadataEntity: UserMetadataEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(userMetadata: Iterable<UserMetadataEntity>)
 }
