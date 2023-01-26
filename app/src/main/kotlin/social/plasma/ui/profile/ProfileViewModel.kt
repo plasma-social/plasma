@@ -6,12 +6,15 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import social.plasma.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.nostr.models.UserMetaData
 import social.plasma.prefs.Preference
 import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
@@ -22,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val noteRepository: NoteRepository,
+    noteRepository: NoteRepository,
     userMetaDataRepository: RealUserMetaDataRepository,
     @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
     contactListRepository: ContactListRepository,
@@ -56,9 +59,15 @@ class ProfileViewModel @Inject constructor(
         ),
     )
 
+
+    private val userMetadata = merge(
+        userMetaDataRepository.observeUserMetaData(profilePubKey.hex).filterNotNull(),
+        userMetaDataRepository.syncUserMetadata(profilePubKey.hex)
+    ).filterIsInstance<UserMetaData>()
+
     val uiState = combine(
         followingState,
-        userMetaDataRepository.observeUserMetaData(profilePubKey.hex).filterNotNull()
+        userMetadata
     ) { followState, metadata ->
 
         ProfileUiState.Loaded(
