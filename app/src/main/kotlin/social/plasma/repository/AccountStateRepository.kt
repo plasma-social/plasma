@@ -17,6 +17,8 @@ interface AccountStateRepository {
     fun setPublicKey(byteArray: ByteArray)
 
     fun clearKeys()
+
+    fun getPublicKey(): ByteArray?
 }
 
 class RealAccountRepository @Inject constructor(
@@ -46,6 +48,10 @@ class RealAccountRepository @Inject constructor(
         secretKey.remove()
         publicKey.remove()
         _isLoggedIn.compareAndSet(expect = true, update = false)
+    }
+
+    override fun getPublicKey(): ByteArray? {
+        return publicKey.get(default = null)
     }
 
 }

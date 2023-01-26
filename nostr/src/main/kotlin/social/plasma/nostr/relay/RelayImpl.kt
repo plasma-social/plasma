@@ -26,7 +26,7 @@ class RelayImpl(
 ) : Relay {
     private val tag = "relay-$url"
     private val logger get() = Timber.tag(tag)
-    
+
     override val connectionStatus: Flow<Relay.RelayStatus> =
         service.webSocketEventFlow().asFlow()
             .filterNot { it is WebSocket.Event.OnMessageReceived }
@@ -57,7 +57,7 @@ class RelayImpl(
         subscriptions.getAndUpdate { set ->
             set.filterNot { it.subscriptionId == request.subscriptionId }.toSet()
         }
-        logger.d( "removing sub %s", request)
+        logger.d("removing sub %s", request)
     }
 
     override fun connect() {
