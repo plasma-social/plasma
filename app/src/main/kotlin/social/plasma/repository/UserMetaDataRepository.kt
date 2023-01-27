@@ -37,12 +37,7 @@ class RealUserMetaDataRepository @Inject constructor(
             .distinctUntilChanged()
             .map {
                 it?.let {
-                    UserMetaData(
-                        name = it.name,
-                        displayName = it.displayName,
-                        about = it.about,
-                        picture = it.picture,
-                    )
+                    it.toUserMetadata()
                 }
             }
             .filterNotNull()
@@ -67,6 +62,16 @@ class RealUserMetaDataRepository @Inject constructor(
 
 }
 
+private fun UserMetadataEntity.toUserMetadata(): UserMetaData = UserMetaData(
+    name = name,
+    displayName = displayName,
+    about = about,
+    picture = picture,
+    banner = banner,
+    website = website,
+    nip05 = nip05,
+)
+
 fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
     UserMetadataEntity(
         pubkey = pubKey.hex(),
@@ -74,5 +79,8 @@ fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
         about = content.about,
         picture = content.picture,
         displayName = content.displayName,
+        banner = content.banner,
+        nip05 = content.nip05?.split("@")?.getOrNull(1), // TODO regex
+        website = content.website,
         createdAt = createdAt.toEpochMilli(),
     )

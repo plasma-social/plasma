@@ -11,5 +11,8 @@ data class UserMetadataEntity(
     val about: String?,
     val picture: String?,
     val displayName: String?,
+    val banner: String?,
+    val nip05: String?,
+    val website: String?,
     val createdAt: Long?,
 )

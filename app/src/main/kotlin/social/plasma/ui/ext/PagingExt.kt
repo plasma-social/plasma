@@ -29,7 +29,8 @@ fun ViewModel.noteCardsPagingFlow(
 
             NoteCardUiModel(
                 id = note.id,
-                name = user?.displayName ?: user?.name ?: userPubkey.shortBech32,
+                name = user?.displayName?.takeIf { it.isNotBlank() } ?: user?.name
+                ?: userPubkey.shortBech32,
                 content = note.content,
                 avatarUrl = user?.picture
                     ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${userPubkey.hex}",
@@ -38,7 +39,8 @@ fun ViewModel.noteCardsPagingFlow(
                 shareCount = "",
                 likeCount = "${if (note.reactionCount > 0) note.reactionCount else ""}",
                 userPubkey = userPubkey,
-                nip5 = null,
+                nip5 = user?.nip05,
+                displayName = user?.displayName
             )
         }
     }.distinctUntilChanged().cachedIn(viewModelScope)

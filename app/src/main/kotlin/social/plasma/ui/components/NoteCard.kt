@@ -27,6 +27,7 @@ import social.plasma.ui.theme.PlasmaTheme
 data class NoteCardUiModel(
     val id: String,
     val name: String,
+    val displayName: String?,
     val avatarUrl: String?,
     val nip5: String?,
     val content: String,
@@ -123,22 +124,29 @@ private fun NoteCardHeader(uiModel: NoteCardUiModel, onAvatarClick: ((PubKey) ->
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
-                .padding(end = 16.dp)
         ) {
-            Text(
-                uiModel.name,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    uiModel.name,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+                Text(
+                    text = uiModel.timePosted,
+                    textAlign = TextAlign.End,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
             uiModel.nip5?.let {
                 Nip5Badge(it)
             }
         }
-        Text(
-            text = uiModel.timePosted,
-            textAlign = TextAlign.End,
-            style = MaterialTheme.typography.labelMedium
-        )
+
     }
 }
 
@@ -149,7 +157,7 @@ private fun PreviewFeedCard() {
         NoteCard(
             NoteCardUiModel(
                 id = "id",
-                name = "Pleb",
+                name = "@pleb",
                 nip5 = "nostrplebs.com",
                 content = "Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19",
                 timePosted = "19m",
@@ -157,7 +165,8 @@ private fun PreviewFeedCard() {
                 replyCount = "352k",
                 likeCount = "2.9M",
                 shareCount = "509k",
-                userPubkey = PubKey("fdsf")
+                userPubkey = PubKey("fdsf"),
+                displayName = "Pleb"
             ),
             onAvatarClick = {}
         )
