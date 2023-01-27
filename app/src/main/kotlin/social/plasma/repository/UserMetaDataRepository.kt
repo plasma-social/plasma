@@ -60,7 +60,7 @@ class RealUserMetaDataRepository @Inject constructor(
             .filterNotNull()
             .chunked(pubKeys.size, 200)
             .map { metadataList ->
-                metadataDao.insert(metadataList.map { it.toUserMetadataEntity() })
+                metadataDao.insertIfNewer(metadataList.map { it.toUserMetadataEntity() })
             }
             .flowOn(ioDispatcher)
     }
