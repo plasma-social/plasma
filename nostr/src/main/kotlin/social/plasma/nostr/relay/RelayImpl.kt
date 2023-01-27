@@ -33,7 +33,7 @@ class RelayImpl(
             .filterNot { it is WebSocket.Event.OnMessageReceived }
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
-    private val relayMessages = service.relayMessageFlow()
+    private val relayMessages = service.relayMessageFlow().hide()
 
     private val subscriptions: AtomicReference<Set<SubscribeMessage>> =
         AtomicReference(setOf())

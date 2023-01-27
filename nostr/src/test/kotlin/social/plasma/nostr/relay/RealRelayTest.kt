@@ -27,12 +27,14 @@ class RealRelayTest : StringSpec({
         .build()
 
     // TODO - a deterministic test using a mock webserver
+    val relayUrl = "wss://brb.io"
+
     "can get events from a relay" {
         runTest {
             val relay = RelayImpl(
-                "wss://brb.io",
+                relayUrl,
                 scarlet
-                    .webSocketFactory(client.newWebSocketFactory("wss://brb.io"))
+                    .webSocketFactory(client.newWebSocketFactory(relayUrl))
                     .build()
                     .create(),
                 this
@@ -50,9 +52,9 @@ class RealRelayTest : StringSpec({
 
     "can subscribe to a relay" {
         val relay = RelayImpl(
-            "wss://brb.io",
+            relayUrl,
             scarlet
-                .webSocketFactory(client.newWebSocketFactory("wss://brb.io"))
+                .webSocketFactory(client.newWebSocketFactory(relayUrl))
                 .build()
                 .create(),
             this
