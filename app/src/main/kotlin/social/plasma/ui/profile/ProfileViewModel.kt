@@ -78,6 +78,8 @@ class ProfileViewModel @Inject constructor(
             nip5 = null,
             avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
             publicKey = profilePubKey,
+            website = null,
+            banner = nostrichImage
         ),
     )
 
@@ -98,9 +100,11 @@ class ProfileViewModel @Inject constructor(
             userNotesPagingFlow = userNotesPagingFlow,
             userData = ProfileUiState.Loaded.UserData(
                 petName = metadata.displayName ?: profilePubKey.shortBech32,
+                banner = metadata.banner ?: nostrichImage,
+                website = metadata.website,
                 username = metadata.name?.let { "@$it" },
                 about = metadata.about,
-                nip5 = null,
+                nip5 = metadata.nip05,
                 avatarUrl = metadata.picture ?: "",
                 publicKey = profilePubKey,
             ),
@@ -117,6 +121,11 @@ class ProfileViewModel @Inject constructor(
     fun onNoteDisplayed(id: String) {
         // TODO  move to repo
 //        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
+    }
+
+    companion object {
+        private const val nostrichImage =
+            "https://s3-alpha-sig.figma.com/img/4a90/2d76/b5f9770952063fd97aa73441dbeef396?Expires=1675036800&Signature=isHUrgxr-OJjU4HHfA~wfa-GTLIq~FT83RxqEurf13bTXwLykd-aHhsMXuLhx2Zqs-g5hCj4jM3355ngZlcY9qcrcrTgwcAxZLbwAhpntHl499McE9BU7aO7jG7j~eMy0Z7a~p3lFCHuQsyO7ukKZsawWVkCNtPdl8E-IQ~yxMc~LAB6QSlQlEJV7hIwBAbWgOKDgQ6spq-UFeoOee5Po02JCGtZOEb9vlxzFrhBKdCxCh1PdrX0~9Qb8rEeLGzAFzhJeOKJ0RYwzHsiGYGWsc1Ad9nvgoCXY2FwwIrixsxh3Jy87BivV4XCibvTE7YHhXwTRY29D-0Yun95GsHWWw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4"
     }
 }
 

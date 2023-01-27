@@ -19,6 +19,8 @@ sealed interface ProfileUiState {
         )
 
         data class UserData(
+            val banner: String,
+            val website: String?,
             val petName: String,
             val username: String?,
             val publicKey: PubKey,

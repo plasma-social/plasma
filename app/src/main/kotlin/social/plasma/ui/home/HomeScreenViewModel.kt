@@ -29,6 +29,9 @@ class HomeScreenViewModel @Inject constructor(
             picture = "https://api.dicebear.com/5.x/bottts/jpg?seed=${myPubKey.hex}",
             displayName = myPubKey.shortBech32,
             about = null,
+            nip05 = null,
+            website = null,
+            banner = null,
         )
     )
 
