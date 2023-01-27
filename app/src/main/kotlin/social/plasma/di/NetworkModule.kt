@@ -3,7 +3,9 @@ package social.plasma.di
 import android.app.Application
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.tinder.scarlet.Lifecycle
 import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.lifecycle.LifecycleRegistry
 import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
 import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
@@ -14,6 +16,8 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import social.plasma.nostr.relay.message.NostrMessageAdapter
+import social.plasma.utils.ApplicationResumedLifecycle
+import social.plasma.utils.ConnectivityOnLifecycle
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -53,10 +57,18 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providesScarletBuilder(application: Application, moshi: Moshi): Scarlet.Builder =
+    fun providesLifecycle(application: Application): Lifecycle {
+        return ApplicationResumedLifecycle(application, LifecycleRegistry(500))
+            .combineWith(ConnectivityOnLifecycle(application))
+    }
+
+    @Provides
+    @Singleton
+    fun providesScarletBuilder(lifecycle: Lifecycle, moshi: Moshi): Scarlet.Builder =
         Scarlet.Builder()
             .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
             .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
             .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
-//            .lifecycle(AndroidLifecycle.ofApplicationForeground(application))
+            .lifecycle(lifecycle)
 }
+
