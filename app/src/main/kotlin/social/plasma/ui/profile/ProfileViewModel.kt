@@ -6,9 +6,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import social.plasma.PubKey
@@ -41,10 +42,31 @@ class ProfileViewModel @Inject constructor(
     private val myPubkey = PubKey.of(pubkeyPref.get(null)!!)
 
     private val followingState =
-        contactListRepository.observeContactLists(myPubkey.hex)
-            .map { it.map { it.pubKey.hex() } }
-            .map { it.contains(profilePubKey.hex) }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        contactListRepository
+            .observeFollowState(myPubkey.hex, contactPubKey = profilePubKey.hex)
+            .distinctUntilChanged()
+
+    private val followingCount =
+        contactListRepository.observeFollowingCount(profilePubKey.hex)
+            .distinctUntilChanged()
+
+    private val statCards = followingCount
+        .mapLatest { followingCount ->
+            listOf(
+                ProfileUiState.Loaded.ProfileStat(
+                    label = "Following",
+                    value = "$followingCount",
+                ),
+                ProfileUiState.Loaded.ProfileStat(
+                    label = "Followers",
+                    value = "2M",
+                ),
+                ProfileUiState.Loaded.ProfileStat(
+                    label = "Relays",
+                    value = "11",
+                )
+            )
+        }
 
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
@@ -62,13 +84,15 @@ class ProfileViewModel @Inject constructor(
 
     private val userMetadata = merge(
         userMetaDataRepository.observeUserMetaData(profilePubKey.hex).filterNotNull(),
-        userMetaDataRepository.syncUserMetadata(profilePubKey.hex)
+        userMetaDataRepository.syncUserMetadata(profilePubKey.hex),
+        contactListRepository.syncContactList(profilePubKey.hex),
     ).filterIsInstance<UserMetaData>()
 
     val uiState = combine(
         followingState,
-        userMetadata
-    ) { followState, metadata ->
+        userMetadata,
+        statCards
+    ) { followState, metadata, profileStats ->
 
         ProfileUiState.Loaded(
             userNotesPagingFlow = userNotesPagingFlow,
@@ -81,7 +105,7 @@ class ProfileViewModel @Inject constructor(
                 publicKey = profilePubKey,
             ),
             following = followState,
-            statCards = fakeProfile.statCards,
+            statCards = profileStats,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 

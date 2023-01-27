@@ -19,6 +19,11 @@ import kotlin.coroutines.CoroutineContext
 
 interface ContactListRepository {
     fun observeContactLists(pubkey: String): Flow<Set<Contact>>
+
+    fun observeFollowState(pubKey: String, contactPubKey: String): Flow<Boolean>
+
+    fun observeFollowingCount(pubkey: String): Flow<Long>
+
     fun syncContactList(pubkey: String): Flow<Set<Contact>>
 }
 
@@ -35,6 +40,14 @@ class RealContactListRepository @Inject constructor(
             .map { it.toSet() }
     }
 
+    override fun observeFollowState(pubKey: String, contactPubKey: String): Flow<Boolean> {
+        return contactListDao.observeOwnerFollowsContact(pubKey, contactPubKey)
+    }
+
+    override fun observeFollowingCount(pubkey: String): Flow<Long> {
+        return contactListDao.observeFollowingCount(pubkey)
+    }
+
     override fun syncContactList(pubkey: String): Flow<Set<Contact>> {
         return relay.subscribe(SubscribeMessage(filters = Filters.contactList(pubkey)))
             .distinctUntilChanged()
@@ -44,8 +57,9 @@ class RealContactListRepository @Inject constructor(
             .map {
                 it.pubKey.hex() to it.contacts()
             }.map { (owner, contacts) ->
-                contactListDao.delete(owner)
-                contactListDao.insert(contacts.map { it.toContactEntity(owner) })
+                contactListDao.insertAndDeleteOldContacts(
+                    owner,
+                    contacts.map { it.toContactEntity(owner) })
                 contacts
             }
             .flowOn(ioDispatcher)
