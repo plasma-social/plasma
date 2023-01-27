@@ -68,7 +68,6 @@ class ProfileViewModel @Inject constructor(
             )
         }
 
-
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
         statCards = fakeProfile.statCards,
