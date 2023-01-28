@@ -13,6 +13,7 @@ import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filters
 import social.plasma.nostr.relay.message.SubscribeMessage
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -35,7 +36,8 @@ class RealContactListRepository @Inject constructor(
 ) : ContactListRepository {
 
     override fun observeContactLists(pubkey: String): Flow<Set<Contact>> {
-        return contactListDao.observeContacts(pubkey).distinctUntilChanged()
+        return contactListDao.observeContacts(pubkey)
+            .distinctUntilChanged()
             .map { list -> list.map { it.toContact() } }
             .map { it.toSet() }
     }
@@ -56,10 +58,9 @@ class RealContactListRepository @Inject constructor(
             .distinctUntilChanged()
             .map {
                 it.pubKey.hex() to it.contacts()
-            }.map { (owner, contacts) ->
-                contactListDao.insertAndDeleteOldContacts(
-                    owner,
-                    contacts.map { it.toContactEntity(owner) })
+            }
+            .map { (owner, contacts) ->
+                contactListDao.insert(contacts.map { it.toContactEntity(owner) })
                 contacts
             }
             .flowOn(ioDispatcher)
@@ -77,4 +78,5 @@ private fun Contact.toContactEntity(owner: String) = ContactEntity(
     pubKey = pubKey.hex(),
     petName = petName,
     homeRelay = homeRelayUrl,
+    createdAt = Instant.now().toEpochMilli(),
 )

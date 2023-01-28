@@ -14,7 +14,7 @@ class FollowingFeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
     noteRepository: NoteRepository,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
-    private val feedPagingFlow = noteCardsPagingFlow(noteRepository.observeContactsNotes())
+    private val feedPagingFlow = noteCardsPagingFlow(noteRepository.observeContactsNotesPaging())
 
     @Composable
     override fun models(): FeedUiState {

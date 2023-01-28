@@ -4,19 +4,12 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ContactsDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(contacts: Iterable<ContactEntity>)
-
-    @Transaction
-    fun insertAndDeleteOldContacts(ownerPubKey: String, newContacts: Iterable<ContactEntity>) {
-        delete(ownerPubKey)
-        insert(newContacts)
-    }
 
     @Query("SELECT * FROM contacts WHERE owner = :pubkey")
     fun observeContacts(pubkey: String): Flow<List<ContactEntity>>

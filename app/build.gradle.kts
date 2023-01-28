@@ -84,7 +84,11 @@ dependencies {
     implementation(libs.compose.ui.uitoolingpreview)
 
     implementation(libs.dagger.hilt.android)
+    implementation(libs.androidx.hilt.workmanager)
     kapt(libs.dagger.hilt.compiler)
+    kapt(libs.androidx.hilt.compiler)
+
+    implementation(libs.androidx.workmanager)
 
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
