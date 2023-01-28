@@ -21,4 +21,8 @@ class FakeUserMetadataDao : UserMetadataDao {
             inserts.add(it)
         }
     }
+
+    override fun newestMetadata(pubKey: String): UserMetadataEntity? {
+        TODO("Not yet implemented")
+    }
 }
