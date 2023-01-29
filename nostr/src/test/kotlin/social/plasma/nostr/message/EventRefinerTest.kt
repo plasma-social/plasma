@@ -22,7 +22,7 @@ import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.RelayMessage
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class EventRefinerTest : StringSpec({
 
@@ -61,7 +61,7 @@ class EventRefinerTest : StringSpec({
     companion object {
         private val userMetaDataAdapter = moshi.adapter(UserMetaData::class.java)
 
-        val arbUserMetaData: Arb<UserMetaData> =
+        private val arbUserMetaData: Arb<UserMetaData> =
             Arb.bind(
                 arbVanillaString.orNull(0.1),
                 arbVanillaString.orNull(0.1),

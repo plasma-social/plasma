@@ -31,7 +31,7 @@ import social.plasma.nostr.models.Reaction
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
-import social.plasma.nostr.relay.message.Filters
+import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.SubscribeMessage
 import social.plasma.prefs.Preference
 import social.plasma.utils.chunked
@@ -69,7 +69,7 @@ class RealNoteRepository @Inject constructor(
             ).flow,
 
             fetchWithNoteDbSync(
-                SubscribeMessage(filters = Filters.globalFeedNotes),
+                SubscribeMessage(Filter.globalFeedNotes),
                 NoteSource.Global
             )
 
@@ -89,12 +89,8 @@ class RealNoteRepository @Inject constructor(
                 .map { epoch -> epoch?.let { Instant.ofEpochMilli(it) } ?: Instant.EPOCH }
                 .flatMapLatest { since ->
                     fetchWithNoteDbSync(
-                        SubscribeMessage(
-                            filters = Filters.userNotes(
-                                pubkey,
-                                since
-                            )
-                        ), NoteSource.Profile
+                        subscribeMessage = SubscribeMessage(Filter.userNotes(pubkey, since)),
+                        source = NoteSource.Profile
                     )
                 }
                 .flowOn(ioDispatcher),
@@ -116,7 +112,7 @@ class RealNoteRepository @Inject constructor(
                     ).flow,
 
                     fetchWithNoteDbSync(
-                        SubscribeMessage(filters = Filters.userNotes(contactNpubList.toSet())),
+                        SubscribeMessage(Filter.userNotes(contactNpubList.toSet())),
                         NoteSource.Contacts
                     )
                 ).filterIsInstance()
@@ -141,7 +137,7 @@ class RealNoteRepository @Inject constructor(
                     ).flow,
 
                     fetchWithNoteDbSync(
-                        SubscribeMessage(filters = Filters.userNotes(contactNpubList.toSet())),
+                        SubscribeMessage(Filter.userNotes(contactNpubList.toSet())),
                         NoteSource.Contacts
                     )
                 ).filterIsInstance()
@@ -158,7 +154,7 @@ class RealNoteRepository @Inject constructor(
         val contactNpubList = contacts.map { it.pubKey.hex() }
         return fetchWithNoteDbSync(
             SubscribeMessage(
-                filters = Filters.userNotes(
+                Filter.userNotes(
                     pubKeys = contactNpubList.toSet(),
                     since = since,
                 )
@@ -168,7 +164,7 @@ class RealNoteRepository @Inject constructor(
     }
 
     override fun observeNoteReactionCount(id: String): Flow<Unit> {
-        return relay.subscribe(SubscribeMessage(filters = Filters.noteReactions(id)))
+        return relay.subscribe(SubscribeMessage(Filter.noteReactions(id)))
             .map { eventRefiner.toReaction(it) }
             .map { it?.toReactionEntity() }
             .filterNotNull()

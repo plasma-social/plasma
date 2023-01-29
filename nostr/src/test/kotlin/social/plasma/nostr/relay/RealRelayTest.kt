@@ -8,7 +8,6 @@ import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,7 +15,7 @@ import social.plasma.nostr.BuildingBlocks.JemPubKey
 import social.plasma.nostr.BuildingBlocks.moshi
 import social.plasma.nostr.BuildingBlocks.scarlet
 import social.plasma.nostr.models.UserMetaData
-import social.plasma.nostr.relay.message.Filters
+import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.SubscribeMessage
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -40,11 +39,7 @@ class RealRelayTest : StringSpec({
                 this
             )
             relay.connect()
-            val events = relay.subscribe(
-                SubscribeMessage(
-                    filters = Filters.contactList(JemPubKey)
-                )
-            )
+            val events = relay.subscribe(SubscribeMessage(Filter.contactList(JemPubKey)))
             events.first().event.content shouldContain "nostr.satsophone.tk"
             relay.disconnect()
         }
@@ -60,22 +55,13 @@ class RealRelayTest : StringSpec({
             this
         )
         relay.connect()
-        relay.subscribe(
-            SubscribeMessage(
-                filters = Filters.contactList(JemPubKey)
-            )
-        )
-
-        // TODO - the Subscription result was better
+        relay.subscribe(SubscribeMessage(Filter.contactList(JemPubKey)))
 
         val event = relay.subscribe(
             SubscribeMessage(
-                filters = Filters.userMetaData("67e4027f797f15c8a89de7a03a07ddb0efe63985fa6716f8b3c742a008ca0be7")
+                Filter.userMetaData("67e4027f797f15c8a89de7a03a07ddb0efe63985fa6716f8b3c742a008ca0be7")
             )
-        ).map {
-            println(it)
-            it
-        }.filter { it.event.content.contains("heastmined") }
+        ).filter { it.event.content.contains("heastmined") }
             .first()
 
 
