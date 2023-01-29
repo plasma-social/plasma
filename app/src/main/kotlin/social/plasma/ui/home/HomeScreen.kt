@@ -3,9 +3,7 @@ package social.plasma.ui.home
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.CardDefaults
@@ -36,6 +34,7 @@ import social.plasma.ui.components.PlasmaTabRow
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.ContactsFeed
 import social.plasma.ui.feed.GlobalFeed
+import social.plasma.ui.feed.RepliesFeed
 import social.plasma.ui.theme.PlasmaTheme
 
 
@@ -89,34 +88,27 @@ fun HomeScreen(
                         onAvatarClick = { onNavigateToProfile(userPubKey) },
                     )
                     PlasmaTabRow(
-                        modifier = Modifier.padding(horizontal = 16.dp),
                         selectedTabIndex = selectedTab.ordinal,
                     ) {
-                        tabs.forEachIndexed { index, tab ->
-                            val isFirstTab = index == 0
-                            val isLastTab = index == tabs.lastIndex
+                        tabs.forEach { tab ->
                             val isSelected = selectedTab == tab
 
                             PlasmaTab(
-                                useLeftRoundShape = isFirstTab,
-                                useRightRoundShape = isLastTab,
                                 selected = isSelected,
                                 title = tab.title,
                                 icon = tab.icon,
-                                onClick = {
-                                    if (tab != selectedTab) {
-                                        navController.popBackStack()
-                                        navController.navigate(tab.name) {
-                                            launchSingleTop = true
+                            ) {
+                                if (!isSelected) {
+                                    navController.popBackStack()
+                                    navController.navigate(tab.name) {
+                                        launchSingleTop = true
 
-                                            restoreState = true
-                                        }
+                                        restoreState = true
                                     }
-                                },
-                            )
+                                }
+                            }
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
                 }
             }
 
@@ -125,6 +117,7 @@ fun HomeScreen(
             navController = navController,
             startDestination = HomeTab.Following.name
         ) {
+            // TODO figure out a way to combine all of these
             composable(HomeTab.Following.name) {
                 ContactsFeed(
                     onNavigateToProfile = onNavigateToProfile,
@@ -138,6 +131,14 @@ fun HomeScreen(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
+
+            composable(HomeTab.Replies.name) {
+                RepliesFeed(
+                    onNavigateToProfile = onNavigateToProfile,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+
         }
     }
 }
@@ -159,11 +160,15 @@ enum class HomeTab(
 
     Following(
         title = R.string.following,
-        icon = R.drawable.ic_plasma_follow
+        icon = R.drawable.ic_plasma_follow,
+    ),
+    Replies(
+        title = R.string.replies,
+        icon = R.drawable.ic_plasma_replies,
     ),
     Global(
         title = R.string.global,
-        icon = R.drawable.ic_plasma_global_outline
+        icon = R.drawable.ic_plasma_global_outline,
     ),
     ;
 }

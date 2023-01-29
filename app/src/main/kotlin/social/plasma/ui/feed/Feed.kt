@@ -44,6 +44,23 @@ fun GlobalFeed(
 }
 
 @Composable
+fun RepliesFeed(
+    modifier: Modifier = Modifier,
+    viewModel: RepliesFeedViewModel = hiltViewModel(),
+    onNavigateToProfile: (PubKey) -> Unit,
+) {
+    val uiState by viewModel.uiState().collectAsState()
+
+    FeedContent(
+        modifier = modifier,
+        uiState = uiState,
+        onNavigateToProfile = onNavigateToProfile,
+        onNoteDisposed = viewModel::onNoteDisposed,
+        onNoteDisplayed = viewModel::onNoteDisplayed,
+    )
+}
+
+@Composable
 fun ContactsFeed(
     modifier: Modifier = Modifier,
     viewModel: FollowingFeedViewModel = hiltViewModel(),

@@ -17,4 +17,6 @@ data class NoteView(
     val createdAt: Long,
     val reactionCount: Int,
     val pubkey: String,
+    @ColumnInfo(name = "is_reply")
+    val isReply: Boolean,
 )
