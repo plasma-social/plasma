@@ -14,23 +14,26 @@ import java.time.Instant
 
 class NostrMessageAdapter {
 
-    // RequestMessage
+    // SubscribeMessage
     @FromJson
     fun requestMessageFromJson(
         reader: JsonReader,
-        filtersDelegate: JsonAdapter<Filters>,
+        filterDelegate: JsonAdapter<Filter>,
     ): SubscribeMessage {
         reader.beginArray()
         reader.nextString()
         val subscriptionId = reader.nextString()
-        val filters = filtersDelegate.fromJson(reader)!!
+        val filters = mutableListOf<Filter>()
+        while (reader.hasNext()) {
+            filters.add(filterDelegate.fromJson(reader)!!)
+        }
         reader.endArray()
-        return SubscribeMessage(subscriptionId, filters)
+        return SubscribeMessage(subscriptionId, filters.first(), filters.drop(1))
     }
 
     @ToJson
     fun requestMessageToJson(request: SubscribeMessage) =
-        listOf("REQ", request.subscriptionId, request.filters)
+        listOf("REQ", request.subscriptionId) + request.filters
 
     // CloseMessage
     @FromJson

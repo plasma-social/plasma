@@ -5,7 +5,7 @@ import social.plasma.nostr.models.Event
 import java.time.Instant
 import kotlin.time.Duration.Companion.hours
 
-data class Filters(
+data class Filter(
     val since: Instant? = null,
     val authors: Set<String>? = null,
     val kinds: Set<Int>? = null,
@@ -17,7 +17,7 @@ data class Filters(
 ) {
     companion object {
 
-        val globalFeedNotes = Filters(
+        val globalFeedNotes = Filter(
             since = Instant.now().minusSeconds(12.hours.inWholeSeconds),
             kinds = setOf(Event.Kind.Note),
             limit = 500,
@@ -28,14 +28,14 @@ data class Filters(
             since = since,
         )
 
-        fun userNotes(pubKeys: Set<String>, since: Instant = Instant.EPOCH) = Filters(
+        fun userNotes(pubKeys: Set<String>, since: Instant = Instant.EPOCH) = Filter(
             since = since,
             authors = pubKeys,
             kinds = setOf(Event.Kind.Note),
             limit = 500,
         )
 
-        fun contactList(pubKey: String) = Filters(
+        fun contactList(pubKey: String) = Filter(
             since = Instant.EPOCH,
             authors = setOf(pubKey),
             kinds = setOf(Event.Kind.ContactList),
@@ -44,18 +44,18 @@ data class Filters(
 
         fun userMetaData(pubKey: String) = userMetaData(pubKeys = setOf(pubKey))
 
-        fun userMetaData(pubKeys: Set<String>) = Filters(
+        fun userMetaData(pubKeys: Set<String>) = Filter(
             authors = pubKeys,
             kinds = setOf(Event.Kind.MetaData),
         )
 
-        fun noteReactions(id: String): Filters = Filters(
+        fun noteReactions(id: String): Filter = Filter(
             since = Instant.EPOCH,
             kinds = setOf(Event.Kind.Reaction),
             eTags = setOf(id),
         )
 
-        fun userFollowers(pubKey: String) = Filters(
+        fun userFollowers(pubKey: String) = Filter(
             kinds = setOf(Event.Kind.ContactList),
             pTags = setOf(pubKey),
         )

@@ -12,7 +12,7 @@ import social.plasma.db.contacts.ContactsDao
 import social.plasma.nostr.models.Contact
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
-import social.plasma.nostr.relay.message.Filters
+import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.SubscribeMessage
 import java.time.Instant
 import javax.inject.Inject
@@ -54,7 +54,7 @@ class RealContactListRepository @Inject constructor(
     }
 
     override fun observeFollowersCount(pubkey: String): Flow<Int> =
-        relay.subscribe(SubscribeMessage(filters = Filters.userFollowers(pubkey)))
+        relay.subscribe(SubscribeMessage(Filter.userFollowers(pubkey)))
             .distinctUntilChanged()
             .runningFold(
                 emptySet<String>()
@@ -64,7 +64,7 @@ class RealContactListRepository @Inject constructor(
             .map { it.size }
 
     override fun syncContactList(pubkey: String): Flow<Set<Contact>> {
-        return relay.subscribe(SubscribeMessage(filters = Filters.contactList(pubkey)))
+        return relay.subscribe(SubscribeMessage(Filter.contactList(pubkey)))
             .distinctUntilChanged()
             .map { eventRefiner.toContacts(it) }
             .filterNotNull()

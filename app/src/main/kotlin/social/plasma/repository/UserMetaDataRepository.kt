@@ -11,7 +11,7 @@ import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
-import social.plasma.nostr.relay.message.Filters
+import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.SubscribeMessage
 import social.plasma.utils.chunked
 import javax.inject.Inject
@@ -48,7 +48,7 @@ class RealUserMetaDataRepository @Inject constructor(
 
     override fun syncUserMetadata(pubKeys: Set<String>): Flow<Unit> {
         return relays.subscribe(
-            SubscribeMessage(filters = Filters.userMetaData(pubKeys))
+            SubscribeMessage(filter = Filter.userMetaData(pubKeys))
         )
             .distinctUntilChanged()
             .map { eventRefiner.toUserMetaData(it) }

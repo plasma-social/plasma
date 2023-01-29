@@ -1,8 +1,19 @@
 package social.plasma.nostr.relay.message
 
-import java.util.UUID
+import java.util.*
 
 data class SubscribeMessage(
-    val subscriptionId: String = "plasma-request-${UUID.randomUUID()}",
-    val filters: Filters,
-)
+    val subscriptionId: String,
+    val filter: Filter,
+    val additionalFilters: List<Filter>,
+) {
+
+    constructor(filter: Filter, vararg additionalFilters: Filter) : this(
+        subscriptionId = "plasma-request-${UUID.randomUUID()}",
+        filter = filter,
+        additionalFilters = additionalFilters.toList()
+    )
+
+    val filters = listOf(filter).plus(additionalFilters)
+
+}
