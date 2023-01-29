@@ -145,7 +145,7 @@ private fun ProfileContent(
             item { ProfileStatsRow(uiState.statCards) }
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
-            items(lazyPagingItems) { cardUiModel ->
+            items(lazyPagingItems, key = { it.id }) { cardUiModel ->
                 cardUiModel?.let {
                     LaunchedEffect(Unit) {
                         onNoteDisplayed(cardUiModel.id)
