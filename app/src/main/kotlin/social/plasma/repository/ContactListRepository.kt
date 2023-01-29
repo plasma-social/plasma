@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningFold
 import okio.ByteString.Companion.decodeHex
 import social.plasma.db.contacts.ContactEntity
 import social.plasma.db.contacts.ContactsDao
@@ -24,6 +25,8 @@ interface ContactListRepository {
     fun observeFollowState(pubKey: String, contactPubKey: String): Flow<Boolean>
 
     fun observeFollowingCount(pubkey: String): Flow<Long>
+
+    fun observeFollowersCount(pubkey: String): Flow<Int>
 
     fun syncContactList(pubkey: String): Flow<Set<Contact>>
 }
@@ -49,6 +52,16 @@ class RealContactListRepository @Inject constructor(
     override fun observeFollowingCount(pubkey: String): Flow<Long> {
         return contactListDao.observeFollowingCount(pubkey)
     }
+
+    override fun observeFollowersCount(pubkey: String): Flow<Int> =
+        relay.subscribe(SubscribeMessage(filters = Filters.userFollowers(pubkey)))
+            .distinctUntilChanged()
+            .runningFold(
+                emptySet<String>()
+            ) { acc, value ->
+                acc + value.event.pubKey.hex()
+            }
+            .map { it.size }
 
     override fun syncContactList(pubkey: String): Flow<Set<Contact>> {
         return relay.subscribe(SubscribeMessage(filters = Filters.contactList(pubkey)))

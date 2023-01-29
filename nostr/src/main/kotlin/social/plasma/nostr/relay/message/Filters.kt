@@ -11,6 +11,8 @@ data class Filters(
     val kinds: Set<Int>? = null,
     @Json(name = "#e")
     val eTags: Set<String>? = null,
+    @Json(name = "#p")
+    val pTags: Set<String>? = null,
     val limit: Int? = null,
 ) {
     companion object {
@@ -51,6 +53,11 @@ data class Filters(
             since = Instant.EPOCH,
             kinds = setOf(Event.Kind.Reaction),
             eTags = setOf(id),
+        )
+
+        fun userFollowers(pubKey: String) = Filters(
+            kinds = setOf(Event.Kind.ContactList),
+            pTags = setOf(pubKey),
         )
 
     }

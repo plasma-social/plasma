@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import social.plasma.PubKey
@@ -50,23 +49,25 @@ class ProfileViewModel @Inject constructor(
         contactListRepository.observeFollowingCount(profilePubKey.hex)
             .distinctUntilChanged()
 
-    private val statCards = followingCount
-        .mapLatest { followingCount ->
-            listOf(
-                ProfileUiState.Loaded.ProfileStat(
-                    label = "Following",
-                    value = "$followingCount",
-                ),
-                ProfileUiState.Loaded.ProfileStat(
-                    label = "Followers",
-                    value = "2M",
-                ),
-                ProfileUiState.Loaded.ProfileStat(
-                    label = "Relays",
-                    value = "11",
-                )
+    private val followersCount = contactListRepository.observeFollowersCount(profilePubKey.hex)
+        .distinctUntilChanged()
+
+    private val statCards = combine(followingCount, followersCount) { following, followers ->
+        listOf(
+            ProfileUiState.Loaded.ProfileStat(
+                label = "Following",
+                value = "$following",
+            ),
+            ProfileUiState.Loaded.ProfileStat(
+                label = "Followers",
+                value = "$followers",
+            ),
+            ProfileUiState.Loaded.ProfileStat(
+                label = "Relays",
+                value = "11",
             )
-        }
+        )
+    }
 
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,

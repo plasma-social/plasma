@@ -5,12 +5,12 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.take
 import social.plasma.nostr.BuildingBlocks.JemPubKey
 import social.plasma.nostr.BuildingBlocks.client
 import social.plasma.nostr.BuildingBlocks.scarlet
 import social.plasma.nostr.relay.message.Filters
 import social.plasma.nostr.relay.message.SubscribeMessage
-import kotlin.time.Duration.Companion.seconds
 
 class RelaysTest : StringSpec({
 
@@ -21,7 +21,6 @@ class RelaysTest : StringSpec({
     )
 
     "can get metadata from relay" {
-        // TODO - have this return subscriptions that can be used to unsubscribe
         relays().subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey)))
             .first().event.pubKey.hex() shouldBe JemPubKey
     }
@@ -35,10 +34,10 @@ class RelaysTest : StringSpec({
         val relays = relays()
 
         listOf(
-            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))),
-            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))),
-            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))),
-        ).merge().test(timeout = 5.seconds) {
+            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))).take(1),
+            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))).take(1),
+            relays.subscribe(SubscribeMessage(filters = Filters.userMetaData(JemPubKey))).take(1),
+        ).merge().test {
             awaitItem().event.pubKey.hex() shouldBe JemPubKey
             awaitItem().event.pubKey.hex() shouldBe JemPubKey
             awaitItem().event.pubKey.hex() shouldBe JemPubKey
