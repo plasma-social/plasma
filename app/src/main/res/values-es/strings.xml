@@ -19,4 +19,5 @@
     <string name="back">Regresar</string>
     <string name="follow">Seguir</string>
     <string name="feed">Feed</string>
+    <string name="replies">Replies</string>
 </resources>

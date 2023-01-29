@@ -10,11 +10,12 @@ import social.plasma.ui.ext.noteCardsPagingFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class FollowingFeedViewModel @Inject constructor(
+class RepliesFeedViewModel @Inject constructor(
     recompositionClock: RecompositionClock,
     noteRepository: NoteRepository,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
-    private val feedPagingFlow = noteCardsPagingFlow(noteRepository.observeContactsNotes())
+    private val feedPagingFlow =
+        noteCardsPagingFlow(noteRepository.observeContactsNotesAndReplies())
 
     @Composable
     override fun models(): FeedUiState {

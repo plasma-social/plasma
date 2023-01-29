@@ -20,6 +20,9 @@ data class NoteEntity(
     val content: String,
     val sig: String,
     val source: NoteSource,
+    // This should change when we start storing tags
+    @ColumnInfo("is_reply")
+    val isReply: Boolean,
 )
 
 enum class NoteSource {

@@ -44,7 +44,9 @@ interface NoteRepository {
     fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>>
     fun observeProfileNotes(pubkey: String): Flow<PagingData<NoteWithUser>>
     fun observeNoteReactionCount(id: String): Flow<Unit>
-    fun observeContactsNotesPaging(): Flow<PagingData<NoteWithUser>>
+    fun observeContactsNotes(): Flow<PagingData<NoteWithUser>>
+
+    fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>>
 
     suspend fun refreshContactsNotes(): List<NoteEntity>
 }
@@ -63,7 +65,7 @@ class RealNoteRepository @Inject constructor(
         return merge(
             Pager(
                 config = PagingConfig(pageSize = 25, maxSize = 500),
-                pagingSourceFactory = { noteDao.allNotesWithUsersPagingSource() }
+                pagingSourceFactory = { noteDao.globalNotesPagingSource() }
             ).flow,
 
             fetchWithNoteDbSync(
@@ -80,7 +82,7 @@ class RealNoteRepository @Inject constructor(
         return merge(
             Pager(
                 config = PagingConfig(pageSize = 25, maxSize = 500),
-                pagingSourceFactory = { noteDao.userNotesPagingSource(listOf(pubkey)) }
+                pagingSourceFactory = { noteDao.userNotesAndRepliesPagingSource(listOf(pubkey)) }
             ).flow,
 
             noteDao.getLatestNoteEpoch(pubkey).take(1)
@@ -100,7 +102,7 @@ class RealNoteRepository @Inject constructor(
     }
 
 
-    override fun observeContactsNotesPaging(): Flow<PagingData<NoteWithUser>> {
+    override fun observeContactsNotes(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
         return contactListRepository.observeContactLists(myPubkey)
@@ -111,6 +113,31 @@ class RealNoteRepository @Inject constructor(
                     Pager(
                         config = PagingConfig(pageSize = 25, maxSize = 500),
                         pagingSourceFactory = { noteDao.userNotesPagingSource(contactNpubList) }
+                    ).flow,
+
+                    fetchWithNoteDbSync(
+                        SubscribeMessage(filters = Filters.userNotes(contactNpubList.toSet())),
+                        NoteSource.Contacts
+                    )
+                ).filterIsInstance()
+            }
+    }
+
+    override fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>> {
+        val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
+
+        return contactListRepository.observeContactLists(myPubkey)
+            .filter { it.isNotEmpty() }.distinctUntilChanged().flatMapLatest {
+                val contactNpubList = it.map { it.pubKey.hex() }
+
+                merge(
+                    Pager(
+                        config = PagingConfig(pageSize = 25, maxSize = 500),
+                        pagingSourceFactory = {
+                            noteDao.userNotesAndRepliesPagingSource(
+                                contactNpubList
+                            )
+                        }
                     ).flow,
 
                     fetchWithNoteDbSync(
@@ -193,4 +220,7 @@ private fun TypedEvent<Note>.toNoteEntity(
     content = content.text,
     sig = sig.hex(),
     source = source,
+    // TODO This isn't fool-proof.
+    //  What happens with notes that mention other notes but aren't replies?
+    isReply = tags.any { it.firstOrNull() == "e" }
 )
