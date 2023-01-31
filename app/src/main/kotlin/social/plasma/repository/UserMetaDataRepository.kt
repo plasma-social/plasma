@@ -1,12 +1,19 @@
 package social.plasma.repository
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.db.usermetadata.UserMetadataEntity
+import social.plasma.nostr.models.Event
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.Relay
@@ -14,52 +21,87 @@ import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.SubscribeMessage
 import social.plasma.utils.chunked
+import timber.log.Timber
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 interface UserMetaDataRepository {
     fun observeUserMetaData(pubKey: String): Flow<UserMetaData>
 
-    fun syncUserMetadata(pubKey: String): Flow<Unit>
+    suspend fun syncUserMetadata(pubKey: String, force: Boolean = false)
 
-    fun syncUserMetadata(pubKeys: Set<String>): Flow<Unit>
+    suspend fun stopUserMetadataSync(pubKey: String)
 }
 
+@Singleton
 class RealUserMetaDataRepository @Inject constructor(
     private val relays: Relay,
     private val metadataDao: UserMetadataDao,
     private val eventRefiner: EventRefiner,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : UserMetaDataRepository {
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
+    private val syncedIds = AtomicReference(setOf<String>())
+    private val idsToSync = AtomicReference(setOf<String>())
+    private val idsToSyncFlow = MutableSharedFlow<Set<String>>()
+
+    init {
+        idsToSyncFlow
+            .filter { it.isNotEmpty() }
+            .distinctUntilChanged()
+            .debounce(500)
+            .flatMapLatest {
+                Timber.d("Request %s users", it.size)
+                relays.subscribe(
+                    SubscribeMessage(
+                        filter = Filter(
+                            authors = setOf(it.first()),
+                            kinds = setOf(Event.Kind.MetaData),
+                            limit = 1,
+                        ),
+                        *it.drop(1).map {
+                            Filter(
+                                authors = setOf(it),
+                                kinds = setOf(Event.Kind.MetaData),
+                                limit = 1,
+                            )
+                        }.toTypedArray()
+                    )
+                )
+            }
+            .map { eventRefiner.toUserMetaData(it) }
+            .filterNotNull()
+            .chunked(100, 200)
+            .map { metadataList ->
+                metadataDao.insertIfNewer(metadataList.map { it.toUserMetadataEntity() })
+
+                val newIds = metadataList.map { it.pubKey.hex() }.toSet()
+                syncedIds.getAndUpdate { it + newIds }
+                idsToSync.getAndUpdate { it - newIds }
+            }
+            .launchIn(scope)
+    }
+
     override fun observeUserMetaData(pubKey: String): Flow<UserMetaData> =
         metadataDao.observeUserMetadata(pubKey)
             .distinctUntilChanged()
-            .map {
-                it?.let {
-                    it.toUserMetadata()
-                }
-            }
             .filterNotNull()
+            .map { it.toUserMetadata() }
 
-    override fun syncUserMetadata(pubKey: String): Flow<Unit> {
-        return syncUserMetadata(setOf(pubKey))
+    override suspend fun syncUserMetadata(pubKey: String, force: Boolean) {
+        if (force || !syncedIds.get().contains(pubKey)) {
+            idsToSync.getAndUpdate { it + pubKey }
+
+            idsToSyncFlow.emit(idsToSync.get())
+        }
     }
 
-    override fun syncUserMetadata(pubKeys: Set<String>): Flow<Unit> {
-        return relays.subscribe(
-            SubscribeMessage(filter = Filter.userMetaData(pubKeys))
-        )
-            .distinctUntilChanged()
-            .map { eventRefiner.toUserMetaData(it) }
-            .filterNotNull()
-            .chunked(pubKeys.size, 200)
-            .map { metadataList ->
-                metadataDao.insertIfNewer(metadataList.map { it.toUserMetadataEntity() })
-            }
-            .flowOn(ioDispatcher)
+    override suspend fun stopUserMetadataSync(pubKey: String) {
+        idsToSync.getAndUpdate { it - pubKey }
     }
-
 }
 
 private fun UserMetadataEntity.toUserMetadata(): UserMetaData = UserMetaData(

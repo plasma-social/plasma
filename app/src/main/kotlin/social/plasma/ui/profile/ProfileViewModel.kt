@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import social.plasma.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
@@ -26,7 +27,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     noteRepository: NoteRepository,
-    userMetaDataRepository: RealUserMetaDataRepository,
+    private val userMetaDataRepository: RealUserMetaDataRepository,
     @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
     contactListRepository: ContactListRepository,
 ) : ViewModel() {
@@ -87,7 +88,6 @@ class ProfileViewModel @Inject constructor(
 
     private val userMetadata = merge(
         userMetaDataRepository.observeUserMetaData(profilePubKey.hex).filterNotNull(),
-        userMetaDataRepository.syncUserMetadata(profilePubKey.hex),
         contactListRepository.syncContactList(profilePubKey.hex),
     ).filterIsInstance<UserMetaData>()
 
@@ -114,6 +114,11 @@ class ProfileViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 
+    init {
+        viewModelScope.launch {
+            userMetaDataRepository.syncUserMetadata(profilePubKey.hex, force = true)
+        }
+    }
 
     fun onNoteDisposed(id: String) {
         // TODO cancel coroutine
@@ -122,6 +127,13 @@ class ProfileViewModel @Inject constructor(
     fun onNoteDisplayed(id: String) {
         // TODO  move to repo
 //        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            userMetaDataRepository.stopUserMetadataSync(profilePubKey.hex)
+        }
     }
 
     companion object {
