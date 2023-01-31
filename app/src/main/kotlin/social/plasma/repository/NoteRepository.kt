@@ -22,12 +22,9 @@ import social.plasma.db.notes.NoteDao
 import social.plasma.db.notes.NoteEntity
 import social.plasma.db.notes.NoteSource
 import social.plasma.db.notes.NoteWithUser
-import social.plasma.db.reactions.ReactionDao
-import social.plasma.db.reactions.ReactionEntity
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.nostr.models.Note
-import social.plasma.nostr.models.Reaction
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.EventRefiner
@@ -42,8 +39,9 @@ import kotlin.coroutines.CoroutineContext
 
 interface NoteRepository {
     fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>>
+
     fun observeProfileNotes(pubkey: String): Flow<PagingData<NoteWithUser>>
-    fun observeNoteReactionCount(id: String): Flow<Unit>
+
     fun observeContactsNotes(): Flow<PagingData<NoteWithUser>>
 
     fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>>
@@ -53,7 +51,6 @@ interface NoteRepository {
 
 class RealNoteRepository @Inject constructor(
     private val noteDao: NoteDao,
-    private val reactionDao: ReactionDao,
     private val contactListRepository: ContactListRepository,
     @UserKey(KeyType.Public) private val myPubKey: Preference<ByteArray>,
     private val eventRefiner: EventRefiner,
@@ -163,17 +160,6 @@ class RealNoteRepository @Inject constructor(
         ).first()
     }
 
-    override fun observeNoteReactionCount(id: String): Flow<Unit> {
-        return relay.subscribe(SubscribeMessage(Filter.noteReactions(id)))
-            .map { eventRefiner.toReaction(it) }
-            .map { it?.toReactionEntity() }
-            .filterNotNull()
-            .chunked(CHUNK_MAX_SIZE, CHUNK_DELAY)
-            .onEach { reactionDao.insert(it) }
-            .flowOn(ioDispatcher)
-            .map { }
-    }
-
     private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =
         relay.subscribe(subscribeMessage)
             .map { eventRefiner.toNote(it) }
@@ -187,24 +173,6 @@ class RealNoteRepository @Inject constructor(
         const val CHUNK_MAX_SIZE = 500
         const val CHUNK_DELAY = 1000L
     }
-}
-
-private fun TypedEvent<Reaction>.toReactionEntity(): ReactionEntity? {
-    val noteId = noteIdFromTags()
-    noteId ?: return null
-
-    return ReactionEntity(
-        id = id.hex(),
-        content = content.text,
-        createdAt = createdAt.toEpochMilli(),
-        noteId = noteId
-    )
-}
-
-private fun TypedEvent<Reaction>.noteIdFromTags(): String? {
-    // TODO we need to figure out what to do with the rest of the tags :/
-    val noteId = this.tags.lastOrNull { it.firstOrNull() == "e" }?.getOrNull(1)
-    return noteId
 }
 
 private fun TypedEvent<Note>.toNoteEntity(

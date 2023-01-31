@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import social.plasma.PubKey
 import social.plasma.db.notes.NoteWithUser
+import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.base.MoleculeViewModel
 import social.plasma.ui.ext.noteCardsPagingFlow
@@ -15,7 +16,8 @@ import social.plasma.ui.ext.noteCardsPagingFlow
 abstract class AbstractFeedViewModel(
     recompositionClock: RecompositionClock,
     private val userMetaDataRepository: UserMetaDataRepository,
-    pagingFlow : Flow<PagingData<NoteWithUser>>,
+    private val reactionsRepository: ReactionsRepository,
+    pagingFlow: Flow<PagingData<NoteWithUser>>,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
 
     private val feedPagingFlow = noteCardsPagingFlow(pagingFlow)
@@ -28,10 +30,14 @@ abstract class AbstractFeedViewModel(
     open fun onNoteDisposed(id: String, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.stopUserMetadataSync(pubkey.hex)
+            reactionsRepository.stopSyncNoteReactions(id)
         }
     }
 
     open fun onNoteDisplayed(id: String, pubkey: PubKey) {
-        viewModelScope.launch { userMetaDataRepository.syncUserMetadata(pubkey.hex) }
+        viewModelScope.launch {
+            userMetaDataRepository.syncUserMetadata(pubkey.hex)
+            reactionsRepository.syncNoteReactions(id)
+        }
     }
 }

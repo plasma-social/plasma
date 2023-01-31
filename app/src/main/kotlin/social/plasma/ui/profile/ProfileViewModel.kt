@@ -19,6 +19,7 @@ import social.plasma.nostr.models.UserMetaData
 import social.plasma.prefs.Preference
 import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
+import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.RealUserMetaDataRepository
 import social.plasma.ui.ext.noteCardsPagingFlow
 import javax.inject.Inject
@@ -30,6 +31,7 @@ class ProfileViewModel @Inject constructor(
     private val userMetaDataRepository: RealUserMetaDataRepository,
     @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
     contactListRepository: ContactListRepository,
+    private val reactionsRepository: ReactionsRepository,
 ) : ViewModel() {
     private val fakeProfile =
         ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
@@ -121,12 +123,15 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onNoteDisposed(id: String) {
-        // TODO cancel coroutine
+        viewModelScope.launch {
+            reactionsRepository.stopSyncNoteReactions(id)
+        }
     }
 
     fun onNoteDisplayed(id: String) {
-        // TODO  move to repo
-//        noteRepository.observeNoteReactionCount(id).launchIn(viewModelScope)
+        viewModelScope.launch {
+            reactionsRepository.syncNoteReactions(id)
+        }
     }
 
     override fun onCleared() {
