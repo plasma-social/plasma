@@ -46,6 +46,7 @@ class RelayImpl(
         logger.d("adding sub %s", subscribeMessage)
 
         return relayMessages.asFlow()
+            .onEach { if (it is RelayMessage.NoticeRelayMessage) logger.w(it.message) }
             .filterIsInstance<RelayMessage.EventRelayMessage>()
             .filter { it.subscriptionId == subscribeMessage.subscriptionId }
             .onCompletion {

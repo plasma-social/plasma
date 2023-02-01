@@ -34,7 +34,6 @@ object NetworkModule {
         "wss://relay.nostr.bg",
         "wss://eden.nostr.land",
         "wss://nostr.oxtr.dev",
-        "wss://nostr.v0l.io",
         "wss://nostr-pub.semisol.dev",
         "wss://relay.kronkltd.net",
         "wss://nostr.zebedee.cloud",

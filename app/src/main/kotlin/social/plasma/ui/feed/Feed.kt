@@ -82,7 +82,7 @@ private fun FeedContent(
     modifier: Modifier = Modifier,
     uiState: FeedUiState,
     onNavigateToProfile: (PubKey) -> Unit,
-    onNoteDisposed: (String) -> Unit,
+    onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
 ) {
     when (uiState) {
@@ -103,7 +103,7 @@ private fun FeedList(
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
-    onNoteDisposed: (String) -> Unit,
+    onNoteDisposed: (NoteId, PubKey) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -129,7 +129,7 @@ private fun FeedList(
 
                     DisposableEffect(Unit) {
                         onDispose {
-                            onNoteDisposed(note.id)
+                            onNoteDisposed(note.id, note.userPubkey)
                         }
                     }
                 }
