@@ -11,7 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,18 +28,18 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
 ) {
-    var selectedNavItem by remember { mutableStateOf<Screen>(Screen.Home) }
+    var selectedNavItem by rememberSaveable { mutableStateOf(0) }
 
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets.navigationBars,
         bottomBar = {
             NavigationBar {
-                bottomNavItems.forEach { (screen, icon) ->
+                bottomNavItems.forEachIndexed { index, (screen, icon) ->
                     NavigationBarItem(
-                        selected = selectedNavItem == screen,
+                        selected = selectedNavItem == index,
                         onClick = {
-                            selectedNavItem = screen
+                            selectedNavItem = index
                             navController.popBackStack()
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
