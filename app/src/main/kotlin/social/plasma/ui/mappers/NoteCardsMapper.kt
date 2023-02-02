@@ -37,7 +37,10 @@ class NoteCardsMapper @Inject constructor(
 
                 note.noteEntity.tags.forEach {
                     if (it.firstOrNull() == "p") {
-                        pubKeyTags.add(PubKey(it[1]))
+                        val pubkey = PubKey(it[1])
+                        if (pubkey.hex != note.noteEntity.pubkey) {
+                            pubKeyTags.add(pubkey)
+                        }
                     }
                 }
 
