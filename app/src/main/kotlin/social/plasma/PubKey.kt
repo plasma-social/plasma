@@ -12,7 +12,9 @@ data class PubKey(
     }
 
     val shortBech32 by lazy {
-        bech32.take(12)
+        with(bech32.replace("npub", "")) {
+            "${take(8)}:${takeLast(8)}"
+        }
     }
 
     companion object {

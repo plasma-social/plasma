@@ -3,6 +3,7 @@ package social.plasma.ui.feed
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.molecule.RecompositionClock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -11,16 +12,18 @@ import social.plasma.db.notes.NoteWithUser
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.base.MoleculeViewModel
-import social.plasma.ui.ext.noteCardsPagingFlow
+import social.plasma.ui.mappers.NoteCardsMapper
 
 abstract class AbstractFeedViewModel(
     recompositionClock: RecompositionClock,
     private val userMetaDataRepository: UserMetaDataRepository,
     private val reactionsRepository: ReactionsRepository,
+    noteCardsMapper: NoteCardsMapper,
     pagingFlow: Flow<PagingData<NoteWithUser>>,
 ) : MoleculeViewModel<FeedUiState>(recompositionClock) {
 
-    private val feedPagingFlow = noteCardsPagingFlow(pagingFlow)
+    private val feedPagingFlow = noteCardsMapper.map(pagingFlow)
+        .cachedIn(viewModelScope)
 
     @Composable
     override fun models(): FeedUiState {
