@@ -21,8 +21,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
 import social.plasma.PubKey
-import social.plasma.ui.components.NoteElevatedCard
-import social.plasma.ui.components.NoteUiModel
+import social.plasma.ui.components.notes.NoteElevatedCard
+import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.components.ProgressIndicator
 
 typealias NoteId = String

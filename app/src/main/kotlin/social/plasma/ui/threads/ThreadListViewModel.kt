@@ -15,7 +15,7 @@ import social.plasma.PubKey
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.ThreadRepository
 import social.plasma.repository.UserMetaDataRepository
-import social.plasma.ui.ext.toNoteUiModel
+import social.plasma.ui.mappers.toNoteUiModel
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext

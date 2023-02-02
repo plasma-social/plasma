@@ -1,4 +1,4 @@
-package social.plasma.ui.components
+package social.plasma.ui.components.notes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,30 +26,12 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import social.plasma.PubKey
 import social.plasma.R
-import social.plasma.ui.components.NoteUiModel.RichContent
+import social.plasma.ui.components.Avatar
+import social.plasma.ui.components.ImageCarousel
+import social.plasma.ui.components.Nip5Badge
+import social.plasma.ui.components.ZoomableImage
+import social.plasma.ui.components.notes.NoteUiModel.RichContent
 import social.plasma.ui.theme.PlasmaTheme
-
-data class NoteUiModel(
-    val id: String,
-    val name: String,
-    val displayName: String,
-    val avatarUrl: String?,
-    val nip5: String?,
-    val content: String,
-    val timePosted: String,
-    val replyCount: String,
-    val shareCount: String,
-    val likeCount: String,
-    val userPubkey: PubKey,
-    val richContent: RichContent = RichContent.None,
-) {
-    sealed interface RichContent {
-        object None : RichContent
-        data class Image(val imageUrl: String) : RichContent
-
-        data class Carousel(val imageUrls: List<String>) : RichContent
-    }
-}
 
 @Composable
 fun NoteElevatedCard(
@@ -219,7 +201,6 @@ private fun NoteCardHeader(
                 .weight(1f)
                 .align(Alignment.CenterVertically)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -228,6 +209,7 @@ private fun NoteCardHeader(
                     uiModel.displayName,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
                     text = uiModel.timePosted,
@@ -241,6 +223,13 @@ private fun NoteCardHeader(
             }
         }
 
+    }
+    if (uiModel.cardLabel != null) {
+        Text(
+            text = uiModel.cardLabel,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
     }
 }
 
@@ -278,5 +267,6 @@ object NoteCardFakes {
         likeCount = "2.9M",
         userPubkey = PubKey("fdsf"),
         richContent = RichContent.None,
+        cardLabel = "Replying to Jack, JM, and 3 others"
     )
 }

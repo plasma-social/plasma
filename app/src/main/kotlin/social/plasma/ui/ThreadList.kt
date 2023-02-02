@@ -2,7 +2,6 @@ package social.plasma.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -32,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import social.plasma.PubKey
-import social.plasma.ui.components.NoteFlatCard
-import social.plasma.ui.components.ThreadNote
+import social.plasma.ui.components.notes.NoteFlatCard
+import social.plasma.ui.components.notes.ThreadNote
 import social.plasma.ui.theme.PlasmaTheme
 import social.plasma.ui.threads.ThreadListViewModel
 import social.plasma.ui.threads.ThreadNoteUiModel.LeafNote

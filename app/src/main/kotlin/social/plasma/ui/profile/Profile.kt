@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,7 +57,7 @@ import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
-import social.plasma.ui.components.NoteElevatedCard
+import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
