@@ -196,5 +196,6 @@ fun TypedEvent<Note>.toNoteEntity(
     source = source,
     // TODO This isn't fool-proof.
     //  What happens with notes that mention other notes but aren't replies?
-    isReply = tags.any { it.firstOrNull() == "e" }
+    isReply = tags.any { it.firstOrNull() == "e" },
+    tags = tags,
 )

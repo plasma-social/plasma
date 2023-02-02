@@ -32,7 +32,7 @@ import social.plasma.ui.theme.PlasmaTheme
 data class NoteUiModel(
     val id: String,
     val name: String,
-    val displayName: String?,
+    val displayName: String,
     val avatarUrl: String?,
     val nip5: String?,
     val content: String,
@@ -225,7 +225,7 @@ private fun NoteCardHeader(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    uiModel.name,
+                    uiModel.displayName,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )

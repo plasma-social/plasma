@@ -44,8 +44,7 @@ fun NoteWithUser.toNoteUiModel(): NoteUiModel {
 
     return NoteUiModel(
         id = note.id,
-        name = user?.displayName?.takeIf { it.isNotBlank() } ?: user?.name
-        ?: userPubkey.shortBech32,
+        name = user?.name ?: userPubkey.shortBech32,
         content = note.content,
         avatarUrl = user?.picture
             ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${userPubkey.hex}",
@@ -55,7 +54,8 @@ fun NoteWithUser.toNoteUiModel(): NoteUiModel {
         likeCount = "${if (note.reactionCount > 0) note.reactionCount else ""}",
         userPubkey = userPubkey,
         nip5 = user?.nip05,
-        displayName = user?.displayName,
+        displayName = user?.displayName?.takeIf { it.isNotBlank() } ?: user?.name
+        ?: userPubkey.shortBech32,
         richContent = when {
             imageUrls.size == 1 -> RichContent.Image(imageUrls.first())
             imageUrls.size > 1 -> RichContent.Carousel(imageUrls)
