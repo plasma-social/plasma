@@ -40,6 +40,7 @@ fun MainScreen(
                         selected = selectedNavItem == screen,
                         onClick = {
                             selectedNavItem = screen
+                            navController.popBackStack()
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true

@@ -30,7 +30,7 @@ data class NoteEntity(
 )
 
 enum class NoteSource {
-    Global, Profile, Contacts, Thread,
+    Global, Profile, Contacts, Thread, Notifications
 }
 
 @Entity(tableName = "note_ref", primaryKeys = ["sourceNote", "targetNote"])
