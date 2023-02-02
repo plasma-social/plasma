@@ -3,12 +3,12 @@ package social.plasma.ui.profile
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import social.plasma.PubKey
-import social.plasma.ui.components.NoteCardUiModel
+import social.plasma.ui.components.NoteUiModel
 
 sealed interface ProfileUiState {
     object Loading : ProfileUiState
     data class Loaded(
-        val userNotesPagingFlow: Flow<PagingData<NoteCardUiModel>>,
+        val userNotesPagingFlow: Flow<PagingData<NoteUiModel>>,
         val statCards: List<ProfileStat>,
         val userData: UserData,
         val following: Boolean? = false,

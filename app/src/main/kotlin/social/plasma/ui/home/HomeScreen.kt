@@ -43,6 +43,7 @@ fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel = hiltViewModel(),
+    navigateToThread: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -51,7 +52,8 @@ fun HomeScreen(
             onNavigateToProfile = onNavigateToProfile,
             modifier = modifier,
             userMetaData = state.userMetadata,
-            userPubKey = state.userPubkey
+            userPubKey = state.userPubkey,
+            navigateToThread = navigateToThread,
         )
     }
 }
@@ -61,6 +63,7 @@ fun HomeScreen(
 fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
+    navigateToThread: (String) -> Unit,
     userMetaData: UserMetaData,
     userPubKey: PubKey,
 ) {
@@ -121,21 +124,25 @@ fun HomeScreen(
             composable(HomeTab.Following.name) {
                 ContactsFeed(
                     onNavigateToProfile = onNavigateToProfile,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    navigateToThread = navigateToThread,
                 )
             }
 
             composable(HomeTab.Global.name) {
                 GlobalFeed(
                     onNavigateToProfile = onNavigateToProfile,
-                    modifier = Modifier.padding(paddingValues)
-                )
+                    modifier = Modifier.padding(paddingValues),
+                    navigateToThread = navigateToThread,
+
+                    )
             }
 
             composable(HomeTab.Replies.name) {
                 RepliesFeed(
                     onNavigateToProfile = onNavigateToProfile,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    navigateToThread = navigateToThread,
                 )
             }
 
@@ -177,6 +184,6 @@ enum class HomeTab(
 @Composable
 private fun PreviewHomeScreen() {
     PlasmaTheme {
-        HomeScreen(onNavigateToProfile = {})
+        HomeScreen(onNavigateToProfile = {}, navigateToThread = {})
     }
 }

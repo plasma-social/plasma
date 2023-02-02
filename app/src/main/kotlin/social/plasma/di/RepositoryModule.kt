@@ -12,7 +12,9 @@ import social.plasma.repository.RealAccountRepository
 import social.plasma.repository.RealContactListRepository
 import social.plasma.repository.RealNoteRepository
 import social.plasma.repository.RealReactionsRepository
+import social.plasma.repository.RealThreadRepository
 import social.plasma.repository.RealUserMetaDataRepository
+import social.plasma.repository.ThreadRepository
 import social.plasma.repository.UserMetaDataRepository
 import javax.inject.Singleton
 
@@ -38,4 +40,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindReactionsRepo(impl: RealReactionsRepository) : ReactionsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindThreadRepo(impl: RealThreadRepository) : ThreadRepository
 }

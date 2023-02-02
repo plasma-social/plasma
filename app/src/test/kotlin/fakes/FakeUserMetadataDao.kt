@@ -25,4 +25,8 @@ class FakeUserMetadataDao : UserMetadataDao {
     override fun newestMetadata(pubKey: String): UserMetadataEntity? {
         TODO("Not yet implemented")
     }
+
+    override fun getById(pubkey: String): Flow<UserMetadataEntity?> {
+        TODO("Not yet implemented")
+    }
 }

@@ -45,7 +45,7 @@ class RealReactionsRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     init {
-        noteIdsFlow.debounce(250)
+        noteIdsFlow.debounce(500)
             .filter { it.isNotEmpty() }
             .flatMapLatest { noteIds ->
                 relays.subscribe(

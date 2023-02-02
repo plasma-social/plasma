@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.take
 import social.plasma.PubKey
 import social.plasma.db.notes.NoteDao
 import social.plasma.db.notes.NoteEntity
+import social.plasma.db.notes.NoteReferenceEntity
 import social.plasma.db.notes.NoteSource
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.di.KeyType
@@ -164,6 +165,15 @@ class RealNoteRepository @Inject constructor(
         relay.subscribe(subscribeMessage)
             .map { eventRefiner.toNote(it) }
             .filterNotNull()
+            .onEach { note ->
+                val sourceNoteId = note.id.hex()
+
+                val noteReferences = note.tags.filter { it.firstOrNull() == "e" }.map {
+                    NoteReferenceEntity(sourceNoteId, targetNote = it[1])
+                }
+
+                noteDao.insertNoteReference(noteReferences)
+            }
             .map { it.toNoteEntity(source) }
             .chunked(500, 200)
             .onEach { noteDao.insert(it) }
@@ -175,7 +185,7 @@ class RealNoteRepository @Inject constructor(
     }
 }
 
-private fun TypedEvent<Note>.toNoteEntity(
+fun TypedEvent<Note>.toNoteEntity(
     source: NoteSource,
 ): NoteEntity = NoteEntity(
     id = id.hex(),

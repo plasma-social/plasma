@@ -33,7 +33,7 @@ class RelayImpl(
             .filterNot { it is WebSocket.Event.OnMessageReceived }
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
-    private val relayMessages = service.relayMessageFlow().hide()
+    private val relayMessages = service.relayMessageFlow()
 
     private val subscriptions: AtomicReference<Set<SubscribeMessage>> =
         AtomicReference(setOf())
@@ -44,6 +44,7 @@ class RelayImpl(
 
         service.sendSubscribe(subscribeMessage)
         logger.d("adding sub %s", subscribeMessage)
+        logger.d("sub count %s", subscriptions.get().count())
 
         return relayMessages.asFlow()
             .onEach { if (it is RelayMessage.NoticeRelayMessage) logger.w(it.message) }
@@ -60,6 +61,7 @@ class RelayImpl(
             set.filterNot { it.subscriptionId == request.subscriptionId }.toSet()
         }
         logger.d("removing sub %s", request)
+        logger.d("sub count %s", subscriptions.get().count())
     }
 
     override fun connect() {

@@ -34,7 +34,7 @@ class RequestMessageAdapterTest : StringSpec({
             arbInstantSeconds,
             Arb.set(arbByteString32.map { it.hex() }, 0..10),
             Arb.set(Arb.int(0..99), 0..10)
-        ) { since, authors, kinds -> Filter(since, authors, kinds) }
+        ) { since, authors, kinds -> Filter(since = since, authors = authors, kinds = kinds) }
 
         val arbSubscribeMessage = Arb.bind(
             arbVanillaString,

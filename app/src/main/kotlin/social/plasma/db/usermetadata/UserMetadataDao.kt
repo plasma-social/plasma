@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import social.plasma.nostr.models.UserMetaData
 
 @Dao
 interface UserMetadataDao {
@@ -30,4 +31,7 @@ interface UserMetadataDao {
             }
         }
     }
+
+    @Query("SELECT * FROM user_metadata WHERE pubkey = :pubkey")
+    fun getById(pubkey: String): Flow<UserMetadataEntity?>
 }

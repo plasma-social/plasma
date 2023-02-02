@@ -6,6 +6,7 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.hours
 
 data class Filter(
+    val ids: Set<String>? = null,
     val since: Instant? = null,
     val authors: Set<String>? = null,
     val kinds: Set<Int>? = null,
