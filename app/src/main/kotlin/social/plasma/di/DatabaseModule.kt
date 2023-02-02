@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.db.PlasmaDb
+import social.plasma.db.converters.TagsTypeConverter
 import social.plasma.db.contacts.ContactsDao
 import social.plasma.db.notes.NoteDao
 import social.plasma.db.reactions.ReactionDao
@@ -18,11 +19,16 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun providesDb(applicationContext: Application): PlasmaDb {
+    fun providesDb(
+        applicationContext: Application,
+        tagsTypeConverter: TagsTypeConverter,
+    ): PlasmaDb {
         return Room.databaseBuilder(
             applicationContext,
             PlasmaDb::class.java, "plasmadb"
-        ).fallbackToDestructiveMigration()
+        )
+            .addTypeConverter(tagsTypeConverter)
+            .fallbackToDestructiveMigration()
             .build()
     }
 
@@ -40,5 +46,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun providesContactsDao(db: PlasmaDb) : ContactsDao = db.contactsDao()
+    fun providesContactsDao(db: PlasmaDb): ContactsDao = db.contactsDao()
 }
