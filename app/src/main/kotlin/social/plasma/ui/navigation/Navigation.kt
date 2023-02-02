@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import social.plasma.R
 import social.plasma.ui.ThreadList
 import social.plasma.ui.home.HomeScreen
+import social.plasma.ui.notifications.NotificationsScreen
 import social.plasma.ui.profile.Profile
 
 @Composable
@@ -32,7 +33,7 @@ fun Navigation(
                         Screen.Profile.buildRoute(pubKey)
                     )
                 },
-                navigateToThread = {
+                onNavigateToThread = {
                     navHostController.navigate(Screen.Thread.buildRoute(it))
                 }
             )
@@ -43,7 +44,17 @@ fun Navigation(
         }
 
         composable(Screen.Notifications.route) {
-            ComingSoon()
+            NotificationsScreen(
+                modifier = modifier,
+                onNavigateToThread = {
+                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                },
+                onNavigateToProfile = { pubkey ->
+                    navHostController.navigate(
+                        Screen.Profile.buildRoute(pubkey)
+                    )
+                }
+            )
         }
 
         composable(Screen.Profile.route) {

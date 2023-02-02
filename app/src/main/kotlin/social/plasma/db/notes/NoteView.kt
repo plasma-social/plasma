@@ -20,4 +20,5 @@ data class NoteView(
     @ColumnInfo(name = "is_reply")
     val isReply: Boolean,
     val tags: List<List<String>>,
+    val source: NoteSource,
 )

@@ -48,6 +48,8 @@ interface NoteRepository {
     fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>>
 
     suspend fun refreshContactsNotes(): List<NoteEntity>
+
+    fun observeMentions(): Flow<PagingData<NoteWithUser>>
 }
 
 class RealNoteRepository @Inject constructor(
@@ -106,7 +108,7 @@ class RealNoteRepository @Inject constructor(
                 merge(
                     Pager(
                         config = PagingConfig(pageSize = 25, maxSize = 500),
-                        pagingSourceFactory = { noteDao.userNotesPagingSource(contactNpubList) }
+                        pagingSourceFactory = { noteDao.notesBySource(NoteSource.Contacts) }
                     ).flow,
 
                     fetchWithNoteDbSync(
@@ -128,9 +130,7 @@ class RealNoteRepository @Inject constructor(
                     Pager(
                         config = PagingConfig(pageSize = 25, maxSize = 500),
                         pagingSourceFactory = {
-                            noteDao.userNotesAndRepliesPagingSource(
-                                contactNpubList
-                            )
+                            noteDao.notesAndRepliesBySource(NoteSource.Contacts)
                         }
                     ).flow,
 
@@ -159,6 +159,24 @@ class RealNoteRepository @Inject constructor(
             ),
             NoteSource.Contacts
         ).first()
+    }
+
+    override fun observeMentions(): Flow<PagingData<NoteWithUser>> {
+        val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
+
+        return merge(
+            Pager(
+                config = PagingConfig(pageSize = 25, maxSize = 500),
+                pagingSourceFactory = {
+                    noteDao.notesAndRepliesBySource(NoteSource.Notifications)
+                }
+            ).flow,
+
+            fetchWithNoteDbSync(
+                SubscribeMessage(Filter(pTags = setOf(myPubkey), limit = 500)),
+                NoteSource.Notifications
+            )
+        ).filterIsInstance()
     }
 
     private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =

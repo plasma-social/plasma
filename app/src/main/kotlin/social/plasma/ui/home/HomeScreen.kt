@@ -43,7 +43,7 @@ fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel = hiltViewModel(),
-    navigateToThread: (String) -> Unit,
+    onNavigateToThread: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -53,7 +53,7 @@ fun HomeScreen(
             modifier = modifier,
             userMetaData = state.userMetadata,
             userPubKey = state.userPubkey,
-            navigateToThread = navigateToThread,
+            navigateToThread = onNavigateToThread,
         )
     }
 }
@@ -184,6 +184,6 @@ enum class HomeTab(
 @Composable
 private fun PreviewHomeScreen() {
     PlasmaTheme {
-        HomeScreen(onNavigateToProfile = {}, navigateToThread = {})
+        HomeScreen(onNavigateToProfile = {}, onNavigateToThread = {})
     }
 }

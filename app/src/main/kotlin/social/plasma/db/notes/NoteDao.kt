@@ -18,11 +18,6 @@ interface NoteDao {
     fun insert(noteEntity: Iterable<NoteEntity>)
 
     @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE NOT(is_reply) AND pubkey IN (:pubkey)")
-    fun userNotesPagingSource(pubkey: List<String>): PagingSource<Int, NoteWithUser>
-
-    @Transaction
     @Query("SELECT * FROM noteview WHERE pubkey IN (:pubkey)")
     fun userNotesAndRepliesPagingSource(pubkey: List<String>): PagingSource<Int, NoteWithUser>
 
@@ -40,9 +35,18 @@ interface NoteDao {
 
     @Transaction
     @Query("SELECT * FROM noteview WHERE id = :noteId")
-    fun observeThreadNotes(noteId: String) : Flow<NoteThread>
+    fun observeThreadNotes(noteId: String): Flow<NoteThread>
 
     @Query("SELECT targetNote FROM note_ref WHERE sourceNote = :noteId")
-    fun getParentNoteIds(noteId: String) : List<String>
+    fun getParentNoteIds(noteId: String): List<String>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query("SELECT * FROM noteview WHERE NOT(is_reply) AND source = :source")
+    fun notesBySource(source: NoteSource): PagingSource<Int, NoteWithUser>
+
+    @Transaction
+    @Query("SELECT * FROM noteview WHERE source = :source")
+    fun notesAndRepliesBySource(source: NoteSource): PagingSource<Int, NoteWithUser>
 }
 

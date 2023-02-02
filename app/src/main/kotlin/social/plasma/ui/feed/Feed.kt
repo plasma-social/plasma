@@ -85,7 +85,7 @@ fun ContactsFeed(
 }
 
 @Composable
-private fun FeedContent(
+fun FeedContent(
     modifier: Modifier = Modifier,
     uiState: FeedUiState,
     onNavigateToProfile: (PubKey) -> Unit,
