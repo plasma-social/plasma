@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import social.plasma.R
+import social.plasma.ui.ThreadList
 import social.plasma.ui.home.HomeScreen
 import social.plasma.ui.profile.Profile
 
@@ -24,11 +25,17 @@ fun Navigation(
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            HomeScreen(modifier = modifier, onNavigateToProfile = { pubKey ->
-                navHostController.navigate(
-                    Screen.Profile.buildRoute(pubKey)
-                )
-            })
+            HomeScreen(
+                modifier = modifier,
+                onNavigateToProfile = { pubKey ->
+                    navHostController.navigate(
+                        Screen.Profile.buildRoute(pubKey)
+                    )
+                },
+                navigateToThread = {
+                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                }
+            )
         }
 
         composable(Screen.Messages.route) {
@@ -40,7 +47,28 @@ fun Navigation(
         }
 
         composable(Screen.Profile.route) {
-            Profile(onNavigateBack = { navHostController.popBackStack() })
+            Profile(
+                modifier = modifier,
+                onNavigateBack = { navHostController.popBackStack() },
+                onNavigateToThread = {
+                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                }
+            )
+        }
+
+        composable(Screen.Thread.route) {
+            ThreadList(
+                modifier = modifier,
+                onNavigateBack = { navHostController.popBackStack() },
+                onNavigateToThread = {
+                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                },
+                onNavigateToProfile = { pubkey ->
+                    navHostController.navigate(
+                        Screen.Profile.buildRoute(pubkey)
+                    )
+                }
+            )
         }
     }
 }

@@ -29,8 +29,10 @@ object NetworkModule {
     @Singleton
     @Named("default-relay-list")
     fun provideDefaultRelayList(): List<String> = listOf(
-        "wss://brb.io",
         "wss://relay.damus.io",
+        "wss://brb.io",
+        "wss://nos.lol",
+        "wss://nostr.orangepill.dev",
         "wss://relay.nostr.bg",
         "wss://eden.nostr.land",
         "wss://nostr.oxtr.dev",

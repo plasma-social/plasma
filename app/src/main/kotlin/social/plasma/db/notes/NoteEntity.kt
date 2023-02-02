@@ -1,9 +1,12 @@
 package social.plasma.db.notes
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
+import androidx.room.Junction
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 
 @Entity(
     tableName = "notes",
@@ -26,5 +29,29 @@ data class NoteEntity(
 )
 
 enum class NoteSource {
-    Global, Profile, Contacts
+    Global, Profile, Contacts, Thread,
 }
+
+@Entity(tableName = "note_ref", primaryKeys = ["sourceNote", "targetNote"])
+data class NoteReferenceEntity(
+    val sourceNote: String,
+    val targetNote: String
+)
+
+data class NoteThread(
+    @Embedded val note: NoteView,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(NoteReferenceEntity::class, parentColumn = "targetNote", entityColumn = "sourceNote")
+    )
+    val childrenNotes: List<NoteView>,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(NoteReferenceEntity::class, parentColumn = "sourceNote", entityColumn = "targetNote")
+    )
+    val parentNotes: List<NoteView>,
+)

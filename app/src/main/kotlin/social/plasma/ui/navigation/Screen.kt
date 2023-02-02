@@ -8,6 +8,10 @@ sealed class Screen(
     val route: String,
     @StringRes val name: Int,
 ) {
+    object Thread : Screen(route = "thread/{noteId}", name = R.string.thread) {
+        fun buildRoute(noteId: String): String = route.replace("{noteId}", noteId)
+    }
+
     object Profile : Screen(route = "profile/{pubkey}", name = R.string.profile) {
         fun buildRoute(pubKey: PubKey): String = route.replace("{pubkey}", pubKey.hex)
     }

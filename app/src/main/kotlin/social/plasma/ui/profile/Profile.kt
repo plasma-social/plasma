@@ -2,6 +2,7 @@ package social.plasma.ui.profile
 
 import android.app.Activity
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,7 +58,7 @@ import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
-import social.plasma.ui.components.NoteCard
+import social.plasma.ui.components.NoteElevatedCard
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
@@ -69,6 +70,7 @@ fun Profile(
     modifier: Modifier = Modifier,
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
+    onNavigateToThread: (String) -> Unit,
 ) {
     val uiState by profileViewModel.uiState.collectAsState(ProfileUiState.Loading)
 
@@ -78,6 +80,7 @@ fun Profile(
         onNoteDisposed = profileViewModel::onNoteDisposed,
         onNoteDisplayed = profileViewModel::onNoteDisplayed,
         onNavigateBack = onNavigateBack,
+        onNoteClick = onNavigateToThread,
     )
 }
 
@@ -88,6 +91,7 @@ private fun Profile(
     onNoteDisposed: (String) -> Unit,
     onNoteDisplayed: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onNoteClick: (String) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
@@ -97,6 +101,7 @@ private fun Profile(
             onNoteDisposed = onNoteDisposed,
             modifier = modifier,
             onNavigateBack = onNavigateBack,
+            onNoteClick = onNoteClick,
         )
     }
 }
@@ -108,6 +113,7 @@ private fun ProfileContent(
     onNoteDisplayed: (String) -> Unit,
     onNoteDisposed: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onNoteClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
@@ -122,8 +128,8 @@ private fun ProfileContent(
 
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets.navigationBars,
-    ) { paddingValues ->
+        contentWindowInsets = WindowInsets(left = 0, right = 0, top = 0, bottom = 0),
+        ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
@@ -150,8 +156,12 @@ private fun ProfileContent(
                     LaunchedEffect(Unit) {
                         onNoteDisplayed(cardUiModel.id)
                     }
-                    NoteCard(
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                    NoteElevatedCard(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .clickable {
+                                onNoteClick(cardUiModel.id)
+                            },
                         uiModel = it,
                         onAvatarClick = null
                     )
@@ -208,7 +218,7 @@ fun ProfileAppBar(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        Icons.Default.ArrowBack,
+                        Icons.Default.ChevronLeft,
                         stringResource(R.string.back)
                     )
                 }
@@ -335,6 +345,7 @@ private fun PreviewProfile(
             onNoteDisplayed = {},
             onNoteDisposed = {},
             onNavigateBack = {},
+            onNoteClick = {},
         )
     }
 }

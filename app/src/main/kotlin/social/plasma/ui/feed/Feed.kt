@@ -1,5 +1,6 @@
 package social.plasma.ui.feed
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +21,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
 import social.plasma.PubKey
-import social.plasma.ui.components.NoteCard
-import social.plasma.ui.components.NoteCardUiModel
+import social.plasma.ui.components.NoteElevatedCard
+import social.plasma.ui.components.NoteUiModel
 import social.plasma.ui.components.ProgressIndicator
 
 typealias NoteId = String
@@ -31,6 +32,7 @@ fun GlobalFeed(
     modifier: Modifier = Modifier,
     viewModel: GlobalFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
+    navigateToThread: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -40,6 +42,7 @@ fun GlobalFeed(
         onNavigateToProfile = onNavigateToProfile,
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
+        onNoteClicked = navigateToThread,
     )
 }
 
@@ -48,6 +51,7 @@ fun RepliesFeed(
     modifier: Modifier = Modifier,
     viewModel: RepliesFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
+    navigateToThread: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -57,6 +61,7 @@ fun RepliesFeed(
         onNavigateToProfile = onNavigateToProfile,
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
+        onNoteClicked = navigateToThread,
     )
 }
 
@@ -65,6 +70,7 @@ fun ContactsFeed(
     modifier: Modifier = Modifier,
     viewModel: FollowingFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
+    navigateToThread: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -74,6 +80,7 @@ fun ContactsFeed(
         onNavigateToProfile = onNavigateToProfile,
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
+        onNoteClicked = navigateToThread
     )
 }
 
@@ -84,6 +91,7 @@ private fun FeedContent(
     onNavigateToProfile: (PubKey) -> Unit,
     onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
+    onNoteClicked: (NoteId) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -93,17 +101,19 @@ private fun FeedContent(
             onNavigateToProfile = onNavigateToProfile,
             onNoteDisplayed = onNoteDisplayed,
             onNoteDisposed = onNoteDisposed,
+            onNoteClicked = onNoteClicked,
         )
     }
 }
 
 @Composable
 private fun FeedList(
-    noteList: Flow<PagingData<NoteCardUiModel>>,
+    noteList: Flow<PagingData<NoteUiModel>>,
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteDisposed: (NoteId, PubKey) -> Unit,
+    onNoteClicked: (NoteId) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -121,8 +131,12 @@ private fun FeedList(
                     LaunchedEffect(Unit) {
                         onNoteDisplayed(note.id, note.userPubkey)
                     }
-                    NoteCard(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    NoteElevatedCard(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clickable {
+                                onNoteClicked(it.id)
+                            },
                         uiModel = it,
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
                     )

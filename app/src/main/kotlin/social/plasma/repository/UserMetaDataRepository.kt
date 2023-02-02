@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,7 @@ interface UserMetaDataRepository {
     suspend fun syncUserMetadata(pubKey: String, force: Boolean = false)
 
     suspend fun stopUserMetadataSync(pubKey: String)
+    suspend fun getById(pubkey: String) : UserMetaData?
 }
 
 @Singleton
@@ -77,10 +79,6 @@ class RealUserMetaDataRepository @Inject constructor(
             .chunked(100, 200)
             .map { metadataList ->
                 metadataDao.insertIfNewer(metadataList.map { it.toUserMetadataEntity() })
-
-                val newIds = metadataList.map { it.pubKey.hex() }.toSet()
-                syncedIds.getAndUpdate { it + newIds }
-                idsToSync.getAndUpdate { it - newIds }
             }
             .launchIn(scope)
     }
@@ -101,6 +99,10 @@ class RealUserMetaDataRepository @Inject constructor(
 
     override suspend fun stopUserMetadataSync(pubKey: String) {
         idsToSync.getAndUpdate { it - pubKey }
+    }
+
+    override suspend fun getById(pubkey: String): UserMetaData? {
+        return metadataDao.getById(pubkey).first()?.toUserMetadata()
     }
 }
 
