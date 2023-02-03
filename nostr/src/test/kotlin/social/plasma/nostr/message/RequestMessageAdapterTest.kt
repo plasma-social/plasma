@@ -10,9 +10,9 @@ import io.kotest.property.checkAll
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbByteString32
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbInstantSeconds
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbVanillaString
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
 import social.plasma.nostr.relay.message.NostrMessageAdapter
-import social.plasma.nostr.relay.message.SubscribeMessage
 
 class RequestMessageAdapterTest : StringSpec({
 

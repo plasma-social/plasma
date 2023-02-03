@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.first
 import social.plasma.nostr.BuildingBlocks.JemPubKey
 import social.plasma.nostr.BuildingBlocks.client
 import social.plasma.nostr.BuildingBlocks.scarlet
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
-import social.plasma.nostr.relay.message.SubscribeMessage
 import kotlin.time.Duration.Companion.seconds
 
 class RelaysTest : StringSpec({

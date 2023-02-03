@@ -1,8 +1,8 @@
 package social.plasma.nostr.relay
 
 import kotlinx.coroutines.flow.Flow
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
-import social.plasma.nostr.relay.message.SubscribeMessage
 
 interface Relay {
     val connectionStatus: Flow<RelayStatus>

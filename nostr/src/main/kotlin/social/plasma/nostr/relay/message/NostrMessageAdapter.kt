@@ -5,14 +5,38 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
+import okhttp3.internal.closeQuietly
 import okio.ByteString
 import okio.ByteString.Companion.decodeHex
 import social.plasma.nostr.models.Event
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.nostr.relay.message.RelayMessage.NoticeRelayMessage
 import java.time.Instant
 
 class NostrMessageAdapter {
+
+    @FromJson
+    fun clientMessageFromJson(
+        reader: JsonReader,
+        subscribeDelegate: JsonAdapter<SubscribeMessage>,
+        unsubscribeDelegate: JsonAdapter<UnsubscribeMessage>,
+    ): ClientMessage {
+        val peekyReader = reader.peekJson()
+        peekyReader.beginArray()
+        return when (val messageType = peekyReader.nextString()) {
+            "REQ" -> subscribeDelegate.fromJson(reader)!!
+            "CLOSE" -> unsubscribeDelegate.fromJson(reader)!!
+            else -> error("Unsupported message type: $messageType")
+        }
+    }
+
+    @ToJson
+    fun clientMessageToJson(message: ClientMessage) = when(message) {
+        is SubscribeMessage -> requestMessageToJson(message)
+        is UnsubscribeMessage -> closeMessageToJson(message)
+    }
 
     // SubscribeMessage
     @FromJson

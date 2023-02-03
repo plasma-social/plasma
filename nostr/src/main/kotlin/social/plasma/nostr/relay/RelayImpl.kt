@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
 import social.plasma.nostr.relay.message.RelayMessage
-import social.plasma.nostr.relay.message.SubscribeMessage
-import social.plasma.nostr.relay.message.UnsubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
@@ -68,6 +68,7 @@ class RelayImpl(
         connectionLoop = connectionStatus.distinctUntilChanged().onEach {
             when (it.status) {
                 is Relay.Status.Connected -> {
+                    println("XXXXXX")
                     logger.d("connection opened: %s", it)
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }
