@@ -34,7 +34,7 @@ class RealAccountRepository @Inject constructor(
 
     override fun setSecretKey(byteArray: ByteArray) {
         secretKey.set(byteArray)
-        setPublicKey(Bech32.pubkeyCreate(byteArray))
+        publicKey.set(Bech32.pubkeyCreate(byteArray))
         _isLoggedIn.compareAndSet(expect = false, update = true)
     }
 
