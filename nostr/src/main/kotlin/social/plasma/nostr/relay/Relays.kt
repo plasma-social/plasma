@@ -8,8 +8,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.merge
 import okhttp3.OkHttpClient
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
-import social.plasma.nostr.relay.message.SubscribeMessage
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton

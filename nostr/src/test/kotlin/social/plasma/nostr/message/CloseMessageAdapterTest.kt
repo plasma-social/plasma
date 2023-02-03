@@ -7,8 +7,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.property.arbitrary.map
 import io.kotest.property.checkAll
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbVanillaString
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.NostrMessageAdapter
-import social.plasma.nostr.relay.message.UnsubscribeMessage
 
 class CloseMessageAdapterTest : StringSpec({
 

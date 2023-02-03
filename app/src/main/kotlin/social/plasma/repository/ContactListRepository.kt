@@ -1,19 +1,14 @@
 package social.plasma.repository
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.*
 import okio.ByteString.Companion.decodeHex
 import social.plasma.db.contacts.ContactEntity
 import social.plasma.db.contacts.ContactsDao
 import social.plasma.nostr.models.Contact
 import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
-import social.plasma.nostr.relay.message.SubscribeMessage
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named

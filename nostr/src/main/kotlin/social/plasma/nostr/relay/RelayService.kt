@@ -5,8 +5,8 @@ import com.tinder.scarlet.ws.Receive
 import com.tinder.scarlet.ws.Send
 import io.reactivex.Flowable
 import social.plasma.nostr.relay.message.RelayMessage
-import social.plasma.nostr.relay.message.SubscribeMessage
-import social.plasma.nostr.relay.message.UnsubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 
 interface RelayService {
 

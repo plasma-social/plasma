@@ -15,8 +15,8 @@ import social.plasma.nostr.BuildingBlocks.JemPubKey
 import social.plasma.nostr.BuildingBlocks.moshi
 import social.plasma.nostr.BuildingBlocks.scarlet
 import social.plasma.nostr.models.UserMetaData
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
-import social.plasma.nostr.relay.message.SubscribeMessage
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RealRelayTest : StringSpec({
