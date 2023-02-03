@@ -15,7 +15,7 @@ import social.plasma.PubKey
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.ThreadRepository
 import social.plasma.repository.UserMetaDataRepository
-import social.plasma.ui.mappers.toNoteUiModel
+import social.plasma.ui.mappers.NoteCardMapper
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -28,6 +28,7 @@ class ThreadListViewModel @Inject constructor(
     private val userMetaDataRepository: UserMetaDataRepository,
     private val reactionsRepository: ReactionsRepository,
     @Named("default") defaultDispatcher: CoroutineContext,
+    private val noteCardMapper: NoteCardMapper,
 ) : ViewModel() {
     private val noteId: String = requireNotNull(savedStateHandle["noteId"])
 
@@ -39,9 +40,9 @@ class ThreadListViewModel @Inject constructor(
             val noteUiModels = thread.mapIndexed { index, noteWithUser ->
                 if (noteWithUser.noteEntity.id == noteId) {
                     initialFirstVisibleItem = index
-                    ThreadNoteUiModel.RootNote(noteWithUser.toNoteUiModel())
+                    ThreadNoteUiModel.RootNote(noteCardMapper.toNoteUiModel(noteWithUser))
                 } else {
-                    ThreadNoteUiModel.LeafNote(noteWithUser.toNoteUiModel())
+                    ThreadNoteUiModel.LeafNote(noteCardMapper.toNoteUiModel(noteWithUser))
                 }
             }
 

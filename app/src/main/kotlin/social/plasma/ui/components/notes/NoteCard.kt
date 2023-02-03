@@ -1,5 +1,6 @@
 package social.plasma.ui.components.notes
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import social.plasma.PubKey
 import social.plasma.R
@@ -30,7 +32,7 @@ import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ImageCarousel
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ZoomableImage
-import social.plasma.ui.components.notes.NoteUiModel.RichContent
+import social.plasma.ui.components.notes.NoteUiModel.ContentBlock
 import social.plasma.ui.theme.PlasmaTheme
 
 @Composable
@@ -109,27 +111,34 @@ fun ThreadNote(
 private fun NoteContent(
     uiModel: NoteUiModel,
 ) {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
-        text = uiModel.content
-    )
+    FlowRow(
+        modifier = Modifier.padding(16.dp),
+    ) {
+        uiModel.content.forEach {
+            when (it) {
+                is ContentBlock.Text -> {
+                    Text(
+                        text = it.text
+                    )
+                }
 
-    when (uiModel.richContent) {
-        is RichContent.Image -> ZoomableImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            imageUrl = uiModel.richContent.imageUrl
-        )
+                is ContentBlock.Image -> {
+                    ZoomableImage(
+                        modifier = Modifier.fillMaxWidth(),
+                        imageUrl = it.imageUrl
+                    )
+                }
 
-        is RichContent.Carousel -> ImageCarousel(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            imageUrls = uiModel.richContent.imageUrls
-        )
+                is ContentBlock.Carousel -> {
+                    ImageCarousel(
+                        modifier = Modifier.fillMaxWidth(),
+                        imageUrls = it.imageUrls
+                    )
+                }
 
-        RichContent.None -> {}
+                is ContentBlock.Mention -> TODO()
+            }
+        }
     }
 
     NoteCardActionsRow(
@@ -260,13 +269,12 @@ object NoteCardFakes {
         displayName = "Pleb",
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
         nip5 = "nostrplebs.com",
-        content = "Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19",
+        content = listOf(ContentBlock.Text("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19")),
         timePosted = "19m",
         replyCount = "352k",
         shareCount = "509k",
         likeCount = "2.9M",
         userPubkey = PubKey("fdsf"),
-        richContent = RichContent.None,
         cardLabel = "Replying to Jack, JM, and 3 others"
     )
 }

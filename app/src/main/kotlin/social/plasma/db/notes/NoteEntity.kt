@@ -11,7 +11,8 @@ import androidx.room.Relation
 @Entity(
     tableName = "notes",
     indices = [
-        Index("created_at", "id", orders = [Index.Order.DESC, Index.Order.ASC])
+        Index("created_at", "id", orders = [Index.Order.DESC, Index.Order.ASC]),
+        Index("created_at", "pubkey", orders = [Index.Order.DESC, Index.Order.ASC]),
     ]
 )
 data class NoteEntity(

@@ -5,7 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
-import social.plasma.ui.mappers.NoteCardsMapper
+import social.plasma.ui.mappers.NotePagingFlowMapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -14,11 +14,11 @@ class RepliesFeedViewModel @Inject constructor(
     noteRepository: NoteRepository,
     userMetaDataRepository: UserMetaDataRepository,
     reactionsRepository: ReactionsRepository,
-    noteCardsMapper: NoteCardsMapper,
+    notePagingFlowMapper: NotePagingFlowMapper,
 ) : AbstractFeedViewModel(
     recompositionClock = recompositionClock,
     userMetaDataRepository = userMetaDataRepository,
     reactionsRepository = reactionsRepository,
     pagingFlow = noteRepository.observeContactsNotesAndReplies(),
-    noteCardsMapper = noteCardsMapper,
+    notePagingFlowMapper = notePagingFlowMapper,
 )
