@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.merge
 import okhttp3.OkHttpClient
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 import javax.inject.Inject
@@ -44,6 +45,10 @@ class Relays @Inject constructor(
 
     override fun subscribe(subscribeMessage: SubscribeMessage): Flow<EventRelayMessage> {
         return relayList.map { it.subscribe(subscribeMessage) }.merge()
+    }
+
+    override suspend fun send(event: EventMessage) {
+        relayList.forEach { relay -> relay.send(event) }
     }
 
     private fun createRelay(url: String, scope: CoroutineScope): Relay = RelayImpl(

@@ -1,6 +1,7 @@
 package social.plasma.nostr.relay.message
 
-import java.util.*
+import social.plasma.nostr.models.Event
+import java.util.UUID
 
 /** A message sent from a client to a relay */
 sealed class ClientMessage {
@@ -22,5 +23,9 @@ sealed class ClientMessage {
 
 
     data class UnsubscribeMessage(val subscriptionId: String): ClientMessage()
+
+    data class EventMessage(
+        val event: Event,
+    ) : ClientMessage()
 
 }

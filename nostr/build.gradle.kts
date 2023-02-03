@@ -62,6 +62,8 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.secp256k1)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotest.property)

@@ -21,4 +21,9 @@
     <string name="feed">Feed</string>
     <string name="replies">Replies</string>
     <string name="thread">Hilo</string>
+    <string name="post_note">Publicar nota</string>
+    <string name="post">Publicar</string>
+    <string name="drop_a_note">Deja una nota.</string>
+    <string name="new_note">" Nueva nota"</string>
+    <string name="your_message">Tu mensaje</string>
 </resources>

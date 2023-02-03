@@ -4,9 +4,10 @@ import com.tinder.scarlet.WebSocket
 import com.tinder.scarlet.ws.Receive
 import com.tinder.scarlet.ws.Send
 import io.reactivex.Flowable
-import social.plasma.nostr.relay.message.RelayMessage
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
+import social.plasma.nostr.relay.message.RelayMessage
 
 interface RelayService {
 
@@ -15,6 +16,9 @@ interface RelayService {
 
     @Send
     fun sendUnsubscribe(msg: UnsubscribeMessage)
+
+    @Send
+    fun sendEvent(msg: EventMessage)
 
     @Receive
     fun relayMessageFlow(): Flowable<RelayMessage>

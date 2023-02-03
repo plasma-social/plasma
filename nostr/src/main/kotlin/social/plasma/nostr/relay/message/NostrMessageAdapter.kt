@@ -5,10 +5,10 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import okhttp3.internal.closeQuietly
 import okio.ByteString
 import okio.ByteString.Companion.decodeHex
 import social.plasma.nostr.models.Event
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
@@ -22,20 +22,25 @@ class NostrMessageAdapter {
         reader: JsonReader,
         subscribeDelegate: JsonAdapter<SubscribeMessage>,
         unsubscribeDelegate: JsonAdapter<UnsubscribeMessage>,
+        eventDelegate: JsonAdapter<EventMessage>,
     ): ClientMessage {
         val peekyReader = reader.peekJson()
         peekyReader.beginArray()
         return when (val messageType = peekyReader.nextString()) {
             "REQ" -> subscribeDelegate.fromJson(reader)!!
             "CLOSE" -> unsubscribeDelegate.fromJson(reader)!!
+            "EVENT" -> eventDelegate.fromJson(reader)!!
             else -> error("Unsupported message type: $messageType")
         }
     }
 
     @ToJson
-    fun clientMessageToJson(message: ClientMessage) = when(message) {
-        is SubscribeMessage -> requestMessageToJson(message)
-        is UnsubscribeMessage -> closeMessageToJson(message)
+    fun clientMessageToJson(message: ClientMessage): List<Any> {
+        return when(message) {
+            is SubscribeMessage -> requestMessageToJson(message)
+            is UnsubscribeMessage -> closeMessageToJson(message)
+            is EventMessage -> eventMessageToJson(message)
+        }
     }
 
     // SubscribeMessage
@@ -58,6 +63,9 @@ class NostrMessageAdapter {
     @ToJson
     fun requestMessageToJson(request: SubscribeMessage) =
         listOf("REQ", request.subscriptionId) + request.filters
+
+    @ToJson
+    fun eventMessageToJson(request: EventMessage): List<Any> = listOf("EVENT", request.event)
 
     // CloseMessage
     @FromJson

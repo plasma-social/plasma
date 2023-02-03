@@ -44,6 +44,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel = hiltViewModel(),
     onNavigateToThread: (String) -> Unit,
+    navigateToPost: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -54,6 +55,7 @@ fun HomeScreen(
             userMetaData = state.userMetadata,
             userPubKey = state.userPubkey,
             navigateToThread = onNavigateToThread,
+            navigateToPost = navigateToPost,
         )
     }
 }
@@ -64,6 +66,7 @@ fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
     navigateToThread: (String) -> Unit,
+    navigateToPost: () -> Unit,
     userMetaData: UserMetaData,
     userPubKey: PubKey,
 ) {
@@ -126,6 +129,7 @@ fun HomeScreen(
                     onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
                     navigateToThread = navigateToThread,
+                    onAddNote = navigateToPost,
                 )
             }
 
@@ -134,8 +138,8 @@ fun HomeScreen(
                     onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
                     navigateToThread = navigateToThread,
-
-                    )
+                    onAddNote = navigateToPost,
+                )
             }
 
             composable(HomeTab.Replies.name) {
@@ -143,6 +147,7 @@ fun HomeScreen(
                     onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
                     navigateToThread = navigateToThread,
+                    onAddNote = navigateToPost,
                 )
             }
 
@@ -184,6 +189,10 @@ enum class HomeTab(
 @Composable
 private fun PreviewHomeScreen() {
     PlasmaTheme {
-        HomeScreen(onNavigateToProfile = {}, onNavigateToThread = {})
+        HomeScreen(
+            onNavigateToProfile = {},
+            onNavigateToThread = {},
+            navigateToPost = {},
+        )
     }
 }
