@@ -68,7 +68,6 @@ class RelayImpl(
         connectionLoop = connectionStatus.distinctUntilChanged().onEach {
             when (it.status) {
                 is Relay.Status.Connected -> {
-                    println("XXXXXX")
                     logger.d("connection opened: %s", it)
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }

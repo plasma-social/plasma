@@ -24,6 +24,7 @@ scarlet = "0.1.12"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+gradle-docker = { id = "com.bmuschko.docker-remote-api", version = "9.2.0" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
