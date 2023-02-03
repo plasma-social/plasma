@@ -53,6 +53,7 @@ android {
 dependencies {
     implementation(projects.nostr)
 
+    implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.androidx.activity.compose)

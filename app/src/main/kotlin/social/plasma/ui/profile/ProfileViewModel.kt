@@ -22,7 +22,7 @@ import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.RealUserMetaDataRepository
-import social.plasma.ui.mappers.NoteCardsMapper
+import social.plasma.ui.mappers.NotePagingFlowMapper
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +33,7 @@ class ProfileViewModel @Inject constructor(
     @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
     contactListRepository: ContactListRepository,
     private val reactionsRepository: ReactionsRepository,
-    noteCardsMapper: NoteCardsMapper,
+    notePagingFlowMapper: NotePagingFlowMapper,
 ) : ViewModel() {
     private val fakeProfile =
         ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
@@ -41,7 +41,7 @@ class ProfileViewModel @Inject constructor(
     private val profilePubKey: PubKey = PubKey(checkNotNull(savedStateHandle["pubkey"]))
 
     private val userNotesPagingFlow =
-        noteCardsMapper.map(noteRepository.observeProfileNotes(profilePubKey.hex))
+        notePagingFlowMapper.map(noteRepository.observeProfileNotes(profilePubKey.hex))
             .cachedIn(viewModelScope)
 
     private val myPubkey = PubKey.of(pubkeyPref.get(null)!!)

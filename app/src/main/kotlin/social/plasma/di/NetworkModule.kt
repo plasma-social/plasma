@@ -41,6 +41,7 @@ object NetworkModule {
         "wss://nostr.zebedee.cloud",
         "wss://no.str.cr",
         "wss://relay.nostr.info",
+        "wss://relay.snort.social"
     )
 
     @Provides

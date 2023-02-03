@@ -8,19 +8,27 @@ data class NoteUiModel(
     val displayName: String,
     val avatarUrl: String?,
     val nip5: String?,
-    val content: String,
+    val content: List<ContentBlock>,
     val cardLabel: String?,
     val timePosted: String,
     val replyCount: String,
     val shareCount: String,
     val likeCount: String,
     val userPubkey: PubKey,
-    val richContent: RichContent = RichContent.None,
 ) {
-    sealed interface RichContent {
-        object None : RichContent
-        data class Image(val imageUrl: String) : RichContent
+    sealed interface ContentBlock {
 
-        data class Carousel(val imageUrls: List<String>) : RichContent
+        data class Image(val imageUrl: String) : ContentBlock
+
+        data class Carousel(val imageUrls: List<String>) : ContentBlock
+
+        data class Text(val text: String) : ContentBlock
+
+        sealed class  Mention : ContentBlock{
+            abstract val text: String
+        }
+        data class ProfileMention(override val text: String, val pubkey: String) : Mention()
+
+        data class NoteMention(override val text: String, val id: String) : Mention()
     }
 }

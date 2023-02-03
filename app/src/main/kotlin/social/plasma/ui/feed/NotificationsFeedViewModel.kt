@@ -11,7 +11,7 @@ import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
-import social.plasma.ui.mappers.NoteCardsMapper
+import social.plasma.ui.mappers.NotePagingFlowMapper
 
 @HiltViewModel
 class NotificationsFeedViewModel @javax.inject.Inject constructor(
@@ -19,14 +19,14 @@ class NotificationsFeedViewModel @javax.inject.Inject constructor(
     noteRepository: NoteRepository,
     userMetaDataRepository: UserMetaDataRepository,
     reactionsRepository: ReactionsRepository,
-    noteCardsMapper: NoteCardsMapper,
+    notePagingFlowMapper: NotePagingFlowMapper,
     accountStateRepository: AccountStateRepository,
 ) : AbstractFeedViewModel(
     recompositionClock = recompositionClock,
     userMetaDataRepository = userMetaDataRepository,
     reactionsRepository = reactionsRepository,
     pagingFlow = noteRepository.observeMentions(),
-    noteCardsMapper = noteCardsMapper,
+    notePagingFlowMapper = notePagingFlowMapper,
 ) {
     val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
 
