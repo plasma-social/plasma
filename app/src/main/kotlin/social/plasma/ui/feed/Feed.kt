@@ -51,6 +51,7 @@ fun GlobalFeed(
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
+        onReactToNote = viewModel::onNoteReaction
     )
 }
 
@@ -72,6 +73,7 @@ fun RepliesFeed(
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
+        onReactToNote = viewModel::onNoteReaction,
     )
 }
 
@@ -93,6 +95,7 @@ fun ContactsFeed(
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
+        onReactToNote = viewModel::onNoteReaction,
     )
 }
 
@@ -105,6 +108,7 @@ fun FeedContent(
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
+    onReactToNote: (NoteId) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -116,6 +120,7 @@ fun FeedContent(
             onNoteDisposed = onNoteDisposed,
             onNoteClicked = onNoteClicked,
             onAddNote = onAddNote,
+            onReactToNote = onReactToNote,
         )
     }
 }
@@ -129,6 +134,7 @@ private fun FeedList(
     onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
+    onReactToNote: (NoteId) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -154,6 +160,7 @@ private fun FeedList(
                             },
                         uiModel = it,
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
+                        onLikeClick = { onReactToNote(it.id) }
                     )
 
                     DisposableEffect(Unit) {
@@ -169,7 +176,8 @@ private fun FeedList(
             CircularProgressIndicator()
         }
         FloatingActionButton(
-            modifier = Modifier.align(alignment = Alignment.BottomEnd)
+            modifier = Modifier
+                .align(alignment = Alignment.BottomEnd)
                 .padding(all = 16.dp),
             onClick = onAddNote,
             shape = CircleShape,

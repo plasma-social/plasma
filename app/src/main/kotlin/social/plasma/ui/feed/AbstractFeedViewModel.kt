@@ -43,4 +43,10 @@ abstract class AbstractFeedViewModel(
             reactionsRepository.syncNoteReactions(id)
         }
     }
+
+    fun onNoteReaction(noteId: NoteId) {
+        viewModelScope.launch {
+            reactionsRepository.sendReaction(noteId)
+        }
+    }
 }

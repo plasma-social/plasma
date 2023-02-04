@@ -14,6 +14,7 @@ data class ReactionEntity(
     @PrimaryKey
     val id: String,
     val content: String,
+    val pubkey: String,
     val createdAt: Long,
     val noteId: String,
 )

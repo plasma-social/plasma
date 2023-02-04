@@ -13,6 +13,9 @@ import androidx.room.Relation
     indices = [
         Index("created_at", "id", orders = [Index.Order.DESC, Index.Order.ASC]),
         Index("created_at", "pubkey", orders = [Index.Order.DESC, Index.Order.ASC]),
+        Index(
+            "created_at", "source", orders = [Index.Order.DESC, Index.Order.ASC]
+        ),
     ]
 )
 data class NoteEntity(
@@ -37,7 +40,7 @@ enum class NoteSource {
 @Entity(tableName = "note_ref", primaryKeys = ["sourceNote", "targetNote"])
 data class NoteReferenceEntity(
     val sourceNote: String,
-    val targetNote: String
+    val targetNote: String,
 )
 
 data class NoteThread(
@@ -46,14 +49,22 @@ data class NoteThread(
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
-        associateBy = Junction(NoteReferenceEntity::class, parentColumn = "targetNote", entityColumn = "sourceNote")
+        associateBy = Junction(
+            NoteReferenceEntity::class,
+            parentColumn = "targetNote",
+            entityColumn = "sourceNote"
+        )
     )
     val childrenNotes: List<NoteView>,
 
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
-        associateBy = Junction(NoteReferenceEntity::class, parentColumn = "sourceNote", entityColumn = "targetNote")
+        associateBy = Junction(
+            NoteReferenceEntity::class,
+            parentColumn = "sourceNote",
+            entityColumn = "targetNote"
+        )
     )
     val parentNotes: List<NoteView>,
 )

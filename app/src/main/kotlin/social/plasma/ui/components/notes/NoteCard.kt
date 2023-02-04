@@ -1,6 +1,5 @@
 package social.plasma.ui.components.notes
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +39,7 @@ fun NoteElevatedCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -49,7 +49,7 @@ fun NoteElevatedCard(
             onAvatarClick,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        NoteContent(uiModel)
+        NoteContent(uiModel, onLikeClick = onLikeClick)
     }
 }
 
@@ -58,6 +58,7 @@ fun NoteFlatCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -67,7 +68,7 @@ fun NoteFlatCard(
             onAvatarClick,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        NoteContent(uiModel)
+        NoteContent(uiModel, onLikeClick = onLikeClick)
     }
 }
 
@@ -76,6 +77,7 @@ fun ThreadNote(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -101,7 +103,7 @@ fun ThreadNote(
                 }
                 .padding(start = 22.dp)
         ) {
-            NoteContent(uiModel = uiModel)
+            NoteContent(uiModel = uiModel, onLikeClick = onLikeClick)
         }
     }
 }
@@ -110,6 +112,7 @@ fun ThreadNote(
 @Composable
 private fun NoteContent(
     uiModel: NoteUiModel,
+    onLikeClick: () -> Unit,
 ) {
     FlowRow(
         modifier = Modifier.padding(16.dp),
@@ -145,6 +148,7 @@ private fun NoteContent(
         likeCount = uiModel.likeCount,
         replyCount = uiModel.replyCount,
         shareCount = uiModel.shareCount,
+        onLikeClick = onLikeClick,
     )
 }
 
@@ -153,6 +157,7 @@ private fun NoteCardActionsRow(
     likeCount: String,
     shareCount: String,
     replyCount: String,
+    onLikeClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -177,7 +182,7 @@ private fun NoteCardActionsRow(
             )
         }
 
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(onClick = onLikeClick) {
             Icon(painterResource(R.drawable.ic_plasma_shaka_outline), contentDescription = "")
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -212,10 +217,12 @@ private fun NoteCardHeader(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     uiModel.displayName,
+                    modifier = Modifier.weight(1f),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium,
@@ -248,7 +255,8 @@ private fun PreviewFeedCard() {
     PlasmaTheme {
         NoteElevatedCard(
             NoteCardFakes.fakeUiModel,
-            onAvatarClick = {}
+            onAvatarClick = {},
+            onLikeClick = {}
         )
     }
 }
@@ -257,8 +265,11 @@ private fun PreviewFeedCard() {
 @Composable
 private fun PreviewThreadCard() {
     PlasmaTheme {
-        ThreadNote(uiModel = NoteCardFakes.fakeUiModel,
-            onAvatarClick = {})
+        ThreadNote(
+            uiModel = NoteCardFakes.fakeUiModel,
+            onAvatarClick = {},
+            onLikeClick = {}
+        )
     }
 }
 

@@ -137,6 +137,12 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun onNoteReaction(id: String) {
+        viewModelScope.launch {
+            reactionsRepository.sendReaction(id)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         viewModelScope.launch {
@@ -145,7 +151,8 @@ class ProfileViewModel @Inject constructor(
     }
 
     companion object {
-        private const val nostrichImage = "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096"
+        private const val nostrichImage =
+            "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096"
     }
 }
 
