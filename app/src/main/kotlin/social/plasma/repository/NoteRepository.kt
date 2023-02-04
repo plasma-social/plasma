@@ -70,7 +70,7 @@ class RealNoteRepository @Inject constructor(
             ).flow,
 
             noteDao.getLatestNoteEpoch(pubkey).take(1)
-                .map { epoch -> epoch?.let { Instant.ofEpochMilli(it) } ?: Instant.EPOCH }
+                .map { epoch -> epoch?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH }
                 .flatMapLatest { since ->
                     fetchWithNoteDbSync(
                         subscribeMessage = SubscribeMessage(Filter.userNotes(pubkey, since)),
@@ -131,7 +131,7 @@ class RealNoteRepository @Inject constructor(
 
         val latestRefresh = noteDao.getLatestNoteEpoch(myPubkey, NoteSource.Contacts)
             .firstOrNull()
-        val since = latestRefresh?.let { Instant.ofEpochMilli(it) } ?: Instant.EPOCH
+        val since = latestRefresh?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH
         val contacts = contactListRepository.syncContactList(pubkey = myPubkey).first()
         val contactNpubList = contacts.map { it.pubKey.hex() }
         return fetchWithNoteDbSync(
@@ -192,7 +192,7 @@ fun TypedEvent<Note>.toNoteEntity(
 ): NoteEntity = NoteEntity(
     id = id.hex(),
     pubkey = pubKey.hex(),
-    createdAt = createdAt.toEpochMilli(),
+    createdAt = createdAt.epochSecond,
     content = content.text,
     sig = sig.hex(),
     source = source,

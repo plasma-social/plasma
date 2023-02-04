@@ -75,7 +75,7 @@ private fun TypedEvent<Reaction>.toReactionEntity(): ReactionEntity? {
     return ReactionEntity(
         id = id.hex(),
         content = content.text,
-        createdAt = createdAt.toEpochMilli(),
+        createdAt = createdAt.epochSecond,
         noteId = noteId
     )
 }

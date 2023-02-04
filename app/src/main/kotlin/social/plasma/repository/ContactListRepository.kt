@@ -86,5 +86,5 @@ private fun Contact.toContactEntity(owner: String) = ContactEntity(
     pubKey = pubKey.hex(),
     petName = petName,
     homeRelay = homeRelayUrl,
-    createdAt = Instant.now().toEpochMilli(),
+    createdAt = Instant.now().epochSecond,
 )
