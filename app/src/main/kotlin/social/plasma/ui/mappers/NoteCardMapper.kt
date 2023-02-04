@@ -29,7 +29,7 @@ class NoteCardMapper @Inject constructor(
             content = splitIntoContentBlocks(note).filterNotNull(),
             avatarUrl = author?.picture
                 ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${authorPubKey.hex}",
-            timePosted = Instant.ofEpochMilli(note.createdAt).relativeTime(),
+            timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
             replyCount = "",
             shareCount = "",
             likeCount = if (note.reactionCount > 0) "${note.reactionCount}" else "",

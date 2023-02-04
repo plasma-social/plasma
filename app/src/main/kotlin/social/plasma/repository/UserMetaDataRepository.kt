@@ -117,5 +117,5 @@ fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
         banner = content.banner,
         nip05 = content.nip05?.split("@")?.getOrNull(1), // TODO regex
         website = content.website,
-        createdAt = createdAt.toEpochMilli(),
+        createdAt = createdAt.epochSecond,
     )
