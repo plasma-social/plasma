@@ -4,8 +4,8 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import fr.acinq.secp256k1.Secp256k1
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
-import java.security.MessageDigest
 import java.time.Instant
 
 /**
@@ -55,10 +55,10 @@ data class Event(
                 content,
             )
             val json = moshi.adapter(List::class.java).toJson(elements)
-            val id = MessageDigest.getInstance("SHA-256").digest(json.toByteArray())
-            val sig = Secp256k1.signSchnorr(id, secretKey.toByteArray(), null)
+            val id = json.encodeUtf8().sha256()
+            val sig = Secp256k1.signSchnorr(id.toByteArray(), secretKey.toByteArray(), null)
             return Event(
-                id = id.toByteString(),
+                id = id,
                 pubKey = pubKey,
                 createdAt = createdAt,
                 kind = kind,
