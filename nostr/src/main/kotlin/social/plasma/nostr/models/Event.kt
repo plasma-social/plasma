@@ -1,7 +1,11 @@
 package social.plasma.nostr.models
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.Moshi
+import fr.acinq.secp256k1.Secp256k1
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import java.security.MessageDigest
 import java.time.Instant
 
 /**
@@ -28,5 +32,40 @@ data class Event(
         const val RecommendServer = 2
         const val ContactList = 3
         const val Reaction = 7
+    }
+
+    companion object {
+
+        private val moshi = Moshi.Builder().build()
+
+        fun createEvent(
+            pubKey: ByteString,
+            secretKey: ByteString,
+            createdAt: Instant,
+            kind: Int,
+            tags: List<List<String>>,
+            content: String,
+        ): Event {
+            val elements = listOf(
+                0,
+                pubKey.hex(),
+                createdAt.epochSecond,
+                kind,
+                tags,
+                content,
+            )
+            val json = moshi.adapter(List::class.java).toJson(elements)
+            val id = MessageDigest.getInstance("SHA-256").digest(json.toByteArray())
+            val sig = Secp256k1.signSchnorr(id, secretKey.toByteArray(), null)
+            return Event(
+                id = id.toByteString(),
+                pubKey = pubKey,
+                createdAt = createdAt,
+                kind = kind,
+                tags = tags,
+                content = content,
+                sig = sig.toByteString(),
+            )
+        }
     }
 }

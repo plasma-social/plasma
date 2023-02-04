@@ -5,13 +5,16 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import okio.ByteString.Companion.toByteString
 import social.plasma.PubKey
 import social.plasma.db.notes.*
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.nostr.models.Event
 import social.plasma.nostr.models.Note
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
@@ -34,12 +37,15 @@ interface NoteRepository {
     suspend fun refreshContactsNotes(): List<NoteEntity>
 
     fun observeMentions(): Flow<PagingData<NoteWithUser>>
+
+    suspend fun postNote(content: String)
 }
 
 class RealNoteRepository @Inject constructor(
     private val noteDao: NoteDao,
     private val contactListRepository: ContactListRepository,
     @UserKey(KeyType.Public) private val myPubKey: Preference<ByteArray>,
+    @UserKey(KeyType.Secret) private val mySecretKey: Preference<ByteArray>,
     private val eventRefiner: EventRefiner,
     private val relay: Relay,
     @Named("io") private val ioDispatcher: CoroutineContext,
@@ -161,6 +167,20 @@ class RealNoteRepository @Inject constructor(
                 NoteSource.Notifications
             )
         ).filterIsInstance()
+    }
+
+    override suspend fun postNote(content: String) {
+        val myPubkey = myPubKey.get(null)!!
+        val mySecretKey = mySecretKey.get(null)!!
+        val event = Event.createEvent(
+            pubKey = myPubkey.toByteString(),
+            secretKey = mySecretKey.toByteString(),
+            createdAt = Instant.now(),
+            kind = Event.Kind.Note,
+            tags = emptyList(),
+            content = content,
+        )
+        relay.send(EventMessage(event = event))
     }
 
     private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =

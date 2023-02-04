@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +17,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
@@ -21,9 +26,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
 import social.plasma.PubKey
+import social.plasma.R
+import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.notes.NoteUiModel
-import social.plasma.ui.components.ProgressIndicator
 
 typealias NoteId = String
 
@@ -33,6 +39,7 @@ fun GlobalFeed(
     viewModel: GlobalFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
+    onAddNote: () -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -43,6 +50,7 @@ fun GlobalFeed(
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
+        onAddNote = onAddNote,
     )
 }
 
@@ -52,6 +60,7 @@ fun RepliesFeed(
     viewModel: RepliesFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
+    onAddNote: () -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -62,6 +71,7 @@ fun RepliesFeed(
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
+        onAddNote = onAddNote,
     )
 }
 
@@ -71,6 +81,7 @@ fun ContactsFeed(
     viewModel: FollowingFeedViewModel = hiltViewModel(),
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
+    onAddNote: () -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -80,7 +91,8 @@ fun ContactsFeed(
         onNavigateToProfile = onNavigateToProfile,
         onNoteDisposed = viewModel::onNoteDisposed,
         onNoteDisplayed = viewModel::onNoteDisplayed,
-        onNoteClicked = navigateToThread
+        onNoteClicked = navigateToThread,
+        onAddNote = onAddNote,
     )
 }
 
@@ -92,6 +104,7 @@ fun FeedContent(
     onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
+    onAddNote: () -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -102,6 +115,7 @@ fun FeedContent(
             onNoteDisplayed = onNoteDisplayed,
             onNoteDisposed = onNoteDisposed,
             onNoteClicked = onNoteClicked,
+            onAddNote = onAddNote,
         )
     }
 }
@@ -114,6 +128,7 @@ private fun FeedList(
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
+    onAddNote: () -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -152,6 +167,17 @@ private fun FeedList(
         if (pagingLazyItems.itemCount == 0) {
             // TODO move to the viewmodel
             CircularProgressIndicator()
+        }
+        FloatingActionButton(
+            modifier = Modifier.align(alignment = Alignment.BottomEnd)
+                .padding(all = 16.dp),
+            onClick = onAddNote,
+            shape = CircleShape,
+        ) {
+            Icon(
+                painterResource(id = R.drawable.ic_plus),
+                contentDescription = stringResource(id = R.string.post_note)
+            )
         }
     }
 }

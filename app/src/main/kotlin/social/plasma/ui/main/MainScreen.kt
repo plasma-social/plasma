@@ -1,5 +1,6 @@
 package social.plasma.ui.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -18,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import social.plasma.R
 import social.plasma.ui.navigation.Navigation
 import social.plasma.ui.navigation.Screen
@@ -29,30 +32,40 @@ fun MainScreen(
     navController: NavHostController,
 ) {
     var selectedNavItem by rememberSaveable { mutableStateOf(0) }
+    var bottomNavigationVisible by remember { mutableStateOf(true) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    bottomNavigationVisible = when (navBackStackEntry?.destination?.route) {
+        Screen.Home.route,
+        Screen.Messages.route,
+        Screen.Notifications.route -> true
+        else -> false
+    }
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets.navigationBars,
         bottomBar = {
-            NavigationBar {
-                bottomNavItems.forEachIndexed { index, (screen, icon) ->
-                    NavigationBarItem(
-                        selected = selectedNavItem == index,
-                        onClick = {
-                            selectedNavItem = index
-                            navController.popBackStack()
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            AnimatedVisibility(visible = bottomNavigationVisible) {
+                NavigationBar {
+                    bottomNavItems.forEachIndexed { index, (screen, icon) ->
+                        NavigationBarItem(
+                            selected = selectedNavItem == index,
+                            onClick = {
+                                selectedNavItem = index
+                                navController.popBackStack()
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+
+                                    launchSingleTop = true
+
+                                    restoreState = true
                                 }
-
-                                launchSingleTop = true
-
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(painterResource(icon), stringResource(screen.name)) },
-                    )
+                            },
+                            icon = { Icon(painterResource(icon), stringResource(screen.name)) },
+                        )
+                    }
                 }
             }
         }) { paddingValues ->

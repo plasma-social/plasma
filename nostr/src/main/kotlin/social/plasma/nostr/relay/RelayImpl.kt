@@ -13,9 +13,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
-import social.plasma.nostr.relay.message.RelayMessage
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
+import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
@@ -53,6 +54,11 @@ class RelayImpl(
             .onCompletion {
                 unsubscribe(UnsubscribeMessage(subscribeMessage.subscriptionId))
             }
+    }
+
+    override suspend fun send(event: EventMessage) {
+        logger.d("Sending new event: $event")
+        service.sendEvent(event)
     }
 
     private fun unsubscribe(request: UnsubscribeMessage) {

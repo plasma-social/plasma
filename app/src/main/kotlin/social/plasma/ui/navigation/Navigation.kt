@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +17,8 @@ import social.plasma.R
 import social.plasma.ui.ThreadList
 import social.plasma.ui.home.HomeScreen
 import social.plasma.ui.notifications.NotificationsScreen
+import social.plasma.ui.post.Post
+import social.plasma.ui.post.PostViewModel
 import social.plasma.ui.profile.Profile
 
 @Composable
@@ -35,7 +40,10 @@ fun Navigation(
                 },
                 onNavigateToThread = {
                     navHostController.navigate(Screen.Thread.buildRoute(it))
-                }
+                },
+                navigateToPost =  {
+                    navHostController.navigate(Screen.PostNote.route)
+                },
             )
         }
 
@@ -79,6 +87,17 @@ fun Navigation(
                         Screen.Profile.buildRoute(pubkey)
                     )
                 }
+            )
+        }
+
+        composable(Screen.PostNote.route) {
+            val viewModel = hiltViewModel<PostViewModel>()
+            val state by viewModel.uiState().collectAsState()
+            Post(
+                state = state,
+                onNoteChanged = viewModel::onNoteChange,
+                onPostNote = viewModel::onPostNote,
+                onBackClicked = { navHostController.popBackStack() }
             )
         }
     }

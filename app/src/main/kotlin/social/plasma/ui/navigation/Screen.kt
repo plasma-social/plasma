@@ -24,4 +24,9 @@ sealed class Screen(
         route = "notifications",
         name = R.string.notifications,
     )
+
+    object PostNote : Screen(
+        route = "post-note",
+        name = R.string.post_note,
+    )
 }
