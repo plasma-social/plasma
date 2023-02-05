@@ -17,4 +17,7 @@ abstract class ReactionDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun insert(list: Iterable<ReactionEntity>)
+
+    @Query("SELECT EXISTS(SELECT id FROM reactions WHERE pubkey = :pubkey AND noteId = :noteId)")
+    abstract suspend fun isNoteLiked(pubkey: String, noteId: String): Boolean
 }

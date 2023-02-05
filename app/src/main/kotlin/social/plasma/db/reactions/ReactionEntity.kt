@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
     tableName = "reactions",
     indices = [
         Index(value = ["noteId"]),
+        Index(value = ["noteId", "pubkey"])
     ]
 )
 data class ReactionEntity(

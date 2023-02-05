@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import social.plasma.PubKey
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
+import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.usermetadata.UserMetadataDao
+import social.plasma.repository.AccountStateRepository
 import social.plasma.ui.components.notes.NoteUiModel
 import java.time.Instant
 import javax.inject.Inject
@@ -14,6 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class NoteCardMapper @Inject constructor(
     private val userMetadataDao: UserMetadataDao,
+    private val accountStateRepository: AccountStateRepository,
+    private val reactionDao: ReactionDao,
 ) {
     private val imageUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:jpg|gif|png|jpeg|svg|webp)")
     private val tagPlaceholderRegex = Regex("#\\[[0-9]+]")
@@ -38,7 +42,15 @@ class NoteCardMapper @Inject constructor(
             displayName = author?.displayName?.takeIf { it.isNotBlank() } ?: author?.name
             ?: authorPubKey.shortBech32,
             cardLabel = note.buildBannerLabel(),
+            isLiked = note.isLiked()
         )
+    }
+
+    private suspend fun NoteView.isLiked(): Boolean {
+        val myPubkey = accountStateRepository.getPublicKey()!!
+
+        // TODO what if the post is liked but we haven't fetched the reaction from relays yet?
+        return reactionDao.isNoteLiked(PubKey.of(myPubkey).hex, id)
     }
 
     private suspend fun NoteView.buildBannerLabel(): String? {

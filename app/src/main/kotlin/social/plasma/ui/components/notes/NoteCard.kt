@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -148,6 +149,7 @@ private fun NoteContent(
         likeCount = uiModel.likeCount,
         replyCount = uiModel.replyCount,
         shareCount = uiModel.shareCount,
+        isLiked = uiModel.isLiked,
         onLikeClick = onLikeClick,
     )
 }
@@ -157,6 +159,7 @@ private fun NoteCardActionsRow(
     likeCount: String,
     shareCount: String,
     replyCount: String,
+    isLiked: Boolean,
     onLikeClick: () -> Unit,
 ) {
     Row(
@@ -165,7 +168,17 @@ private fun NoteCardActionsRow(
             .padding(start = 4.dp, end = 4.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        TextButton(onClick = { /*TODO*/ }) {
+        val colors =
+            ButtonDefaults.textButtonColors(
+                // TODO figure out the right colors for like/unliked
+                contentColor = MaterialTheme.colorScheme.primary.copy(alpha = .5f),
+                disabledContentColor = MaterialTheme.colorScheme.primary
+            )
+
+        TextButton(
+            onClick = { /*TODO*/ },
+            colors = colors
+        ) {
             Icon(painterResource(R.drawable.ic_plasma_replies), contentDescription = "")
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -173,7 +186,10 @@ private fun NoteCardActionsRow(
             )
         }
 
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(
+            onClick = { /*TODO*/ },
+            colors = colors
+        ) {
             Icon(painterResource(R.drawable.ic_plasma_rocket_outline), contentDescription = "")
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -182,8 +198,16 @@ private fun NoteCardActionsRow(
             )
         }
 
-        TextButton(onClick = onLikeClick) {
-            Icon(painterResource(R.drawable.ic_plasma_shaka_outline), contentDescription = "")
+
+        TextButton(
+            onClick = onLikeClick,
+            colors = colors,
+            enabled = !isLiked
+        ) {
+            Icon(
+                painterResource(R.drawable.ic_plasma_shaka_outline),
+                contentDescription = "",
+            )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = likeCount,
@@ -281,11 +305,11 @@ object NoteCardFakes {
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
         nip5 = "nostrplebs.com",
         content = listOf(ContentBlock.Text("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19")),
+        cardLabel = "Replying to Jack, JM, and 3 others",
         timePosted = "19m",
         replyCount = "352k",
         shareCount = "509k",
         likeCount = "2.9M",
-        userPubkey = PubKey("fdsf"),
-        cardLabel = "Replying to Jack, JM, and 3 others"
+        userPubkey = PubKey("fdsf")
     )
 }
