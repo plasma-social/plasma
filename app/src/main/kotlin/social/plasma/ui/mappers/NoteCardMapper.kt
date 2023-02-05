@@ -36,7 +36,7 @@ class NoteCardMapper @Inject constructor(
             timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
             replyCount = "",
             shareCount = "",
-            likeCount = if (note.reactionCount > 0) "${note.reactionCount}" else "",
+            likeCount = note.reactionCount,
             userPubkey = authorPubKey,
             nip5 = author?.nip05,
             displayName = author?.displayName?.takeIf { it.isNotBlank() } ?: author?.name

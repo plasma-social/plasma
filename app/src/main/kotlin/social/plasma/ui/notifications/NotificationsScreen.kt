@@ -22,6 +22,7 @@ fun NotificationsScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     onNavigateToThread: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToPostNote: () -> Unit,
     viewModel: NotificationsFeedViewModel = hiltViewModel(),
 ) {
 
@@ -33,7 +34,7 @@ fun NotificationsScreen(
 
             RootScreenToolbar(
                 title = stringResource(id = R.string.notifications),
-                avatarUrl = userMetadata?.picture ?: "https://api.dicebear.com/5.x/bottts/jpg",
+                avatarUrl = userMetadata?.picture ?: " https://api.dicebear.com/5.x/bottts/jpg",
                 onAvatarClick = { onNavigateToProfile(viewModel.pubkey) },
             )
         }) {
@@ -46,7 +47,7 @@ fun NotificationsScreen(
             onNoteDisposed = viewModel::onNoteDisposed,
             onNoteDisplayed = viewModel::onNoteDisplayed,
             onNoteClicked = onNavigateToThread,
-            onAddNote = {},
+            onAddNote = onNavigateToPostNote,
             onReactToNote = viewModel::onNoteReaction,
         )
     }
