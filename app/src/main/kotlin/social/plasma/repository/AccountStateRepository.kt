@@ -19,6 +19,8 @@ interface AccountStateRepository {
     fun clearKeys()
 
     fun getPublicKey(): ByteArray?
+    
+    fun getSecretKey(): ByteArray?
 }
 
 class RealAccountRepository @Inject constructor(
@@ -52,6 +54,10 @@ class RealAccountRepository @Inject constructor(
 
     override fun getPublicKey(): ByteArray? {
         return publicKey.get(default = null)
+    }
+
+    override fun getSecretKey(): ByteArray? {
+        return secretKey.get(default = null)
     }
 
 }

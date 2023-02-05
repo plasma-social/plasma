@@ -69,4 +69,10 @@ class ThreadListViewModel @Inject constructor(
             reactionsRepository.syncNoteReactions(noteId)
         }
     }
+
+    fun onNoteReaction(noteId: String) {
+        viewModelScope.launch {
+            reactionsRepository.sendReaction(noteId)
+        }
+    }
 }

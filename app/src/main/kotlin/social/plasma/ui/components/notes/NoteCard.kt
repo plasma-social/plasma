@@ -1,6 +1,5 @@
 package social.plasma.ui.components.notes
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -40,6 +40,7 @@ fun NoteElevatedCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -49,7 +50,7 @@ fun NoteElevatedCard(
             onAvatarClick,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        NoteContent(uiModel)
+        NoteContent(uiModel, onLikeClick = onLikeClick)
     }
 }
 
@@ -58,6 +59,7 @@ fun NoteFlatCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -67,7 +69,7 @@ fun NoteFlatCard(
             onAvatarClick,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        NoteContent(uiModel)
+        NoteContent(uiModel, onLikeClick = onLikeClick)
     }
 }
 
@@ -76,6 +78,7 @@ fun ThreadNote(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
+    onLikeClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -101,7 +104,7 @@ fun ThreadNote(
                 }
                 .padding(start = 22.dp)
         ) {
-            NoteContent(uiModel = uiModel)
+            NoteContent(uiModel = uiModel, onLikeClick = onLikeClick)
         }
     }
 }
@@ -110,6 +113,7 @@ fun ThreadNote(
 @Composable
 private fun NoteContent(
     uiModel: NoteUiModel,
+    onLikeClick: () -> Unit,
 ) {
     FlowRow(
         modifier = Modifier.padding(16.dp),
@@ -145,6 +149,8 @@ private fun NoteContent(
         likeCount = uiModel.likeCount,
         replyCount = uiModel.replyCount,
         shareCount = uiModel.shareCount,
+        isLiked = uiModel.isLiked,
+        onLikeClick = onLikeClick,
     )
 }
 
@@ -153,6 +159,8 @@ private fun NoteCardActionsRow(
     likeCount: String,
     shareCount: String,
     replyCount: String,
+    isLiked: Boolean,
+    onLikeClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -160,7 +168,17 @@ private fun NoteCardActionsRow(
             .padding(start = 4.dp, end = 4.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        TextButton(onClick = { /*TODO*/ }) {
+        val colors =
+            ButtonDefaults.textButtonColors(
+                // TODO figure out the right colors for like/unliked
+                contentColor = MaterialTheme.colorScheme.primary.copy(alpha = .5f),
+                disabledContentColor = MaterialTheme.colorScheme.primary
+            )
+
+        TextButton(
+            onClick = { /*TODO*/ },
+            colors = colors
+        ) {
             Icon(painterResource(R.drawable.ic_plasma_replies), contentDescription = "")
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -168,7 +186,10 @@ private fun NoteCardActionsRow(
             )
         }
 
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(
+            onClick = { /*TODO*/ },
+            colors = colors
+        ) {
             Icon(painterResource(R.drawable.ic_plasma_rocket_outline), contentDescription = "")
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -177,8 +198,16 @@ private fun NoteCardActionsRow(
             )
         }
 
-        TextButton(onClick = { /*TODO*/ }) {
-            Icon(painterResource(R.drawable.ic_plasma_shaka_outline), contentDescription = "")
+
+        TextButton(
+            onClick = onLikeClick,
+            colors = colors,
+            enabled = !isLiked
+        ) {
+            Icon(
+                painterResource(R.drawable.ic_plasma_shaka_outline),
+                contentDescription = "",
+            )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = likeCount,
@@ -212,10 +241,12 @@ private fun NoteCardHeader(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     uiModel.displayName,
+                    modifier = Modifier.weight(1f),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium,
@@ -248,7 +279,8 @@ private fun PreviewFeedCard() {
     PlasmaTheme {
         NoteElevatedCard(
             NoteCardFakes.fakeUiModel,
-            onAvatarClick = {}
+            onAvatarClick = {},
+            onLikeClick = {}
         )
     }
 }
@@ -257,8 +289,11 @@ private fun PreviewFeedCard() {
 @Composable
 private fun PreviewThreadCard() {
     PlasmaTheme {
-        ThreadNote(uiModel = NoteCardFakes.fakeUiModel,
-            onAvatarClick = {})
+        ThreadNote(
+            uiModel = NoteCardFakes.fakeUiModel,
+            onAvatarClick = {},
+            onLikeClick = {}
+        )
     }
 }
 
@@ -270,11 +305,11 @@ object NoteCardFakes {
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
         nip5 = "nostrplebs.com",
         content = listOf(ContentBlock.Text("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19")),
+        cardLabel = "Replying to Jack, JM, and 3 others",
         timePosted = "19m",
         replyCount = "352k",
         shareCount = "509k",
         likeCount = "2.9M",
-        userPubkey = PubKey("fdsf"),
-        cardLabel = "Replying to Jack, JM, and 3 others"
+        userPubkey = PubKey("fdsf")
     )
 }

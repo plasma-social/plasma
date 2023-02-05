@@ -57,9 +57,9 @@ import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
-import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
+import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
 import social.plasma.ui.profile.ProfileUiState.Loaded.UserData
 import social.plasma.ui.theme.PlasmaTheme
@@ -80,6 +80,7 @@ fun Profile(
         onNoteDisplayed = profileViewModel::onNoteDisplayed,
         onNavigateBack = onNavigateBack,
         onNoteClick = onNavigateToThread,
+        onNoteReaction = profileViewModel::onNoteReaction
     )
 }
 
@@ -91,6 +92,7 @@ private fun Profile(
     onNoteDisplayed: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onNoteClick: (String) -> Unit,
+    onNoteReaction: (String) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
@@ -101,6 +103,7 @@ private fun Profile(
             modifier = modifier,
             onNavigateBack = onNavigateBack,
             onNoteClick = onNoteClick,
+            onNoteReaction = onNoteReaction,
         )
     }
 }
@@ -113,6 +116,7 @@ private fun ProfileContent(
     onNoteDisposed: (String) -> Unit,
     onNavigateBack: () -> Unit,
     onNoteClick: (String) -> Unit,
+    onNoteReaction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
@@ -128,7 +132,7 @@ private fun ProfileContent(
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets(left = 0, right = 0, top = 0, bottom = 0),
-        ) { paddingValues ->
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
@@ -162,7 +166,8 @@ private fun ProfileContent(
                                 onNoteClick(cardUiModel.id)
                             },
                         uiModel = it,
-                        onAvatarClick = null
+                        onAvatarClick = null,
+                        onLikeClick = { onNoteReaction(it.id) }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DisposableEffect(Unit) {
@@ -345,6 +350,7 @@ private fun PreviewProfile(
             onNoteDisposed = {},
             onNavigateBack = {},
             onNoteClick = {},
+            onNoteReaction = {}
         )
     }
 }

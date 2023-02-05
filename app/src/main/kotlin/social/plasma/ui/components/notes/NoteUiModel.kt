@@ -15,6 +15,7 @@ data class NoteUiModel(
     val shareCount: String,
     val likeCount: String,
     val userPubkey: PubKey,
+    val isLiked: Boolean = false,
 ) {
     sealed interface ContentBlock {
 
@@ -24,9 +25,10 @@ data class NoteUiModel(
 
         data class Text(val text: String) : ContentBlock
 
-        sealed class  Mention : ContentBlock{
+        sealed class Mention : ContentBlock {
             abstract val text: String
         }
+
         data class ProfileMention(override val text: String, val pubkey: String) : Mention()
 
         data class NoteMention(override val text: String, val id: String) : Mention()

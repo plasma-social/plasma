@@ -58,7 +58,8 @@ fun ThreadList(
         onNavigateToThread = onNavigateToThread,
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteDisposed = viewModel::onNoteDisposed,
-        onAvatarClick = onNavigateToProfile
+        onAvatarClick = onNavigateToProfile,
+        onNoteReaction = viewModel::onNoteReaction,
     )
 }
 
@@ -72,6 +73,7 @@ private fun ThreadList(
     onNoteDisplayed: (String, PubKey) -> Unit,
     onNoteDisposed: (String, PubKey) -> Unit,
     onAvatarClick: (PubKey) -> Unit,
+    onNoteReaction: (String) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -93,7 +95,9 @@ private fun ThreadList(
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(it),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it),
             state = state,
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
@@ -103,6 +107,7 @@ private fun ThreadList(
                         NoteFlatCard(
                             uiModel = threadUiModel.noteUiModel,
                             onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
+                            onLikeClick = { onNoteReaction(threadUiModel.id) }
                         )
                         Divider(modifier = Modifier.padding(horizontal = 16.dp))
                         Spacer(Modifier.height(32.dp))
@@ -111,7 +116,9 @@ private fun ThreadList(
                     is LeafNote -> ThreadNote(
                         uiModel = threadUiModel.noteUiModel,
                         onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
-                        modifier = Modifier.clickable { onNavigateToThread(threadUiModel.id) })
+                        modifier = Modifier.clickable { onNavigateToThread(threadUiModel.id) },
+                        onLikeClick = { onNoteReaction(threadUiModel.id) }
+                    )
                 }
 
                 LaunchedEffect(Unit) {

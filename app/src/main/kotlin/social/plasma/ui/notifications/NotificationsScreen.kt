@@ -47,6 +47,7 @@ fun NotificationsScreen(
             onNoteDisplayed = viewModel::onNoteDisplayed,
             onNoteClicked = onNavigateToThread,
             onAddNote = {},
+            onReactToNote = viewModel::onNoteReaction,
         )
     }
 }
