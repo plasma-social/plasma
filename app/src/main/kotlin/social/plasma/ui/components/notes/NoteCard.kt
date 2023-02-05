@@ -15,6 +15,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -156,12 +158,15 @@ private fun NoteContent(
 
 @Composable
 private fun NoteCardActionsRow(
-    likeCount: String,
+    likeCount: Int,
     shareCount: String,
     replyCount: String,
     isLiked: Boolean,
     onLikeClick: () -> Unit,
 ) {
+    val optimisticLikeState = remember(isLiked) { mutableStateOf(isLiked) }
+    val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,17 +205,24 @@ private fun NoteCardActionsRow(
 
 
         TextButton(
-            onClick = onLikeClick,
+            onClick = {
+                optimisticLikeState.value = true
+                optimisticLikeCount.value += 1
+                onLikeClick()
+            },
             colors = colors,
-            enabled = !isLiked
+            enabled = !optimisticLikeState.value
         ) {
             Icon(
                 painterResource(R.drawable.ic_plasma_shaka_outline),
                 contentDescription = "",
             )
             Spacer(modifier = Modifier.width(4.dp))
+
+            val likeCountText =
+                if (optimisticLikeCount.value > 0) "${optimisticLikeCount.value}" else ""
             Text(
-                text = likeCount,
+                text = likeCountText,
                 style = MaterialTheme.typography.labelMedium
             )
         }
@@ -309,7 +321,7 @@ object NoteCardFakes {
         timePosted = "19m",
         replyCount = "352k",
         shareCount = "509k",
-        likeCount = "2.9M",
+        likeCount = 290,
         userPubkey = PubKey("fdsf")
     )
 }

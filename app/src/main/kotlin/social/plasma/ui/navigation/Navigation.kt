@@ -40,7 +40,7 @@ fun Navigation(
                 onNavigateToThread = {
                     navHostController.navigate(Screen.Thread.buildRoute(it))
                 },
-                navigateToPost =  {
+                navigateToPost = {
                     navHostController.navigate(Screen.PostNote.route)
                 },
             )
@@ -60,7 +60,8 @@ fun Navigation(
                     navHostController.navigate(
                         Screen.Profile.buildRoute(pubkey)
                     )
-                }
+                },
+                onNavigateToPostNote = { navHostController.navigate(Screen.PostNote.route) }
             )
         }
 

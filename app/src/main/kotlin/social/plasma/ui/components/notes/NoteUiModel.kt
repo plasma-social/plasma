@@ -13,7 +13,7 @@ data class NoteUiModel(
     val timePosted: String,
     val replyCount: String,
     val shareCount: String,
-    val likeCount: String,
+    val likeCount: Int,
     val userPubkey: PubKey,
     val isLiked: Boolean = false,
 ) {

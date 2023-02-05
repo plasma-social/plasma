@@ -2,11 +2,11 @@ package social.plasma.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import social.plasma.R
@@ -23,7 +23,7 @@ fun Nip5Badge(
         Icon(
             painterResource(R.drawable.ic_plasma_verified),
             // TODO tint with correct color
-            tint = Color.Green,
+            tint = MaterialTheme.colorScheme.primary,
             contentDescription = null,
         )
         Text(
