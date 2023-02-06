@@ -1,47 +1,38 @@
 package social.plasma.nostr.relay
 
-import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.string.shouldContain
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
+import okio.ByteString.Companion.toByteString
 import social.plasma.nostr.BuildingBlocks
-import social.plasma.nostr.BuildingBlocks.JemPubKey
-import social.plasma.nostr.relay.message.ClientMessage
-import social.plasma.nostr.relay.message.Filter
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class RelayConnectionTest : StringSpec({
 
-    val client = OkHttpClient.Builder()
-        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.NONE))
-        .build()
+//    val sec = run {
+//        val bs = ByteArray(32)
+//        SecureRandom().nextBytes(bs)
+//        bs
+//    }
+//    val pub = Sign.publicKeyFromPrivate(BigInteger(sec.toByteString().hex()))
 
+    val msgHash = "hi".toByteArray().toByteString().sha256().toByteArray()
 
     "can get events from a relay" {
+        val relay = BuildingBlocks.testRelay(this)
+        relay.connect()
 /*
-        runTest {
-            val server = LocalRelay(7070).start()
-            val relay = RelayImpl(
-                server.url,
-                BuildingBlocks.scarlet
-                    .webSocketFactory(client.newWebSocketFactory(server.url))
-                    .build()
-                    .create(),
-                this
+        relay.send(
+            EventMessage(
+                Event.createEvent(
+                    pubKey = pair.public.toByteArray().toByteString(),
+                    secretKey = pair.privateKey.toByteArray().toByteString(),
+                    createdAt = Instant.now(),
+                    kind = Event.Kind.Note,
+                    tags = emptyList(),
+                    content = "testing 1, 2, 3"
+                )
             )
-            relay.connect()
-            val events = relay.subscribe(
-                ClientMessage.SubscribeMessage(Filter.contactList(JemPubKey))
-            )
-            events.first().event.content shouldContain "nostr.satsophone.tk"
-            relay.disconnect()
-            server.stop()
-        }
+        )
 */
+        relay.disconnect()
     }
 
 })
