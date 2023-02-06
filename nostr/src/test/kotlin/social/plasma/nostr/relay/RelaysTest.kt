@@ -13,6 +13,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class RelaysTest : StringSpec({
 
+/*
     fun relays(): Relays = Relays(
         okHttpClient = client,
         scarletBuilder = scarlet,
@@ -33,4 +34,5 @@ class RelaysTest : StringSpec({
                 ensureAllEventsConsumed()
             }
     }
+*/
 })

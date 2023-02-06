@@ -62,7 +62,9 @@ dependencies {
 
     implementation(libs.timber)
 
-    implementation(libs.secp256k1)
+    implementation(libs.secp256k1.jvm)
+    implementation(libs.secp256k1.jvm.jni)
+    implementation(files("lib/secp256k1-kmp-jni-jvm-darwin-0.7.1.jar"))
 
     testImplementation(libs.junit)
     testImplementation(libs.kotest.assertions)
@@ -103,7 +105,7 @@ val createContainer by tasks.creating(DockerCreateContainer::class) {
 }
 
 val startContainer by tasks.creating(DockerStartContainer::class) {
-    this.onlyIf { _ ->
+    onlyIf { _ ->
         try {
             val s = ServerSocket(7707)
             s.close()
@@ -117,6 +119,7 @@ val startContainer by tasks.creating(DockerStartContainer::class) {
 }
 
 val stopContainer by tasks.creating(DockerStopContainer::class) {
+    onlyIf { startContainer.enabled }
     targetContainerId(createContainer.containerId)
 }
 

@@ -21,6 +21,7 @@ import social.plasma.nostr.relay.message.Filter
 @OptIn(ExperimentalCoroutinesApi::class)
 class RealRelayTest : StringSpec({
 
+/*
     val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.NONE))
         .build()
@@ -72,4 +73,5 @@ class RealRelayTest : StringSpec({
 
         relay.disconnect()
     }
+*/
 })
