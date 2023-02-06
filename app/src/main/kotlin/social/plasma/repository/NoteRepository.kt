@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import social.plasma.PubKey
 import social.plasma.db.notes.*
@@ -166,13 +167,18 @@ class RealNoteRepository @Inject constructor(
             ).flow,
 
             fetchWithNoteDbSync(
-                SubscribeMessage(Filter(pTags = setOf(myPubkey), limit = 500)),
+                SubscribeMessage(
+                    Filter(
+                        pTags = setOf(myPubkey),
+                        kinds = setOf(Event.Kind.Note)
+                    )
+                ),
                 NoteSource.Notifications
             )
         ).filterIsInstance()
     }
 
-    override suspend fun postNote(content: String) {
+    override suspend fun postNote(content: String) = withContext(ioDispatcher) {
         val myPubkey = myPubKey.get(null)!!
         val mySecretKey = mySecretKey.get(null)!!
         val event = Event.createEvent(
@@ -183,19 +189,25 @@ class RealNoteRepository @Inject constructor(
             tags = emptyList(),
             content = content.trim(),
         )
+
         relay.send(EventMessage(event = event))
     }
 
-    override suspend fun replyToNote(noteId: String, content: String) {
-        val note = noteDao.getById(noteId)
-        note ?: return
+    override suspend fun replyToNote(noteId: String, content: String) = withContext(ioDispatcher) {
+        val note = noteDao.getById(noteId)?.noteEntity
+        note ?: return@withContext
 
-        val tags = note.noteEntity.tags.filter {
-            it.first() == "e" || it.first() == "p"
-        } + listOf(
-            listOf("e", note.noteEntity.id, "", "reply"),
-            listOf("p", note.noteEntity.pubkey)
-        )
+        val notePubkey = note.pubkey
+
+        val tags = mutableSetOf(
+            listOf("e", note.id, "", if (note.isReply) "reply" else "root"),
+            listOf("p", notePubkey)
+        ).apply {
+            val parentNoteTags = note.tags.filter {
+                it.first() == "e" || (it.first() == "p" && notePubkey != it[1])
+            }
+            addAll(parentNoteTags)
+        }
 
         val myPubkey = myPubKey.get(null)!!
         val mySecretKey = mySecretKey.get(null)!!
@@ -204,7 +216,7 @@ class RealNoteRepository @Inject constructor(
             secretKey = mySecretKey.toByteString(),
             createdAt = Instant.now(),
             kind = Event.Kind.Note,
-            tags = tags,
+            tags = tags.toList(),
             content = content.trim(),
         )
 

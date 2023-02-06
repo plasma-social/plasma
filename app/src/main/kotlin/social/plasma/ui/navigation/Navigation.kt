@@ -107,9 +107,11 @@ fun Navigation(
             val viewModel: ReplyViewModel = hiltViewModel()
             val state by viewModel.uiState().collectAsState()
 
-            val title = state.parentNote?.userMetadataEntity?.name?.let {
-                stringResource(R.string.replying_to_author, it)
-            } ?: stringResource(id = R.string.create_reply)
+            val title =
+                // TODO move this to a better place and add the names of the note's p tags
+                state.parentNote?.userMetadataEntity?.name?.takeIf { it.isNotBlank() }?.let {
+                    stringResource(R.string.replying_to_author, it)
+                } ?: stringResource(id = R.string.create_reply)
 
             Post(
                 state = state,
