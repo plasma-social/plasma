@@ -14,6 +14,7 @@ import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.FeedContent
+import social.plasma.ui.feed.NoteId
 import social.plasma.ui.feed.NotificationsFeedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,6 +25,7 @@ fun NotificationsScreen(
     modifier: Modifier = Modifier,
     onNavigateToPostNote: () -> Unit,
     viewModel: NotificationsFeedViewModel = hiltViewModel(),
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
 
     Scaffold(
@@ -49,6 +51,7 @@ fun NotificationsScreen(
             onNoteClicked = onNavigateToThread,
             onAddNote = onNavigateToPostNote,
             onReactToNote = viewModel::onNoteReaction,
+            onReply = onNavigateToReply,
         )
     }
 }

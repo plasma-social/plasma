@@ -26,4 +26,7 @@
     <string name="drop_a_note">Deja una nota.</string>
     <string name="new_note">" Nueva nota"</string>
     <string name="your_message">Tu mensaje</string>
+    <string name="reply">Responder</string>
+    <string name="replying_to_author">Respondiendo a %1$s</string>
+    <string name="create_reply">Crear Respuesta</string>
 </resources>

@@ -48,5 +48,8 @@ interface NoteDao {
     @Transaction
     @Query("SELECT * FROM noteview WHERE source = :source")
     fun notesAndRepliesBySource(source: NoteSource): PagingSource<Int, NoteWithUser>
+
+    @Query("SELECT * FROM noteview WHERE id = :noteId")
+    suspend fun getById(noteId: String): NoteWithUser?
 }
 

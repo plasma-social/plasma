@@ -34,6 +34,7 @@ import social.plasma.ui.components.PlasmaTabRow
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.ContactsFeed
 import social.plasma.ui.feed.GlobalFeed
+import social.plasma.ui.feed.NoteId
 import social.plasma.ui.feed.RepliesFeed
 import social.plasma.ui.theme.PlasmaTheme
 
@@ -45,6 +46,7 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
     onNavigateToThread: (String) -> Unit,
     navigateToPost: () -> Unit,
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -52,10 +54,11 @@ fun HomeScreen(
         is HomeScreenUiState.Loaded -> HomeScreen(
             onNavigateToProfile = onNavigateToProfile,
             modifier = modifier,
-            userMetaData = state.userMetadata,
-            userPubKey = state.userPubkey,
             navigateToThread = onNavigateToThread,
             navigateToPost = navigateToPost,
+            userMetaData = state.userMetadata,
+            userPubKey = state.userPubkey,
+            onNavigateToReply = onNavigateToReply,
         )
     }
 }
@@ -69,6 +72,7 @@ fun HomeScreen(
     navigateToPost: () -> Unit,
     userMetaData: UserMetaData,
     userPubKey: PubKey,
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
     val tabs = remember { HomeTab.values() }
 
@@ -126,28 +130,31 @@ fun HomeScreen(
             // TODO figure out a way to combine all of these
             composable(HomeTab.Following.name) {
                 ContactsFeed(
-                    onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
+                    onNavigateToProfile = onNavigateToProfile,
                     navigateToThread = navigateToThread,
                     onAddNote = navigateToPost,
+                    onNavigateToReply = onNavigateToReply,
                 )
             }
 
             composable(HomeTab.Global.name) {
                 GlobalFeed(
-                    onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
+                    onNavigateToProfile = onNavigateToProfile,
                     navigateToThread = navigateToThread,
                     onAddNote = navigateToPost,
+                    onNavigateToReply = onNavigateToReply,
                 )
             }
 
             composable(HomeTab.Replies.name) {
                 RepliesFeed(
-                    onNavigateToProfile = onNavigateToProfile,
                     modifier = Modifier.padding(paddingValues),
+                    onNavigateToProfile = onNavigateToProfile,
                     navigateToThread = navigateToThread,
                     onAddNote = navigateToPost,
+                    onNavigateToReply = onNavigateToReply,
                 )
             }
 
@@ -193,6 +200,7 @@ private fun PreviewHomeScreen() {
             onNavigateToProfile = {},
             onNavigateToThread = {},
             navigateToPost = {},
+            onNavigateToReply = {},
         )
     }
 }

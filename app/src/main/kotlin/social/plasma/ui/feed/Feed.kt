@@ -40,6 +40,7 @@ fun GlobalFeed(
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
     onAddNote: () -> Unit,
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -51,7 +52,8 @@ fun GlobalFeed(
         onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
-        onReactToNote = viewModel::onNoteReaction
+        onReactToNote = viewModel::onNoteReaction,
+        onReply = onNavigateToReply,
     )
 }
 
@@ -62,6 +64,7 @@ fun RepliesFeed(
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
     onAddNote: () -> Unit,
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -74,6 +77,7 @@ fun RepliesFeed(
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
         onReactToNote = viewModel::onNoteReaction,
+        onReply = onNavigateToReply,
     )
 }
 
@@ -84,6 +88,7 @@ fun ContactsFeed(
     onNavigateToProfile: (PubKey) -> Unit,
     navigateToThread: (NoteId) -> Unit,
     onAddNote: () -> Unit,
+    onNavigateToReply: (NoteId) -> Unit,
 ) {
     val uiState by viewModel.uiState().collectAsState()
 
@@ -96,6 +101,7 @@ fun ContactsFeed(
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
         onReactToNote = viewModel::onNoteReaction,
+        onReply = onNavigateToReply,
     )
 }
 
@@ -109,6 +115,7 @@ fun FeedContent(
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
     onReactToNote: (NoteId) -> Unit,
+    onReply: (NoteId) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -121,6 +128,7 @@ fun FeedContent(
             onNoteClicked = onNoteClicked,
             onAddNote = onAddNote,
             onReactToNote = onReactToNote,
+            onReply = onReply,
         )
     }
 }
@@ -135,6 +143,7 @@ private fun FeedList(
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
     onReactToNote: (NoteId) -> Unit,
+    onReply: (NoteId) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -153,14 +162,15 @@ private fun FeedList(
                         onNoteDisplayed(note.id, note.userPubkey)
                     }
                     NoteElevatedCard(
+                        uiModel = it,
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .clickable {
                                 onNoteClicked(it.id)
                             },
-                        uiModel = it,
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
-                        onLikeClick = { onReactToNote(it.id) }
+                        onLikeClick = { onReactToNote(it.id) },
+                        onReplyClick = { onReply(it.id) }
                     )
 
                     DisposableEffect(Unit) {

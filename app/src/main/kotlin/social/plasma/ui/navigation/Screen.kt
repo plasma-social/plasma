@@ -16,6 +16,10 @@ sealed class Screen(
         fun buildRoute(pubKey: PubKey): String = route.replace("{pubkey}", pubKey.hex)
     }
 
+    object Reply : Screen(route = "reply/{noteId}", name = R.string.reply) {
+        fun buildRoute(noteId: String): String = route.replace("{noteId}", noteId)
+    }
+
     object Home : Screen(route = "home", name = R.string.home)
 
     object Messages : Screen(route = "messages", name = R.string.messages)

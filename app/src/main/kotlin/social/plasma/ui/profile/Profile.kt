@@ -70,6 +70,7 @@ fun Profile(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToThread: (String) -> Unit,
+    onNavigateToReply: (String) -> Unit,
 ) {
     val uiState by profileViewModel.uiState.collectAsState(ProfileUiState.Loading)
 
@@ -80,7 +81,8 @@ fun Profile(
         onNoteDisplayed = profileViewModel::onNoteDisplayed,
         onNavigateBack = onNavigateBack,
         onNoteClick = onNavigateToThread,
-        onNoteReaction = profileViewModel::onNoteReaction
+        onNoteReaction = profileViewModel::onNoteReaction,
+        onReply = onNavigateToReply,
     )
 }
 
@@ -93,6 +95,7 @@ private fun Profile(
     onNavigateBack: () -> Unit,
     onNoteClick: (String) -> Unit,
     onNoteReaction: (String) -> Unit,
+    onReply: (String) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
@@ -104,6 +107,7 @@ private fun Profile(
             onNavigateBack = onNavigateBack,
             onNoteClick = onNoteClick,
             onNoteReaction = onNoteReaction,
+            onReply = onReply,
         )
     }
 }
@@ -117,6 +121,7 @@ private fun ProfileContent(
     onNavigateBack: () -> Unit,
     onNoteClick: (String) -> Unit,
     onNoteReaction: (String) -> Unit,
+    onReply: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
@@ -160,14 +165,15 @@ private fun ProfileContent(
                         onNoteDisplayed(cardUiModel.id)
                     }
                     NoteElevatedCard(
+                        uiModel = it,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .clickable {
                                 onNoteClick(cardUiModel.id)
                             },
-                        uiModel = it,
                         onAvatarClick = null,
-                        onLikeClick = { onNoteReaction(it.id) }
+                        onLikeClick = { onNoteReaction(it.id) },
+                        onReplyClick = { onReply(it.id) }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DisposableEffect(Unit) {
@@ -350,7 +356,8 @@ private fun PreviewProfile(
             onNoteDisposed = {},
             onNavigateBack = {},
             onNoteClick = {},
-            onNoteReaction = {}
+            onNoteReaction = {},
+            onReply = {}
         )
     }
 }

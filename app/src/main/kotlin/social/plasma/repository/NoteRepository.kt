@@ -39,6 +39,9 @@ interface NoteRepository {
     fun observeMentions(): Flow<PagingData<NoteWithUser>>
 
     suspend fun postNote(content: String)
+
+    suspend fun replyToNote(noteId: String, content: String)
+    suspend fun getById(noteId: String): NoteWithUser?
 }
 
 class RealNoteRepository @Inject constructor(
@@ -178,9 +181,38 @@ class RealNoteRepository @Inject constructor(
             createdAt = Instant.now(),
             kind = Event.Kind.Note,
             tags = emptyList(),
-            content = content,
+            content = content.trim(),
         )
         relay.send(EventMessage(event = event))
+    }
+
+    override suspend fun replyToNote(noteId: String, content: String) {
+        val note = noteDao.getById(noteId)
+        note ?: return
+
+        val tags = note.noteEntity.tags.filter {
+            it.first() == "e" || it.first() == "p"
+        } + listOf(
+            listOf("e", note.noteEntity.id, "", "reply"),
+            listOf("p", note.noteEntity.pubkey)
+        )
+
+        val myPubkey = myPubKey.get(null)!!
+        val mySecretKey = mySecretKey.get(null)!!
+        val event = Event.createEvent(
+            pubKey = myPubkey.toByteString(),
+            secretKey = mySecretKey.toByteString(),
+            createdAt = Instant.now(),
+            kind = Event.Kind.Note,
+            tags = tags,
+            content = content.trim(),
+        )
+
+        relay.send(EventMessage(event))
+    }
+
+    override suspend fun getById(noteId: String): NoteWithUser? {
+        return noteDao.getById(noteId)
     }
 
     private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =
