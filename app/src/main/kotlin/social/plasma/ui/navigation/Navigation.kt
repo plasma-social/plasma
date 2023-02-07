@@ -14,10 +14,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import social.plasma.R
 import social.plasma.ui.ThreadList
+import social.plasma.ui.base.viewModelWithNavigator
 import social.plasma.ui.home.HomeScreen
 import social.plasma.ui.notifications.NotificationsScreen
 import social.plasma.ui.post.Post
-import social.plasma.ui.post.postViewModel
+import social.plasma.ui.post.PostViewModel
 import social.plasma.ui.profile.Profile
 
 @Composable
@@ -91,7 +92,7 @@ fun Navigation(
         }
 
         composable(Screen.PostNote.route) {
-            val viewModel = postViewModel(navigator = NavControllerNavigator(navHostController))
+            val viewModel = viewModelWithNavigator<PostViewModel>(navigator = NavControllerNavigator(navHostController))
             val state by viewModel.uiState().collectAsState()
             Post(
                 state = state,
