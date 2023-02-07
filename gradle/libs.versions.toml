@@ -19,6 +19,7 @@ moshi = "1.14.0"
 okhttp = "5.0.0-alpha.11"
 paging = "3.1.1"
 room = "2.5.0"
+rxjava = "2.2.21"
 scarlet = "0.1.12"
 
 [plugins]
@@ -92,6 +93,8 @@ moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "mosh
 
 okhttp-core = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-interceptor-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+
+rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 
 scarlet-core = { module = "com.tinder.scarlet:scarlet", version.ref = "scarlet" }
 scarlet-lifecycle-android = { module = "com.tinder.scarlet:lifecycle-android", version.ref = "scarlet" }

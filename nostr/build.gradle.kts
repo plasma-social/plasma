@@ -1,5 +1,3 @@
-import com.bmuschko.gradle.docker.internal.services.DockerClientService
-import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
 import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 import java.net.ServerSocket
@@ -61,6 +59,7 @@ dependencies {
     implementation(libs.scarlet.streamadapter.rxjava)
 
     implementation(libs.timber)
+    implementation(libs.rxjava)
 
     implementation(libs.secp256k1.jvm)
     implementation(libs.secp256k1.jvm.jni)

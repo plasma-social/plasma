@@ -100,6 +100,7 @@ dependencies {
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.interceptor.logging)
 
+    implementation(libs.rxjava)
     implementation(libs.secp256k1.android)
 
     implementation(libs.scarlet.core)
