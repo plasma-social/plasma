@@ -1,4 +1,4 @@
-package social.plasma.ui.post
+package social.plasma.ui.base
 
 import android.app.Activity
 import androidx.compose.runtime.Composable
@@ -11,15 +11,18 @@ import social.plasma.di.ViewModelFactoryEntryPoint
 import social.plasma.ui.navigation.Navigator
 
 @Composable
-fun postViewModel(navigator: Navigator): PostViewModel {
-    val factory = EntryPointAccessors.fromActivity(
+inline fun <reified VM : ViewModel> viewModelWithNavigator(navigator: Navigator): VM {
+    val map = EntryPointAccessors.fromActivity(
         LocalContext.current as Activity,
         ViewModelFactoryEntryPoint::class.java,
-    ).postViewModelFactory()
+    ).navigatorViewModelFactoryMap()
 
     return viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val factory = requireNotNull(map[VM::class.java]) {
+                    "ViewModelWithNavigatorFactory not found for class ${VM::class.java}"
+                }
                 return factory.create(navigator) as T
             }
         },

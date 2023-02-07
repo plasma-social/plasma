@@ -10,6 +10,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import social.plasma.repository.NoteRepository
 import social.plasma.ui.base.MoleculeViewModel
+import social.plasma.ui.base.ViewModelWithNavigatorFactory
 import social.plasma.ui.navigation.Navigator
 
 class PostViewModel @AssistedInject constructor(
@@ -37,7 +38,7 @@ class PostViewModel @AssistedInject constructor(
     }
 
     @AssistedFactory
-    interface Factory {
-        fun create(navigator: Navigator): PostViewModel
+    interface Factory : ViewModelWithNavigatorFactory<PostViewModel> {
+        override fun create(navigator: Navigator): PostViewModel
     }
 }
