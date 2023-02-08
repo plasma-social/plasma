@@ -8,7 +8,7 @@ import io.kotest.property.arbitrary.*
 import io.kotest.property.checkAll
 import okio.ByteString.Companion.toByteString
 
-class JvmKeyGeneratorTest : StringSpec({
+class KeyGeneratorTest : StringSpec({
 
     "generates valid keys" {
         checkAll(arbTestData) { (key, data) ->
@@ -20,7 +20,7 @@ class JvmKeyGeneratorTest : StringSpec({
 
 }) {
     companion object {
-        private val arbKey = arbitrary { JvmKeyGenerator().generateKey() }
+        private val arbKey = arbitrary { KeyGenerator().generateKey() }
         val arbTestData = Arb.pair(arbKey, Arb.string())
     }
 }
