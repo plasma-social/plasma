@@ -20,13 +20,13 @@ abstract class AbstractFeedViewModel(
     private val reactionsRepository: ReactionsRepository,
     notePagingFlowMapper: NotePagingFlowMapper,
     pagingFlow: Flow<PagingData<NoteWithUser>>,
-) : MoleculeViewModel<FeedUiState>(recompositionClock) {
+) : MoleculeViewModel<FeedUiState, FeedUiEvent>(recompositionClock) {
 
     private val feedPagingFlow = notePagingFlowMapper.map(pagingFlow)
         .cachedIn(viewModelScope)
 
     @Composable
-    override fun models(): FeedUiState {
+    override fun models(events: Flow<FeedUiEvent>): FeedUiState {
         return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
     }
 

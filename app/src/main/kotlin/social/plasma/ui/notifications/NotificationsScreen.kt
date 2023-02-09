@@ -40,7 +40,7 @@ fun NotificationsScreen(
                 onAvatarClick = { onNavigateToProfile(viewModel.pubkey) },
             )
         }) {
-        val uiState by viewModel.uiState().collectAsState()
+        val uiState by viewModel.uiState.collectAsState()
 
         FeedContent(
             modifier = Modifier.padding(it),

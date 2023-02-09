@@ -1,51 +1,55 @@
 package social.plasma.ui.reply
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import app.cash.molecule.RecompositionClock
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import social.plasma.db.notes.NoteWithUser
 import social.plasma.repository.NoteRepository
+import social.plasma.ui.base.EventsEffect
 import social.plasma.ui.base.MoleculeViewModel
+import social.plasma.ui.post.PostUiEvent
 import social.plasma.ui.post.PostUiState
 import javax.inject.Inject
 
 @HiltViewModel
 class ReplyViewModel @Inject constructor(
     val noteRepository: NoteRepository,
-    savedStateHandle: SavedStateHandle,
     recompositionClock: RecompositionClock,
-) : MoleculeViewModel<PostUiState>(recompositionClock) {
+    savedStateHandle: SavedStateHandle,
+) : MoleculeViewModel<PostUiState, PostUiEvent>(recompositionClock) {
     val noteId: String = savedStateHandle["noteId"]!!
 
-    private val state = mutableStateOf(PostUiState())
-
-    init {
-        viewModelScope.launch {
-            val note = noteRepository.getById(noteId)
-
-            state.value = state.value.copy(
-                parentNote = note,
-            )
-        }
-    }
-
     @Composable
-    override fun models(): PostUiState {
-        return state.value
-    }
+    override fun models(events: Flow<PostUiEvent>): PostUiState {
+        val parentNote = remember { mutableStateOf<NoteWithUser?>(null) }
+        var content by remember { mutableStateOf("") }
 
-    fun onNoteChange(note: String) {
-        state.value = state.value.copy(postEnabled = note.isNotBlank())
-    }
-
-    fun onCreateReply(navHostController: NavHostController, content: String) {
-        viewModelScope.launch {
-            noteRepository.replyToNote(noteId, content)
-            navHostController.popBackStack()
+        LaunchedEffect(Unit) {
+            parentNote.value = noteRepository.getById(noteId)
         }
+
+        EventsEffect(events) { event ->
+            when (event) {
+                is PostUiEvent.OnNoteChange -> content = event.content
+                PostUiEvent.PostNote -> launch { onCreateReply(content) }
+            }
+        }
+
+        return PostUiState(
+            postEnabled = content.isNotBlank(),
+            parentNote = parentNote.value,
+        )
+    }
+
+    private suspend fun onCreateReply(content: String) {
+        noteRepository.replyToNote(noteId, content)
     }
 }

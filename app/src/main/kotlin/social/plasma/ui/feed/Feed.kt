@@ -42,7 +42,7 @@ fun GlobalFeed(
     onAddNote: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
 ) {
-    val uiState by viewModel.uiState().collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     FeedContent(
         modifier = modifier,
@@ -66,7 +66,7 @@ fun RepliesFeed(
     onAddNote: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
 ) {
-    val uiState by viewModel.uiState().collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     FeedContent(
         modifier = modifier,
@@ -90,7 +90,7 @@ fun ContactsFeed(
     onAddNote: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
 ) {
-    val uiState by viewModel.uiState().collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     FeedContent(
         modifier = modifier,

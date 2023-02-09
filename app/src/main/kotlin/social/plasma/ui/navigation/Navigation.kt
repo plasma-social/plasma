@@ -19,6 +19,8 @@ import social.plasma.ui.base.viewModelWithNavigator
 import social.plasma.ui.home.HomeScreen
 import social.plasma.ui.notifications.NotificationsScreen
 import social.plasma.ui.post.Post
+import social.plasma.ui.post.PostUiEvent.OnNoteChange
+import social.plasma.ui.post.PostUiEvent.PostNote
 import social.plasma.ui.post.PostViewModel
 import social.plasma.ui.profile.Profile
 import social.plasma.ui.reply.ReplyViewModel
@@ -105,7 +107,7 @@ fun Navigation(
 
         composable(Screen.Reply.route) {
             val viewModel: ReplyViewModel = hiltViewModel()
-            val state by viewModel.uiState().collectAsState()
+            val state by viewModel.uiState.collectAsState()
 
             val title =
                 // TODO move this to a better place and add the names of the note's p tags
@@ -115,22 +117,26 @@ fun Navigation(
 
             Post(
                 state = state,
-                onNoteChanged = viewModel::onNoteChange,
+                onNoteChanged = { viewModel.onEvent(OnNoteChange(it)) },
                 title = title,
-                onPostNote = { content ->
-                    viewModel.onCreateReply(navHostController, content)
+                onPostNote = {
+                    viewModel.onEvent(PostNote)
+                    // TODO pass to viewmodel
+                    navHostController.popBackStack()
                 },
                 onBackClicked = { navHostController.popBackStack() }
             )
         }
 
         composable(Screen.PostNote.route) {
-            val viewModel = viewModelWithNavigator<PostViewModel>(navigator = NavControllerNavigator(navHostController))
-            val state by viewModel.uiState().collectAsState()
+            val viewModel = viewModelWithNavigator<PostViewModel>(
+                navigator = NavControllerNavigator(navHostController)
+            )
+            val state by viewModel.uiState.collectAsState()
             Post(
                 state = state,
-                onNoteChanged = viewModel::onNoteChange,
-                onPostNote = viewModel::onPostNote,
+                onNoteChanged = { viewModel.onEvent(OnNoteChange(it)) },
+                onPostNote = { viewModel.onEvent(PostNote) },
                 onBackClicked = { navHostController.popBackStack() }
             )
         }
