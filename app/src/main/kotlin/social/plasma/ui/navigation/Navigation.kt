@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +21,7 @@ import social.plasma.ui.notifications.NotificationsScreen
 import social.plasma.ui.post.Post
 import social.plasma.ui.post.PostViewModel
 import social.plasma.ui.profile.Profile
+import social.plasma.ui.reply.ReplyViewModel
 
 @Composable
 fun Navigation(
@@ -32,18 +34,21 @@ fun Navigation(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                modifier = modifier,
                 onNavigateToProfile = { pubKey ->
                     navHostController.navigate(
                         Screen.Profile.buildRoute(pubKey)
                     )
                 },
+                modifier = modifier,
                 onNavigateToThread = {
                     navHostController.navigate(Screen.Thread.buildRoute(it))
                 },
                 navigateToPost = {
                     navHostController.navigate(Screen.PostNote.route)
                 },
+                onNavigateToReply = {
+                    navHostController.navigate(Screen.Reply.buildRoute(it))
+                }
             )
         }
 
@@ -53,16 +58,17 @@ fun Navigation(
 
         composable(Screen.Notifications.route) {
             NotificationsScreen(
-                modifier = modifier,
-                onNavigateToThread = {
-                    navHostController.navigate(Screen.Thread.buildRoute(it))
-                },
                 onNavigateToProfile = { pubkey ->
                     navHostController.navigate(
                         Screen.Profile.buildRoute(pubkey)
                     )
                 },
-                onNavigateToPostNote = { navHostController.navigate(Screen.PostNote.route) }
+                onNavigateToThread = {
+                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                },
+                modifier = modifier,
+                onNavigateToPostNote = { navHostController.navigate(Screen.PostNote.route) },
+                onNavigateToReply = { navHostController.navigate(Screen.Reply.buildRoute(it)) }
             )
         }
 
@@ -72,6 +78,9 @@ fun Navigation(
                 onNavigateBack = { navHostController.popBackStack() },
                 onNavigateToThread = {
                     navHostController.navigate(Screen.Thread.buildRoute(it))
+                },
+                onNavigateToReply = {
+                    navHostController.navigate(Screen.Reply.buildRoute(it))
                 }
             )
         }
@@ -87,7 +96,31 @@ fun Navigation(
                     navHostController.navigate(
                         Screen.Profile.buildRoute(pubkey)
                     )
+                },
+                onNavigateToReply = {
+                    navHostController.navigate(Screen.Reply.buildRoute(it))
                 }
+            )
+        }
+
+        composable(Screen.Reply.route) {
+            val viewModel: ReplyViewModel = hiltViewModel()
+            val state by viewModel.uiState().collectAsState()
+
+            val title =
+                // TODO move this to a better place and add the names of the note's p tags
+                state.parentNote?.userMetadataEntity?.name?.takeIf { it.isNotBlank() }?.let {
+                    stringResource(R.string.replying_to_author, it)
+                } ?: stringResource(id = R.string.create_reply)
+
+            Post(
+                state = state,
+                onNoteChanged = viewModel::onNoteChange,
+                title = title,
+                onPostNote = { content ->
+                    viewModel.onCreateReply(navHostController, content)
+                },
+                onBackClicked = { navHostController.popBackStack() }
             )
         }
 

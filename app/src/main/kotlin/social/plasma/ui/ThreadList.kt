@@ -48,6 +48,7 @@ fun ThreadList(
     viewModel: ThreadListViewModel = hiltViewModel(),
     onNavigateToThread: (String) -> Unit,
     onNavigateToProfile: (PubKey) -> Unit,
+    onNavigateToReply: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -60,6 +61,7 @@ fun ThreadList(
         onNoteDisposed = viewModel::onNoteDisposed,
         onAvatarClick = onNavigateToProfile,
         onNoteReaction = viewModel::onNoteReaction,
+        onReply = onNavigateToReply,
     )
 }
 
@@ -74,6 +76,7 @@ private fun ThreadList(
     onNoteDisposed: (String, PubKey) -> Unit,
     onAvatarClick: (PubKey) -> Unit,
     onNoteReaction: (String) -> Unit,
+    onReply: (String) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -107,7 +110,8 @@ private fun ThreadList(
                         NoteFlatCard(
                             uiModel = threadUiModel.noteUiModel,
                             onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
-                            onLikeClick = { onNoteReaction(threadUiModel.id) }
+                            onLikeClick = { onNoteReaction(threadUiModel.id) },
+                            onReplyClick = { onReply(threadUiModel.id) }
                         )
                         Divider(modifier = Modifier.padding(horizontal = 16.dp))
                         Spacer(Modifier.height(32.dp))
@@ -115,9 +119,10 @@ private fun ThreadList(
 
                     is LeafNote -> ThreadNote(
                         uiModel = threadUiModel.noteUiModel,
-                        onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
                         modifier = Modifier.clickable { onNavigateToThread(threadUiModel.id) },
-                        onLikeClick = { onNoteReaction(threadUiModel.id) }
+                        onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
+                        onLikeClick = { onNoteReaction(threadUiModel.id) },
+                        onReplyClick = { onReply(threadUiModel.id) }
                     )
                 }
 
@@ -142,7 +147,8 @@ private fun PreviewThread() {
         ThreadList(
             onNavigateBack = {},
             onNavigateToThread = {},
-            onNavigateToProfile = {}
+            onNavigateToProfile = {},
+            onNavigateToReply = {}
         )
     }
 }

@@ -34,7 +34,23 @@ data class NoteEntity(
 )
 
 enum class NoteSource {
-    Global, Profile, Contacts, Thread, Notifications
+    // Notes inserted from the global feed
+    Global,
+
+    // Notes inserted from a users profile
+    Profile,
+
+    // Notes inserted from the user's contact list
+    Contacts,
+
+    // Notes inserted from a thread
+    Thread,
+
+    // Notes inserted from mentions
+    Notifications,
+
+    // Notes & Replies created by the client
+    Posting
 }
 
 @Entity(tableName = "note_ref", primaryKeys = ["sourceNote", "targetNote"])

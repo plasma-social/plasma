@@ -32,6 +32,7 @@ fun Post(
     onNoteChanged: (String) -> Unit,
     onPostNote: (String) -> Unit,
     modifier: Modifier = Modifier,
+    title: String = stringResource(id = R.string.drop_a_note),
 ) {
 
     Column(modifier = modifier) {
@@ -49,7 +50,7 @@ fun Post(
 
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
-            text = stringResource(id = R.string.drop_a_note),
+            text = title,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
         )

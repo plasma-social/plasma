@@ -43,6 +43,7 @@ fun NoteElevatedCard(
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
     onLikeClick: () -> Unit,
+    onReplyClick: () -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -52,7 +53,11 @@ fun NoteElevatedCard(
             onAvatarClick,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        NoteContent(uiModel, onLikeClick = onLikeClick)
+        NoteContent(
+            uiModel,
+            onLikeClick = onLikeClick,
+            onReplyClick = onReplyClick
+        )
     }
 }
 
@@ -62,6 +67,7 @@ fun NoteFlatCard(
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
     onLikeClick: () -> Unit,
+    onReplyClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -71,7 +77,11 @@ fun NoteFlatCard(
             onAvatarClick,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        NoteContent(uiModel, onLikeClick = onLikeClick)
+        NoteContent(
+            uiModel,
+            onLikeClick = onLikeClick,
+            onReplyClick = onReplyClick
+        )
     }
 }
 
@@ -81,6 +91,7 @@ fun ThreadNote(
     modifier: Modifier = Modifier,
     onAvatarClick: ((PubKey) -> Unit)?,
     onLikeClick: () -> Unit,
+    onReplyClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -106,7 +117,11 @@ fun ThreadNote(
                 }
                 .padding(start = 22.dp)
         ) {
-            NoteContent(uiModel = uiModel, onLikeClick = onLikeClick)
+            NoteContent(
+                uiModel = uiModel,
+                onLikeClick = onLikeClick,
+                onReplyClick = onReplyClick
+            )
         }
     }
 }
@@ -116,6 +131,7 @@ fun ThreadNote(
 private fun NoteContent(
     uiModel: NoteUiModel,
     onLikeClick: () -> Unit,
+    onReplyClick: () -> Unit,
 ) {
     FlowRow(
         modifier = Modifier.padding(16.dp),
@@ -149,10 +165,11 @@ private fun NoteContent(
 
     NoteCardActionsRow(
         likeCount = uiModel.likeCount,
-        replyCount = uiModel.replyCount,
         shareCount = uiModel.shareCount,
+        replyCount = uiModel.replyCount,
         isLiked = uiModel.isLiked,
         onLikeClick = onLikeClick,
+        onReplyClick = onReplyClick,
     )
 }
 
@@ -163,6 +180,7 @@ private fun NoteCardActionsRow(
     replyCount: String,
     isLiked: Boolean,
     onLikeClick: () -> Unit,
+    onReplyClick: () -> Unit,
 ) {
     val optimisticLikeState = remember(isLiked) { mutableStateOf(isLiked) }
     val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
@@ -181,7 +199,7 @@ private fun NoteCardActionsRow(
             )
 
         TextButton(
-            onClick = { /*TODO*/ },
+            onClick = onReplyClick,
             colors = colors
         ) {
             Icon(painterResource(R.drawable.ic_plasma_replies), contentDescription = "")
@@ -292,7 +310,8 @@ private fun PreviewFeedCard() {
         NoteElevatedCard(
             NoteCardFakes.fakeUiModel,
             onAvatarClick = {},
-            onLikeClick = {}
+            onLikeClick = {},
+            onReplyClick = {}
         )
     }
 }
@@ -304,7 +323,8 @@ private fun PreviewThreadCard() {
         ThreadNote(
             uiModel = NoteCardFakes.fakeUiModel,
             onAvatarClick = {},
-            onLikeClick = {}
+            onLikeClick = {},
+            onReplyClick = {}
         )
     }
 }

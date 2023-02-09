@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import social.plasma.PubKey
 import social.plasma.db.notes.*
@@ -39,6 +40,9 @@ interface NoteRepository {
     fun observeMentions(): Flow<PagingData<NoteWithUser>>
 
     suspend fun postNote(content: String)
+
+    suspend fun replyToNote(noteId: String, content: String)
+    suspend fun getById(noteId: String): NoteWithUser?
 }
 
 class RealNoteRepository @Inject constructor(
@@ -163,13 +167,18 @@ class RealNoteRepository @Inject constructor(
             ).flow,
 
             fetchWithNoteDbSync(
-                SubscribeMessage(Filter(pTags = setOf(myPubkey), limit = 500)),
+                SubscribeMessage(
+                    Filter(
+                        pTags = setOf(myPubkey),
+                        kinds = setOf(Event.Kind.Note)
+                    )
+                ),
                 NoteSource.Notifications
             )
         ).filterIsInstance()
     }
 
-    override suspend fun postNote(content: String) {
+    override suspend fun postNote(content: String) = withContext(ioDispatcher) {
         val myPubkey = myPubKey.get(null)!!
         val mySecretKey = mySecretKey.get(null)!!
         val event = Event.createEvent(
@@ -178,9 +187,44 @@ class RealNoteRepository @Inject constructor(
             createdAt = Instant.now(),
             kind = Event.Kind.Note,
             tags = emptyList(),
-            content = content,
+            content = content.trim(),
         )
+
         relay.send(EventMessage(event = event))
+    }
+
+    override suspend fun replyToNote(noteId: String, content: String) = withContext(ioDispatcher) {
+        val note = noteDao.getById(noteId)?.noteEntity
+        note ?: return@withContext
+
+        val notePubkey = note.pubkey
+
+        val tags = mutableSetOf(
+            listOf("e", note.id, "", if (note.isReply) "reply" else "root"),
+            listOf("p", notePubkey)
+        ).apply {
+            val parentNoteTags = note.tags.filter {
+                it.first() == "e" || (it.first() == "p" && notePubkey != it[1])
+            }
+            addAll(parentNoteTags)
+        }
+
+        val myPubkey = myPubKey.get(null)!!
+        val mySecretKey = mySecretKey.get(null)!!
+        val event = Event.createEvent(
+            pubKey = myPubkey.toByteString(),
+            secretKey = mySecretKey.toByteString(),
+            createdAt = Instant.now(),
+            kind = Event.Kind.Note,
+            tags = tags.toList(),
+            content = content.trim(),
+        )
+
+        relay.send(EventMessage(event))
+    }
+
+    override suspend fun getById(noteId: String): NoteWithUser? {
+        return noteDao.getById(noteId)
     }
 
     private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =

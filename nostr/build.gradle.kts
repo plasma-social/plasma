@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     implementation(libs.okhttp.interceptor.logging)
+    implementation(libs.rxjava)
 
     implementation(libs.scarlet.core)
     implementation(libs.scarlet.websocket.okhttp)
@@ -58,12 +59,11 @@ dependencies {
     implementation(libs.scarlet.streamadapter.coroutines)
     implementation(libs.scarlet.streamadapter.rxjava)
 
-    implementation(libs.timber)
-    implementation(libs.rxjava)
-
     implementation(libs.secp256k1.jvm)
     implementation(libs.secp256k1.jvm.jni)
     implementation(files("lib/secp256k1-kmp-jni-jvm-darwin-0.7.1.jar"))
+
+    implementation(libs.timber)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotest.assertions)
