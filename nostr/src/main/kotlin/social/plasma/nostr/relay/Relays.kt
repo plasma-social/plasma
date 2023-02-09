@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
@@ -27,13 +28,13 @@ class Relays @Inject constructor(
     private val relayList: List<Relay> = relayUrlList.map { createRelay(it, scope) }
 
     init {
-        connect()
+        scope.launch { connect() }
     }
 
     override val connectionStatus: Flow<Relay.RelayStatus>
         get() = relayList.map { it.connectionStatus }.merge()
 
-    override fun connect() {
+    override suspend fun connect() {
         relayList.forEach {
             it.connect()
         }

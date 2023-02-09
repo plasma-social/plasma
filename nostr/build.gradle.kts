@@ -124,5 +124,4 @@ val stopContainer by tasks.creating(DockerStopContainer::class) {
 
 tasks.withType<Test>().configureEach {
     dependsOn(startContainer)
-    finalizedBy(stopContainer)
 }

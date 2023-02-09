@@ -8,7 +8,7 @@ import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 interface Relay {
     val connectionStatus: Flow<RelayStatus>
 
-    fun connect()
+    suspend fun connect()
 
     fun disconnect()
 
