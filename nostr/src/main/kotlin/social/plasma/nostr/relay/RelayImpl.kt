@@ -7,10 +7,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
+import social.plasma.crypto.KeyPair
+import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.*
 import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
+import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
 class RelayImpl(
@@ -57,6 +60,20 @@ class RelayImpl(
         if (status.value == Relay.Status.Connected) service.sendEvent(event)
         else pendingSendEvents.emit(event)
     }
+
+    override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) =
+        send(
+            EventMessage(
+                Event.createEvent(
+                    keyPair.pub,
+                    keyPair.sec,
+                    Instant.now(),
+                    Event.Kind.Note,
+                    tags.toList(),
+                    text
+                )
+            )
+        )
 
     private fun unsubscribe(request: UnsubscribeMessage) {
         service.sendUnsubscribe(request)

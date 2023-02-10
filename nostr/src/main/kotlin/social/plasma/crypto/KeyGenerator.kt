@@ -5,12 +5,12 @@ import java.security.SecureRandom
 
 class KeyGenerator {
 
-    fun generateKey(): KeyPair {
+    fun generateKeyPair(): KeyPair {
         val bs = ByteArray(32)
         SecureRandom().nextBytes(bs)
         val sec = bs.toByteString()
         if (sec.hex() > MAX_SEC) {
-            return generateKey()
+            return generateKeyPair()
         }
         return KeyPair(
             Bech32.pubkeyCreate(bs).toByteString(),

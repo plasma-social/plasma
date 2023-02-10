@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import social.plasma.PubKey
+import social.plasma.crypto.KeyPair
 import social.plasma.db.notes.*
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
@@ -15,7 +16,6 @@ import social.plasma.nostr.models.Event
 import social.plasma.nostr.models.Note
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.relay.Relay
-import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
@@ -54,6 +54,11 @@ class RealNoteRepository @Inject constructor(
     private val relay: Relay,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : NoteRepository {
+
+    private val myKeyPair = KeyPair(
+        myPubKey.get(null)!!.toByteString(),
+        mySecretKey.get(null)!!.toByteString()
+    )
 
     override fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>> {
         return merge(
@@ -179,48 +184,24 @@ class RealNoteRepository @Inject constructor(
     }
 
     override suspend fun postNote(content: String) = withContext(ioDispatcher) {
-        val myPubkey = myPubKey.get(null)!!
-        val mySecretKey = mySecretKey.get(null)!!
-        val event = Event.createEvent(
-            pubKey = myPubkey.toByteString(),
-            secretKey = mySecretKey.toByteString(),
-            createdAt = Instant.now(),
-            kind = Event.Kind.Note,
-            tags = emptyList(),
-            content = content.trim(),
-        )
-
-        relay.send(EventMessage(event = event))
+        relay.sendNote(content.trim(), myKeyPair)
     }
 
     override suspend fun replyToNote(noteId: String, content: String) = withContext(ioDispatcher) {
         val note = noteDao.getById(noteId)?.noteEntity
         note ?: return@withContext
 
-        val notePubkey = note.pubkey
-
         val tags = mutableSetOf(
             listOf("e", note.id, "", if (note.isReply) "reply" else "root"),
-            listOf("p", notePubkey)
+            listOf("p", note.pubkey)
         ).apply {
             val parentNoteTags = note.tags.filter {
-                it.first() == "e" || (it.first() == "p" && notePubkey != it[1])
+                it.first() == "e" || (it.first() == "p" && note.pubkey != it[1])
             }
             addAll(parentNoteTags)
         }
 
-        val myPubkey = myPubKey.get(null)!!
-        val mySecretKey = mySecretKey.get(null)!!
-        val event = Event.createEvent(
-            pubKey = myPubkey.toByteString(),
-            secretKey = mySecretKey.toByteString(),
-            createdAt = Instant.now(),
-            kind = Event.Kind.Note,
-            tags = tags.toList(),
-            content = content.trim(),
-        )
-
-        relay.send(EventMessage(event))
+        relay.sendNote(content.trim(), myKeyPair, tags)
     }
 
     override suspend fun getById(noteId: String): NoteWithUser? {
