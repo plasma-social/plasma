@@ -28,7 +28,7 @@ class RelayImpl(
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
     private val relayMessages = service.relayMessageFlow()
-    private val pendingSendEvents = MutableSharedFlow<ClientMessage>()
+    private val pendingSendEvents = MutableSharedFlow<ClientMessage>(extraBufferCapacity = 1_000)
     private val status = MutableStateFlow<Relay.Status?>(null)
 
     private val subscriptions: AtomicReference<Set<SubscribeMessage>> =
