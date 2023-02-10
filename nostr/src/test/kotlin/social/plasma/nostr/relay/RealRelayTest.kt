@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.next
 import io.kotest.property.arbitrary.stringPattern
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import social.plasma.crypto.KeyGenerator
 import social.plasma.nostr.BuildingBlocks.testRelay
@@ -16,6 +17,7 @@ class RealRelayTest : StringSpec({
     "can write notes and subscribe to a relay" {
         val relay = testRelay(this)
         val text = Arb.stringPattern("[a-zA-Z0-9]+").next()
+
         relay.connect()
         val keyPair = KeyGenerator().generateKeyPair()
         val notes = relay.subscribe(SubscribeMessage(Filter.userNotes(pubKey = keyPair.pub.hex())))

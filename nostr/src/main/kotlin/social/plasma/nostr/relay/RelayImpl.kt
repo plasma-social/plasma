@@ -31,18 +31,17 @@ class RelayImpl(
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
     private val relayMessages = service.relayMessageFlow()
-    private val pendingSendEvents = MutableSharedFlow<ClientMessage>(extraBufferCapacity = 1_000)
+    private val subscriptions: AtomicReference<Set<SubscribeMessage>> = AtomicReference(setOf())
+    private val pendingSendEvents: AtomicReference<List<ClientMessage>> = AtomicReference(listOf())
     private val status = MutableStateFlow<Relay.Status?>(null)
 
-    private val subscriptions: AtomicReference<Set<SubscribeMessage>> =
-        AtomicReference(setOf())
     private var connectionLoop: Job? = null
 
     override fun subscribe(subscribeMessage: SubscribeMessage): Flow<RelayMessage.EventRelayMessage> {
         subscriptions.getAndUpdate { it.plus(subscribeMessage) }
 
         if (status.value == Relay.Status.Connected) service.sendSubscribe(subscribeMessage)
-        else scope.launch { pendingSendEvents.emit(subscribeMessage) }
+        else pendingSendEvents.updateAndGet { it.plus(subscribeMessage) }
 
         logger.d("adding sub %s", subscribeMessage)
         logger.d("sub count %s", subscriptions.get().count())
@@ -58,7 +57,7 @@ class RelayImpl(
 
     override suspend fun send(event: EventMessage) {
         if (status.value == Relay.Status.Connected) service.sendEvent(event)
-        else pendingSendEvents.emit(event)
+        else pendingSendEvents.updateAndGet { it.plus(event) }
     }
 
     override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) =
@@ -85,7 +84,7 @@ class RelayImpl(
     }
 
     private suspend fun publishPendingEvents() {
-        pendingSendEvents.collect {
+        pendingSendEvents.getAndSet(emptyList()).forEach {
             when (it) {
                 is EventMessage -> service.sendEvent(it)
                 is SubscribeMessage -> service.sendSubscribe(it)
@@ -117,7 +116,6 @@ class RelayImpl(
                 }
             }
         }.launchIn(scope)
-        while (status.value != Relay.Status.Connected) delay(100L)
     }
 
     override fun disconnect() {
