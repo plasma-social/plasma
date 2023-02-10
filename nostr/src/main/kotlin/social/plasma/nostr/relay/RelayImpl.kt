@@ -3,19 +3,12 @@ package social.plasma.nostr.relay
 import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
-import social.plasma.nostr.relay.message.ClientMessage.EventMessage
-import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
-import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage
+import social.plasma.nostr.relay.message.ClientMessage.*
 import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
@@ -35,6 +28,8 @@ class RelayImpl(
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
     private val relayMessages = service.relayMessageFlow()
+    private val pendingSendEvents = MutableSharedFlow<ClientMessage>(extraBufferCapacity = 1_000)
+    private val status = MutableStateFlow<Relay.Status?>(null)
 
     private val subscriptions: AtomicReference<Set<SubscribeMessage>> =
         AtomicReference(setOf())
@@ -43,7 +38,9 @@ class RelayImpl(
     override fun subscribe(subscribeMessage: SubscribeMessage): Flow<RelayMessage.EventRelayMessage> {
         subscriptions.getAndUpdate { it.plus(subscribeMessage) }
 
-        service.sendSubscribe(subscribeMessage)
+        if (status.value == Relay.Status.Connected) service.sendSubscribe(subscribeMessage)
+        else scope.launch { pendingSendEvents.emit(subscribeMessage) }
+
         logger.d("adding sub %s", subscribeMessage)
         logger.d("sub count %s", subscriptions.get().count())
 
@@ -57,8 +54,8 @@ class RelayImpl(
     }
 
     override suspend fun send(event: EventMessage) {
-        logger.d("Sending new event: $event")
-        service.sendEvent(event)
+        if (status.value == Relay.Status.Connected) service.sendEvent(event)
+        else pendingSendEvents.emit(event)
     }
 
     private fun unsubscribe(request: UnsubscribeMessage) {
@@ -70,11 +67,23 @@ class RelayImpl(
         logger.d("sub count %s", subscriptions.get().count())
     }
 
-    override fun connect() {
+    private suspend fun publishPendingEvents() {
+        pendingSendEvents.collect {
+            when (it) {
+                is EventMessage -> service.sendEvent(it)
+                is SubscribeMessage -> service.sendSubscribe(it)
+                else -> {}
+            }
+        }
+    }
+
+    override suspend fun connect() {
         connectionLoop = connectionStatus.distinctUntilChanged().onEach {
+            status.emit(it.status)
             when (it.status) {
                 is Relay.Status.Connected -> {
                     logger.d("connection opened: %s", it)
+                    publishPendingEvents()
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }
 
@@ -91,7 +100,7 @@ class RelayImpl(
                 }
             }
         }.launchIn(scope)
-        logger.d("Launched")
+        while (status.value != Relay.Status.Connected) delay(100L)
     }
 
     override fun disconnect() {
