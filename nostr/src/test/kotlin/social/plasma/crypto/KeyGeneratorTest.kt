@@ -20,7 +20,7 @@ class KeyGeneratorTest : StringSpec({
 
 }) {
     companion object {
-        private val arbKey = arbitrary { KeyGenerator().generateKey() }
+        private val arbKey = arbitrary { KeyGenerator().generateKeyPair() }
         val arbTestData = Arb.pair(arbKey, Arb.string())
     }
 }

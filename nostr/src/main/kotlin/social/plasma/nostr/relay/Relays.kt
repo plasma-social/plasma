@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import social.plasma.crypto.KeyPair
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
@@ -50,6 +51,10 @@ class Relays @Inject constructor(
 
     override suspend fun send(event: EventMessage) {
         relayList.forEach { relay -> relay.send(event) }
+    }
+
+    override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) {
+        relayList.forEach { it.sendNote(text, keyPair, tags) }
     }
 
     private fun createRelay(url: String, scope: CoroutineScope): Relay = RelayImpl(
