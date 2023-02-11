@@ -55,10 +55,12 @@ class RealNoteRepository @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : NoteRepository {
 
-    private val myKeyPair = KeyPair(
-        myPubKey.get(null)!!.toByteString(),
-        mySecretKey.get(null)!!.toByteString()
-    )
+    private val myKeyPair by lazy {
+        KeyPair(
+            myPubKey.get(null)!!.toByteString(),
+            mySecretKey.get(null)!!.toByteString()
+        )
+    }
 
     override fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>> {
         return merge(

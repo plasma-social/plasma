@@ -1,15 +1,6 @@
 package social.plasma.nostr.relay
 
-import app.cash.turbine.test
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.flow.first
-import social.plasma.nostr.BuildingBlocks.JemPubKey
-import social.plasma.nostr.BuildingBlocks.client
-import social.plasma.nostr.BuildingBlocks.scarlet
-import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
-import social.plasma.nostr.relay.message.Filter
-import kotlin.time.Duration.Companion.seconds
 
 class RelaysTest : StringSpec({
 
