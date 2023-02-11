@@ -37,8 +37,4 @@ object BuildingBlocks {
             .create(),
         scope
     )
-
-    const val JemPubKey = "8366029071b385def2e4fb964d2d73e6f4246131ac1ff7608bbcb1971c5081d2"
-    const val JackPubKey = "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2"
-
 }
