@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -33,22 +32,24 @@ class ThreadListViewModel @Inject constructor(
     private val noteId: String = requireNotNull(savedStateHandle["noteId"])
 
     val uiState = threadRepository.observeThreadNotes(noteId)
-        .debounce(100)
         .mapLatest { thread ->
-            var initialFirstVisibleItem = 0
+            var firstVisibleItem = Int.MAX_VALUE
 
             val noteUiModels = thread.mapIndexed { index, noteWithUser ->
                 if (noteWithUser.noteEntity.id == noteId) {
-                    initialFirstVisibleItem = index
+                    firstVisibleItem = index
                     ThreadNoteUiModel.RootNote(noteCardMapper.toNoteUiModel(noteWithUser))
                 } else {
-                    ThreadNoteUiModel.LeafNote(noteCardMapper.toNoteUiModel(noteWithUser))
+                    ThreadNoteUiModel.LeafNote(
+                        noteCardMapper.toNoteUiModel(noteWithUser),
+                        showConnector = index < firstVisibleItem,
+                    )
                 }
             }
 
             ThreadUiState(
                 noteUiModels = noteUiModels,
-                firstVisibleItem = initialFirstVisibleItem,
+                firstVisibleItem = firstVisibleItem,
             )
         }.flowOn(defaultDispatcher).stateIn(
             viewModelScope,

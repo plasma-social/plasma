@@ -92,6 +92,7 @@ fun ThreadNote(
     onAvatarClick: ((PubKey) -> Unit)?,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
+    showConnector: Boolean,
 ) {
     Column(
         modifier = modifier,
@@ -107,14 +108,18 @@ fun ThreadNote(
         Column(
             modifier = Modifier
                 .padding(start = 38.dp)
-                .drawBehind {
-                    drawLine(
-                        borderColor,
-                        Offset(0f, 0f),
-                        Offset(0f, size.height),
-                        borderThickness.toPx(),
-                    )
-                }
+                .then(
+                    if (showConnector) {
+                        Modifier.drawBehind {
+                            drawLine(
+                                borderColor,
+                                Offset(0f, 0f),
+                                Offset(0f, size.height),
+                                borderThickness.toPx(),
+                            )
+                        }
+                    } else Modifier
+                )
                 .padding(start = 22.dp)
         ) {
             NoteContent(
@@ -133,6 +138,14 @@ private fun NoteContent(
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
 ) {
+    if (uiModel.cardLabel != null) {
+        Text(
+            text = uiModel.cardLabel,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        )
+    }
+
     FlowRow(
         modifier = Modifier.padding(16.dp),
     ) {
@@ -292,14 +305,6 @@ private fun NoteCardHeader(
                 Nip5Badge(it)
             }
         }
-
-    }
-    if (uiModel.cardLabel != null) {
-        Text(
-            text = uiModel.cardLabel,
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-        )
     }
 }
 
@@ -324,7 +329,8 @@ private fun PreviewThreadCard() {
             uiModel = NoteCardFakes.fakeUiModel,
             onAvatarClick = {},
             onLikeClick = {},
-            onReplyClick = {}
+            onReplyClick = {},
+            showConnector = true,
         )
     }
 }

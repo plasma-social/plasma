@@ -119,6 +119,7 @@ private fun ThreadList(
 
                     is LeafNote -> ThreadNote(
                         uiModel = threadUiModel.noteUiModel,
+                        showConnector = threadUiModel.showConnector,
                         modifier = Modifier.clickable { onNavigateToThread(threadUiModel.id) },
                         onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
                         onLikeClick = { onNoteReaction(threadUiModel.id) },

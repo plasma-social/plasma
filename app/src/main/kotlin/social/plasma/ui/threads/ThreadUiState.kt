@@ -22,5 +22,6 @@ sealed interface ThreadNoteUiModel {
         val noteUiModel: NoteUiModel,
         override val id: String = noteUiModel.id,
         override val pubkey: PubKey = noteUiModel.userPubkey,
+        val showConnector: Boolean = true,
     ) : ThreadNoteUiModel
 }
