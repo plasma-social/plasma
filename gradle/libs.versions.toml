@@ -12,6 +12,7 @@ composeNavigation = "2.5.3"
 coroutines = "1.6.4"
 coreKtx = "1.9.0"
 dagger = "2.44.2"
+exoplayer = "2.18.2"
 kotest = "5.5.4"
 kotlin = "1.7.20"
 lifecycle = "2.5.1"
@@ -76,14 +77,17 @@ compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material-materialicons = { module = "androidx.compose.material:material-icons-extended" }
 
-dagger-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
-dagger-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
+exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayer" }
+exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayer" }
+
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
+
+junit = "junit:junit:4.13.2"
 
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
-
-junit = "junit:junit:4.13.2"
 
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodelcompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }

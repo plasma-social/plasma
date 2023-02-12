@@ -44,8 +44,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.coroutines.android)
 
-    implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)

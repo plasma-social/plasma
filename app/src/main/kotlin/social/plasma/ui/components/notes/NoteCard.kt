@@ -33,6 +33,7 @@ import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ImageCarousel
+import social.plasma.ui.components.InlineVideoPlayer
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ZoomableImage
 import social.plasma.ui.components.notes.NoteUiModel.ContentBlock
@@ -174,6 +175,7 @@ private fun NoteContent(
                 }
 
                 is ContentBlock.Mention -> TODO()
+                is ContentBlock.Video -> InlineVideoPlayer(it.videoUrl)
             }
         }
     }

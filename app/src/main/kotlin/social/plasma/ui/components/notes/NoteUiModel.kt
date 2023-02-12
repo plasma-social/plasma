@@ -21,6 +21,8 @@ data class NoteUiModel(
 
         data class Image(val imageUrl: String) : ContentBlock
 
+        data class Video(val videoUrl: String) : ContentBlock
+
         data class Carousel(val imageUrls: List<String>) : ContentBlock
 
         data class Text(val text: String) : ContentBlock

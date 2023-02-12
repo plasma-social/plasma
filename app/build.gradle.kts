@@ -72,13 +72,11 @@ dependencies {
     implementation(libs.androidx.room.runtime)
 
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.workmanager)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
-
-    implementation(libs.lifecycle.runtime)
-    implementation(libs.lifecycle.viewmodelcompose)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.material3)
@@ -87,12 +85,16 @@ dependencies {
     implementation(libs.compose.ui.ui)
     implementation(libs.compose.ui.uitoolingpreview)
 
-    implementation(libs.dagger.hilt.android)
+    implementation(libs.exoplayer.core)
+    implementation(libs.exoplayer.ui)
+
+    implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.workmanager)
-    kapt(libs.dagger.hilt.compiler)
+    kapt(libs.hilt.compiler)
     kapt(libs.androidx.hilt.compiler)
 
-    implementation(libs.androidx.workmanager)
+    implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.viewmodelcompose)
 
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)

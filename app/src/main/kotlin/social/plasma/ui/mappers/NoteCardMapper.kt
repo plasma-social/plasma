@@ -20,6 +20,7 @@ class NoteCardMapper @Inject constructor(
     private val reactionDao: ReactionDao,
 ) {
     private val imageUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:jpg|gif|png|jpeg|svg|webp)")
+    private val videoUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:mp4|mov|webm)")
     private val tagPlaceholderRegex = Regex("#\\[[0-9]+]")
 
     suspend fun toNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
@@ -30,7 +31,7 @@ class NoteCardMapper @Inject constructor(
         return NoteUiModel(
             id = note.id,
             name = author?.name ?: authorPubKey.shortBech32,
-            content = splitIntoContentBlocks(note).filterNotNull(),
+            content = splitIntoContentBlocks(note),
             avatarUrl = author?.picture
                 ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${authorPubKey.hex}",
             timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
@@ -81,10 +82,11 @@ class NoteCardMapper @Inject constructor(
 
     private suspend fun splitIntoContentBlocks(
         note: NoteView,
-    ): List<NoteUiModel.ContentBlock?> {
+    ): List<NoteUiModel.ContentBlock> {
         val tagIndexMap = note.tags.toIndexedMap()
 
         val imageUrls = note.parseImageUrls()
+        val videoUrls = note.parseVideoUrls()
 
         val imageContent = when {
             imageUrls.size == 1 -> NoteUiModel.ContentBlock.Image(imageUrls.first())
@@ -92,14 +94,20 @@ class NoteCardMapper @Inject constructor(
             else -> null
         }
 
-        return listOf(
+        val videoBlocks = videoUrls.map {
+            NoteUiModel.ContentBlock.Video(videoUrl = it)
+        }
+
+        val contentBlocks = listOf(
             NoteUiModel.ContentBlock.Text(
                 replacePlaceholders(
                     note.content,
                     tagIndexMap
                 )
             )
-        ) + imageContent
+        ) + imageContent + videoBlocks
+
+        return contentBlocks.filterNotNull()
     }
 
 
@@ -154,4 +162,7 @@ class NoteCardMapper @Inject constructor(
     private fun Iterable<String>.generateBannerLabel(): String {
         return "Replying to ${this.joinToString()}"
     }
+
+    private fun NoteView.parseVideoUrls(): Set<String> =
+        videoUrlRegex.findAll(content).map { it.value }.toSet()
 }
