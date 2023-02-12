@@ -111,6 +111,7 @@ dependencies {
     implementation(libs.scarlet.websocket.okhttp)
 
     implementation(libs.timber)
+    implementation(libs.touchimageview)
 
     debugImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.uitooling)
