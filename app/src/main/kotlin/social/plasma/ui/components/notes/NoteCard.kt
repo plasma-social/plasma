@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -160,14 +161,15 @@ private fun NoteContent(
                 is ContentBlock.Image -> {
                     ZoomableImage(
                         modifier = Modifier.fillMaxWidth(),
-                        imageUrl = it.imageUrl
+                        imageUrl = it.imageUrl,
+                        contentScale = ContentScale.FillWidth,
                     )
                 }
 
                 is ContentBlock.Carousel -> {
                     ImageCarousel(
                         modifier = Modifier.fillMaxWidth(),
-                        imageUrls = it.imageUrls
+                        imageUrls = it.imageUrls,
                     )
                 }
 
