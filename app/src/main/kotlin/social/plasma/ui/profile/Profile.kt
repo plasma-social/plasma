@@ -55,10 +55,10 @@ import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import social.plasma.PubKey
 import social.plasma.R
-import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
+import social.plasma.ui.components.ZoomableAvatar
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
 import social.plasma.ui.profile.ProfileUiState.Loaded.UserData
@@ -257,9 +257,8 @@ fun ProfileAppBar(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Avatar(
+            ZoomableAvatar(
                 imageUrl = avatarUrl,
-                contentDescription = null,
                 size = 88.dp,
             )
         }

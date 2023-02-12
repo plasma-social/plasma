@@ -40,3 +40,19 @@ fun Avatar(
         contentDescription = contentDescription
     )
 }
+
+@Composable
+fun ZoomableAvatar(
+    imageUrl: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 44.dp,
+) {
+    ZoomableImage(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surface),
+        imageUrl = imageUrl,
+        contentScale = ContentScale.Crop
+    )
+}
