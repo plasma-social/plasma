@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import social.plasma.PubKey
 import social.plasma.R
 import social.plasma.ui.components.ProgressIndicator
+import social.plasma.ui.components.notes.GetOpenGraphMetadata
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.notes.NoteUiModel
 
@@ -54,6 +55,7 @@ fun GlobalFeed(
         onAddNote = onAddNote,
         onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
     )
 }
 
@@ -78,6 +80,7 @@ fun RepliesFeed(
         onAddNote = onAddNote,
         onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
     )
 }
 
@@ -102,6 +105,7 @@ fun ContactsFeed(
         onAddNote = onAddNote,
         onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
     )
 }
 
@@ -116,6 +120,7 @@ fun FeedContent(
     onAddNote: () -> Unit,
     onReactToNote: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
+    getOpenGraphMetadata: GetOpenGraphMetadata,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -129,6 +134,7 @@ fun FeedContent(
             onAddNote = onAddNote,
             onReactToNote = onReactToNote,
             onReply = onReply,
+            getOpenGraphMetadata = getOpenGraphMetadata,
         )
     }
 }
@@ -144,6 +150,7 @@ private fun FeedList(
     onAddNote: () -> Unit,
     onReactToNote: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
+    getOpenGraphMetadata: GetOpenGraphMetadata,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -170,7 +177,8 @@ private fun FeedList(
                             },
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
                         onLikeClick = { onReactToNote(it.id) },
-                        onReplyClick = { onReply(it.id) }
+                        onReplyClick = { onReply(it.id) },
+                        getOpenGraphMetadata = getOpenGraphMetadata,
                     )
 
                     DisposableEffect(Unit) {

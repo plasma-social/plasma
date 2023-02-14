@@ -59,6 +59,7 @@ import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
+import social.plasma.ui.components.notes.GetOpenGraphMetadata
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
 import social.plasma.ui.profile.ProfileUiState.Loaded.UserData
@@ -83,6 +84,7 @@ fun Profile(
         onNoteClick = onNavigateToThread,
         onNoteReaction = profileViewModel::onNoteReaction,
         onReply = onNavigateToReply,
+        getOpenGraphMetadata = profileViewModel::getOpenGraphMetadata,
     )
 }
 
@@ -96,6 +98,7 @@ private fun Profile(
     onNoteClick: (String) -> Unit,
     onNoteReaction: (String) -> Unit,
     onReply: (String) -> Unit,
+    getOpenGraphMetadata: GetOpenGraphMetadata,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
@@ -108,6 +111,7 @@ private fun Profile(
             onNoteClick = onNoteClick,
             onNoteReaction = onNoteReaction,
             onReply = onReply,
+            getOpenGraphMetadata = getOpenGraphMetadata
         )
     }
 }
@@ -122,6 +126,7 @@ private fun ProfileContent(
     onNoteClick: (String) -> Unit,
     onNoteReaction: (String) -> Unit,
     onReply: (String) -> Unit,
+    getOpenGraphMetadata: GetOpenGraphMetadata,
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
@@ -173,7 +178,8 @@ private fun ProfileContent(
                             },
                         onAvatarClick = null,
                         onLikeClick = { onNoteReaction(it.id) },
-                        onReplyClick = { onReply(it.id) }
+                        onReplyClick = { onReply(it.id) },
+                        getOpenGraphMetadata = getOpenGraphMetadata
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DisposableEffect(Unit) {
@@ -356,7 +362,8 @@ private fun PreviewProfile(
             onNavigateBack = {},
             onNoteClick = {},
             onNoteReaction = {},
-            onReply = {}
+            onReply = {},
+            getOpenGraphMetadata = { null }
         )
     }
 }

@@ -20,7 +20,9 @@ class NoteCardMapper @Inject constructor(
     private val reactionDao: ReactionDao,
 ) {
     private val imageUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:jpg|gif|png|jpeg|svg|webp)")
-    private val videoUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:mp4|mov|webm)")
+    private val mediaUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:mp4|mov|webm|mp3)")
+    private val urlRegex = Regex("(https?://\\S+)")
+
     private val tagPlaceholderRegex = Regex("#\\[[0-9]+]")
 
     suspend fun toNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
@@ -98,18 +100,27 @@ class NoteCardMapper @Inject constructor(
             NoteUiModel.ContentBlock.Video(videoUrl = it)
         }
 
+        val noteTextContent = note.content.replace(imageUrlRegex, "")
+            .replace(mediaUrlRegex, "")
+
+        val urlPreviewBlocks = noteTextContent.parseUrlPreviews().map {
+            NoteUiModel.ContentBlock.UrlPreview(it)
+        }
+
         val contentBlocks = listOf(
             NoteUiModel.ContentBlock.Text(
                 replacePlaceholders(
-                    note.content,
+                    noteTextContent,
                     tagIndexMap
                 )
             )
-        ) + imageContent + videoBlocks
+        ) + urlPreviewBlocks + imageContent + videoBlocks
 
         return contentBlocks.filterNotNull()
     }
 
+    private fun String.parseUrlPreviews(): Set<String> =
+        urlRegex.findAll(this).map { it.value }.toSet()
 
     private suspend fun List<List<String>>.toIndexedMap(): Map<Int, String> =
         mapIndexed { index, tag ->
@@ -164,5 +175,5 @@ class NoteCardMapper @Inject constructor(
     }
 
     private fun NoteView.parseVideoUrls(): Set<String> =
-        videoUrlRegex.findAll(content).map { it.value }.toSet()
+        mediaUrlRegex.findAll(content).map { it.value }.toSet()
 }

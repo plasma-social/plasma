@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import social.plasma.PubKey
+import social.plasma.opengraph.OpenGraphParser
 import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
@@ -21,12 +22,14 @@ class NotificationsFeedViewModel @javax.inject.Inject constructor(
     reactionsRepository: ReactionsRepository,
     notePagingFlowMapper: NotePagingFlowMapper,
     accountStateRepository: AccountStateRepository,
+    openGraphParser: OpenGraphParser,
 ) : AbstractFeedViewModel(
     recompositionClock = recompositionClock,
     userMetaDataRepository = userMetaDataRepository,
     reactionsRepository = reactionsRepository,
     pagingFlow = noteRepository.observeMentions(),
     notePagingFlowMapper = notePagingFlowMapper,
+    openGraphParser = openGraphParser,
 ) {
     val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
 

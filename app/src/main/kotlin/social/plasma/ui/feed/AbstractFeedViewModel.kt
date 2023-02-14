@@ -9,19 +9,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import social.plasma.PubKey
 import social.plasma.db.notes.NoteWithUser
+import social.plasma.opengraph.OpenGraphMetadata
+import social.plasma.opengraph.OpenGraphParser
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.base.MoleculeViewModel
 import social.plasma.ui.mappers.NotePagingFlowMapper
+import java.net.URL
 
+// TODO convert to assisted viewmodel instead of abstract
 abstract class AbstractFeedViewModel(
     recompositionClock: RecompositionClock,
     private val userMetaDataRepository: UserMetaDataRepository,
     private val reactionsRepository: ReactionsRepository,
+    private val openGraphParser: OpenGraphParser,
     notePagingFlowMapper: NotePagingFlowMapper,
     pagingFlow: Flow<PagingData<NoteWithUser>>,
 ) : MoleculeViewModel<FeedUiState, FeedUiEvent>(recompositionClock) {
-
     private val feedPagingFlow = notePagingFlowMapper.map(pagingFlow)
         .cachedIn(viewModelScope)
 
@@ -48,5 +52,9 @@ abstract class AbstractFeedViewModel(
         viewModelScope.launch {
             reactionsRepository.sendReaction(noteId)
         }
+    }
+
+    suspend fun getOpenGraphMetadata(url: String): OpenGraphMetadata? {
+        return runCatching { openGraphParser.parse(URL(url)) }.getOrNull()
     }
 }

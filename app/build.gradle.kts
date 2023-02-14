@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation(projects.nostr)
+    implementation(projects.opengraph)
 
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)

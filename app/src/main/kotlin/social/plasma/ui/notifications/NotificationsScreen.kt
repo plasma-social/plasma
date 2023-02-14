@@ -52,6 +52,7 @@ fun NotificationsScreen(
             onAddNote = onNavigateToPostNote,
             onReactToNote = viewModel::onNoteReaction,
             onReply = onNavigateToReply,
+            getOpenGraphMetadata = viewModel::getOpenGraphMetadata
         )
     }
 }

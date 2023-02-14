@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import social.plasma.PubKey
+import social.plasma.ui.components.notes.GetOpenGraphMetadata
 import social.plasma.ui.components.notes.NoteFlatCard
 import social.plasma.ui.components.notes.ThreadNote
 import social.plasma.ui.theme.PlasmaTheme
@@ -62,6 +63,7 @@ fun ThreadList(
         onAvatarClick = onNavigateToProfile,
         onNoteReaction = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
     )
 }
 
@@ -77,6 +79,7 @@ private fun ThreadList(
     onAvatarClick: (PubKey) -> Unit,
     onNoteReaction: (String) -> Unit,
     onReply: (String) -> Unit,
+    getOpenGraphMetadata: GetOpenGraphMetadata,
 ) {
     Scaffold(
         modifier = modifier,
@@ -111,7 +114,8 @@ private fun ThreadList(
                             uiModel = threadUiModel.noteUiModel,
                             onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
                             onLikeClick = { onNoteReaction(threadUiModel.id) },
-                            onReplyClick = { onReply(threadUiModel.id) }
+                            onReplyClick = { onReply(threadUiModel.id) },
+                            getOpenGraphMetadata = getOpenGraphMetadata
                         )
                         Divider(modifier = Modifier.padding(horizontal = 16.dp))
                         Spacer(Modifier.height(32.dp))
@@ -123,7 +127,8 @@ private fun ThreadList(
                         modifier = Modifier.clickable { onNavigateToThread(threadUiModel.id) },
                         onAvatarClick = { onAvatarClick(threadUiModel.pubkey) },
                         onLikeClick = { onNoteReaction(threadUiModel.id) },
-                        onReplyClick = { onReply(threadUiModel.id) }
+                        onReplyClick = { onReply(threadUiModel.id) },
+                        getOpenGraphMetadata = getOpenGraphMetadata,
                     )
                 }
 
