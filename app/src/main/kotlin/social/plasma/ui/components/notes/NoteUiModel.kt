@@ -27,6 +27,8 @@ data class NoteUiModel(
 
         data class Text(val text: String) : ContentBlock
 
+        data class UrlPreview(val url: String) : ContentBlock
+
         sealed class Mention : ContentBlock {
             abstract val text: String
         }

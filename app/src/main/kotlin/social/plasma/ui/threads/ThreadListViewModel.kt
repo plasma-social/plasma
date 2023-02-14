@@ -11,10 +11,13 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import social.plasma.PubKey
+import social.plasma.opengraph.OpenGraphMetadata
+import social.plasma.opengraph.OpenGraphParser
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.ThreadRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.mappers.NoteCardMapper
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -25,6 +28,7 @@ class ThreadListViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     threadRepository: ThreadRepository,
     private val userMetaDataRepository: UserMetaDataRepository,
+    private val openGraphParser: OpenGraphParser,
     private val reactionsRepository: ReactionsRepository,
     @Named("default") defaultDispatcher: CoroutineContext,
     private val noteCardMapper: NoteCardMapper,
@@ -75,5 +79,9 @@ class ThreadListViewModel @Inject constructor(
         viewModelScope.launch {
             reactionsRepository.sendReaction(noteId)
         }
+    }
+
+    suspend fun getOpenGraphMetadata(url: String): OpenGraphMetadata? {
+        return runCatching { openGraphParser.parse(URL(url)) }.getOrNull()
     }
 }

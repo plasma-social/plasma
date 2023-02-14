@@ -17,12 +17,15 @@ import social.plasma.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.nostr.models.UserMetaData
+import social.plasma.opengraph.OpenGraphMetadata
+import social.plasma.opengraph.OpenGraphParser
 import social.plasma.prefs.Preference
 import social.plasma.repository.ContactListRepository
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.RealUserMetaDataRepository
 import social.plasma.ui.mappers.NotePagingFlowMapper
+import java.net.URL
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +33,7 @@ class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     noteRepository: NoteRepository,
     private val userMetaDataRepository: RealUserMetaDataRepository,
+    private val openGraphParser: OpenGraphParser,
     @UserKey(KeyType.Public) pubkeyPref: Preference<ByteArray>,
     contactListRepository: ContactListRepository,
     private val reactionsRepository: ReactionsRepository,
@@ -141,6 +145,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             reactionsRepository.sendReaction(id)
         }
+    }
+
+    suspend fun getOpenGraphMetadata(url: String): OpenGraphMetadata? {
+        return runCatching { openGraphParser.parse(URL(url)) }.getOrNull()
     }
 
     override fun onCleared() {
