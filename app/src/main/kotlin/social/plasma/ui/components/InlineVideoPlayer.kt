@@ -21,11 +21,13 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.video.VideoSize
 
 @Composable
-fun InlineVideoPlayer(
+fun InlineMediaPlayer(
     videoUrl: String,
     modifier: Modifier = Modifier,
 ) {
     var aspectRatio: Float by rememberSaveable { mutableStateOf(1f) }
+
+    var isPlaying: Boolean by rememberSaveable { mutableStateOf(false) }
 
     var player: Player? by remember { mutableStateOf(null) }
 
@@ -41,9 +43,10 @@ fun InlineVideoPlayer(
                     aspectRatio = size.width / size.height.toFloat()
                 }
             })
-            
+
             setMediaItem(MediaItem.fromUri(videoUrl))
             seekTo(playbackPosition)
+            playWhenReady = isPlaying
             prepare()
         }
     }
@@ -70,6 +73,7 @@ fun InlineVideoPlayer(
         onDispose {
             player?.let { exoPlayer ->
                 playbackPosition = exoPlayer.currentPosition
+                isPlaying = exoPlayer.isPlaying
                 exoPlayer.release()
             }
             player = null

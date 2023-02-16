@@ -2,6 +2,7 @@ package social.plasma.ui.components.notes
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,7 +47,7 @@ import social.plasma.R
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ImageCarousel
-import social.plasma.ui.components.InlineVideoPlayer
+import social.plasma.ui.components.InlineMediaPlayer
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ZoomableImage
 import social.plasma.ui.components.notes.NoteUiModel.ContentBlock
@@ -171,7 +172,9 @@ private fun NoteContent(
     }
 
     FlowRow(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier
+            .padding(16.dp)
+            .animateContentSize(),
     ) {
         uiModel.content.forEach {
             when (it) {
@@ -197,7 +200,7 @@ private fun NoteContent(
                 }
 
                 is ContentBlock.Mention -> TODO()
-                is ContentBlock.Video -> InlineVideoPlayer(it.videoUrl)
+                is ContentBlock.Video -> InlineMediaPlayer(it.videoUrl)
                 is ContentBlock.UrlPreview -> OpenGraphPreviewCard(
                     it.url,
                     getOpenGraphMetadata,

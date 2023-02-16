@@ -32,6 +32,16 @@ class OpenGraphParserTest {
         assertThat(metadata?.siteName).isEqualTo("YouTube")
     }
 
+    @Test
+    fun `can parse from tidal`() = runTest {
+        val metadata = ogParser().parse(URL("https://tidal.com/track/62305984"))
+
+        assertThat(metadata?.title).isNotNull()
+        assertThat(metadata?.description).isNotNull()
+        assertThat(metadata?.image).isNotNull()
+        assertThat(metadata?.siteName).isEqualTo("Music on TIDAL")
+    }
+
     private fun CoroutineScope.ogParser(): OpenGraphParser {
         return OpenGraphParser(RealDocumentProvider(coroutineContext))
     }
