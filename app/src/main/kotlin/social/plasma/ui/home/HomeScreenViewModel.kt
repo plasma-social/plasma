@@ -32,6 +32,7 @@ class HomeScreenViewModel @Inject constructor(
             nip05 = null,
             website = null,
             banner = null,
+            lud = null,
         )
     )
 

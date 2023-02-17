@@ -33,10 +33,10 @@ fun InlineMediaPlayer(
 
     var playbackPosition by rememberSaveable { mutableStateOf(0L) }
 
-    val currentContent = LocalContext.current
+    val currentContext = LocalContext.current
 
     LaunchedEffect(Unit) {
-        player = ExoPlayer.Builder(currentContent).build().apply {
+        player = ExoPlayer.Builder(currentContext).build().apply {
             addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(size: VideoSize) {
                     super.onVideoSizeChanged(size)

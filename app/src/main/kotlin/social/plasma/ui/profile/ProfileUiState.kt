@@ -27,6 +27,7 @@ sealed interface ProfileUiState {
             val about: String?,
             val avatarUrl: String,
             val nip5: String?,
+            val lud: String?,
         )
     }
 }

@@ -22,7 +22,7 @@ import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.RelayMessage
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class EventRefinerTest : StringSpec({
 
@@ -70,8 +70,9 @@ class EventRefinerTest : StringSpec({
                 arbVanillaString.orNull(0.1),
                 arbVanillaString.orNull(0.1),
                 arbVanillaString.orNull(0.1),
-            ) { name, about, picture, banner, nip5, website, displayName ->
-                UserMetaData(name, about, picture, banner, nip5, website, displayName)
+                arbVanillaString.orNull(0.1),
+            ) { name, about, picture, banner, nip5, website, displayName, lud ->
+                UserMetaData(name, about, picture, banner, nip5, website, displayName, lud)
             }
 
         private val arbUserMetadataTestData: Arb<Pair<RelayMessage.EventRelayMessage, UserMetaData>> =

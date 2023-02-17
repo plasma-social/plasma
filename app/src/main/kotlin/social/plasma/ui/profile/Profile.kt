@@ -1,6 +1,8 @@
 package social.plasma.ui.profile
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -149,10 +152,8 @@ private fun ProfileContent(
         ) {
             item {
                 ProfileAppBar(
-                    avatarUrl = uiState.userData.avatarUrl,
                     onNavigateBack = onNavigateBack,
-                    pubkey = uiState.userData.publicKey,
-                    bannerUrl = uiState.userData.banner,
+                    userData = uiState.userData,
                 )
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -196,13 +197,9 @@ private fun ProfileContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileAppBar(
-    avatarUrl: String,
-    bannerUrl: String,
-    pubkey: PubKey,
     onNavigateBack: () -> Unit,
+    userData: UserData,
 ) {
-    val clipboardManager = LocalClipboardManager.current
-
     ConstraintLayout {
         val (coverImage, avatar, topAppBar) = createRefs()
 
@@ -215,7 +212,7 @@ fun ProfileAppBar(
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-            model = bannerUrl,
+            model = userData.banner,
             contentDescription = null,
             contentScale = ContentScale.Crop,
         )
@@ -240,14 +237,10 @@ fun ProfileAppBar(
                 }
             },
             actions = {
-                IconButton(onClick = {
-                    clipboardManager.setText(AnnotatedString(pubkey.bech32))
-                }) {
-                    Icon(
-                        painterResource(R.drawable.ic_plasma_key),
-                        stringResource(R.string.copy_public_key_to_clipboard)
-                    )
+                userData.lud?.let {
+                    LightningButton(lud = it)
                 }
+                SharePubkeyButton(pubKey = userData.publicKey)
             },
             title = { },
         )
@@ -264,10 +257,44 @@ fun ProfileAppBar(
             contentAlignment = Alignment.Center
         ) {
             ZoomableAvatar(
-                imageUrl = avatarUrl,
+                imageUrl = userData.avatarUrl,
                 size = 88.dp,
             )
         }
+    }
+}
+
+@Composable
+private fun SharePubkeyButton(
+    pubKey: PubKey,
+) {
+    val clipboardManager = LocalClipboardManager.current
+
+    IconButton(onClick = {
+        clipboardManager.setText(AnnotatedString(pubKey.bech32))
+    }) {
+        Icon(
+            painterResource(R.drawable.ic_plasma_key),
+            stringResource(R.string.copy_public_key_to_clipboard)
+        )
+    }
+}
+
+@Composable
+private fun LightningButton(lud: String) {
+    val currentContext = LocalContext.current
+    IconButton(onClick = {
+        currentContext.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("lightning:$lud")
+            )
+        )
+    }) {
+        Icon(
+            painterResource(id = R.drawable.ic_plasma_lightning_bolt),
+            null
+        )
     }
 }
 

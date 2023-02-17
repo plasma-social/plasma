@@ -26,7 +26,7 @@ interface UserMetaDataRepository {
     suspend fun syncUserMetadata(pubKey: String, force: Boolean = false)
 
     suspend fun stopUserMetadataSync(pubKey: String)
-    suspend fun getById(pubkey: String) : UserMetaData?
+    suspend fun getById(pubkey: String): UserMetaData?
 }
 
 @Singleton
@@ -105,6 +105,7 @@ private fun UserMetadataEntity.toUserMetadata(): UserMetaData = UserMetaData(
     banner = banner,
     website = website,
     nip05 = nip05,
+    lud = lud,
 )
 
 fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
@@ -118,4 +119,5 @@ fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
         nip05 = content.nip05?.split("@")?.getOrNull(1), // TODO regex
         website = content.website,
         createdAt = createdAt.epochSecond,
+        lud = content.lud,
     )
