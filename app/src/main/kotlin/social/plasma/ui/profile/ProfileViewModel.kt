@@ -90,7 +90,8 @@ class ProfileViewModel @Inject constructor(
             avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
             publicKey = profilePubKey,
             website = null,
-            banner = nostrichImage
+            banner = nostrichImage,
+            lud = null,
         ),
     )
 
@@ -117,6 +118,7 @@ class ProfileViewModel @Inject constructor(
                 nip5 = metadata.nip05,
                 avatarUrl = metadata.picture ?: "",
                 publicKey = profilePubKey,
+                lud = metadata.lud,
             ),
             following = followState,
             statCards = profileStats,
