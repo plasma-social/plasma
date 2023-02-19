@@ -35,35 +35,50 @@ class RealThreadRepository @Inject constructor(
     override fun observeThreadNotes(noteId: String): Flow<List<NoteWithUser>> {
         return merge(
             requestThread(noteId),
-            noteDao.observeThreadNotes(noteId).distinctUntilChanged().flatMapLatest { thread ->
-                val allNotes =
-                    sortedSetOf(
-                        comparator = { a, b -> a.createdAt.compareTo(b.createdAt) },
-                        thread.note
-                    ).apply {
-                        addAll(thread.childrenNotes)
-                        addAll(thread.parentNotes)
+            noteDao.observeThreadNotes(noteId)
+                .distinctUntilChanged()
+                .filterNotNull()
+                .flatMapLatest { thread ->
+                    val allNotes =
+                        sortedSetOf(
+                            comparator = { a, b -> a.createdAt.compareTo(b.createdAt) },
+                            thread.note
+                        ).apply {
+                            addAll(thread.childrenNotes)
+                            addAll(thread.parentNotes)
+                        }
+
+                    val noteFlows = allNotes.map { noteEntity ->
+                        userMetadataDao.getById(noteEntity.pubkey)
+                            .distinctUntilChanged()
+                            .zip(flowOf(noteEntity)) { user, note ->
+                                NoteWithUser(
+                                    noteEntity = note!!,
+                                    userMetadataEntity = user
+                                )
+                            }
                     }
 
-                val noteFlows = allNotes.map { noteEntity ->
-                    userMetadataDao.getById(noteEntity.pubkey)
-                        .distinctUntilChanged()
-                        .zip(flowOf(noteEntity)) { user, note ->
-                            NoteWithUser(
-                                noteEntity = note,
-                                userMetadataEntity = user
-                            )
-                        }
+                    combine(noteFlows) { it.asList() }
                 }
-
-                combine(noteFlows) { it.asList() }
-            }
         ).flowOn(ioDispatcher)
             .filterIsInstance()
     }
 
     private fun requestThread(noteId: String): Flow<Unit> = flow {
-        val parentNoteIds = noteDao.getParentNoteIds(noteId)
+        val noteTags: List<List<String>> = noteDao.getById(noteId)?.noteEntity?.tags ?: run {
+            relay.subscribe(SubscribeMessage(filter = Filter(ids = setOf(noteId))))
+                .map { eventRefiner.toNote(it) }
+                .filterNotNull()
+                .take(1)
+                .onEach {
+                    noteDao.insert(it.toNoteEntity(source = NoteSource.Thread))
+                }
+                .map { it.tags }
+                .first()
+        }
+
+        val parentNoteIds = noteTags.mapNotNull { if (it[0] == "e") it[1] else null }
 
         val childNotesFilter = Filter(eTags = setOf(noteId), kinds = setOf(Event.Kind.Note))
 

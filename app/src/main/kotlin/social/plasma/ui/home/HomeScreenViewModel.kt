@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import social.plasma.PubKey
+import social.plasma.models.PubKey
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.UserMetaDataRepository

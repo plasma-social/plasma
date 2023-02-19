@@ -27,9 +27,14 @@ class PlasmaAndroidApplication : Application(), ImageLoaderFactory, Configuratio
 
         val workManager = WorkManager.getInstance(this)
         // TODO move this to a better place
-        val refreshContactListRequest = PeriodicWorkRequestBuilder<ContactListFeedSyncWorker>(15, TimeUnit.MINUTES)
-            .build()
-        workManager.enqueueUniquePeriodicWork("sync-contactlist-feed", ExistingPeriodicWorkPolicy.UPDATE, refreshContactListRequest)
+        val refreshContactListRequest =
+            PeriodicWorkRequestBuilder<ContactListFeedSyncWorker>(15, TimeUnit.MINUTES)
+                .build()
+        workManager.enqueueUniquePeriodicWork(
+            "sync-contactlist-feed",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            refreshContactListRequest
+        )
 
     }
 

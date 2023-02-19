@@ -2,13 +2,18 @@ package social.plasma.ui.mappers
 
 import android.text.format.DateUtils
 import kotlinx.coroutines.flow.firstOrNull
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.repository.AccountStateRepository
+import social.plasma.ui.components.notes.NoteContentParser
 import social.plasma.ui.components.notes.NoteUiModel
+import social.plasma.ui.components.richtext.Mention
+import social.plasma.ui.components.richtext.NoteMention
+import social.plasma.ui.components.richtext.ProfileMention
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,12 +23,8 @@ class NoteCardMapper @Inject constructor(
     private val userMetadataDao: UserMetadataDao,
     private val accountStateRepository: AccountStateRepository,
     private val reactionDao: ReactionDao,
+    private val noteContentParser: NoteContentParser,
 ) {
-    private val imageUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:jpg|gif|png|jpeg|svg|webp)")
-    private val mediaUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:mp4|mov|webm|mp3)")
-    private val urlRegex = Regex("(https?://\\S+)")
-
-    private val tagPlaceholderRegex = Regex("#\\[[0-9]+]")
 
     suspend fun toNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
         val note = noteWithUser.noteEntity
@@ -33,7 +34,7 @@ class NoteCardMapper @Inject constructor(
         return NoteUiModel(
             id = note.id,
             name = author?.name ?: authorPubKey.shortBech32,
-            content = splitIntoContentBlocks(note),
+            content = noteContentParser.parseNote(note.content, note.tags.toIndexedMap()),
             avatarUrl = author?.picture
                 ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${authorPubKey.hex}",
             timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
@@ -82,47 +83,7 @@ class NoteCardMapper @Inject constructor(
         return referencedNames
     }
 
-    private suspend fun splitIntoContentBlocks(
-        note: NoteView,
-    ): List<NoteUiModel.ContentBlock> {
-        val tagIndexMap = note.tags.toIndexedMap()
-
-        val imageUrls = note.parseImageUrls()
-        val videoUrls = note.parseVideoUrls()
-
-        val imageContent = when {
-            imageUrls.size == 1 -> NoteUiModel.ContentBlock.Image(imageUrls.first())
-            imageUrls.size > 1 -> NoteUiModel.ContentBlock.Carousel(imageUrls.toList())
-            else -> null
-        }
-
-        val videoBlocks = videoUrls.map {
-            NoteUiModel.ContentBlock.Video(videoUrl = it)
-        }
-
-        val noteTextContent = note.content.replace(imageUrlRegex, "")
-            .replace(mediaUrlRegex, "")
-
-        val urlPreviewBlocks = noteTextContent.parseUrlPreviews().map {
-            NoteUiModel.ContentBlock.UrlPreview(it)
-        }
-
-        val contentBlocks = listOf(
-            NoteUiModel.ContentBlock.Text(
-                replacePlaceholders(
-                    noteTextContent,
-                    tagIndexMap
-                )
-            )
-        ) + urlPreviewBlocks + imageContent + videoBlocks
-
-        return contentBlocks.filterNotNull()
-    }
-
-    private fun String.parseUrlPreviews(): Set<String> =
-        urlRegex.findAll(this).map { it.value }.toSet()
-
-    private suspend fun List<List<String>>.toIndexedMap(): Map<Int, String> =
+    private suspend fun List<List<String>>.toIndexedMap(): Map<Int, Mention> =
         mapIndexed { index, tag ->
             when (tag.firstOrNull()) {
                 "p" -> {
@@ -131,20 +92,18 @@ class NoteCardMapper @Inject constructor(
                     val userName = (userMetadataDao.getById(pubkey.hex).firstOrNull()?.name
                         ?: pubkey.shortBech32)
 
-                    return@mapIndexed index to "@${userName}"
+                    return@mapIndexed index to ProfileMention(pubkey = pubkey, text = "@$userName")
                 }
 
                 "e" -> {
-                    return@mapIndexed index to "@${tag[1]}"
+                    val noteId = NoteId(tag[1])
+                    val mentionText = "@${noteId.shortBech32}"
+                    return@mapIndexed index to NoteMention(noteId = noteId, text = mentionText)
                 }
 
                 else -> null
             }
         }.filterNotNull().toMap()
-
-
-    private fun NoteView.parseImageUrls(): Set<String> =
-        imageUrlRegex.findAll(content).map { it.value }.toSet()
 
     private fun Instant.relativeTime(): String {
         return DateUtils.getRelativeTimeSpanString(
@@ -155,25 +114,8 @@ class NoteCardMapper @Inject constructor(
         ).toString()
     }
 
-    private fun replacePlaceholders(input: String, replacements: Map<Int, String>): String {
-        var result = input
-        val matches = tagPlaceholderRegex.findAll(input)
-        for (match in matches) {
-            val placeholder = match.value
-
-            val key = placeholder.substring(2, placeholder.length - 1).toInt()
-
-            if (replacements.containsKey(key)) {
-                result = result.replace(placeholder, replacements[key]!!)
-            }
-        }
-        return result
-    }
 
     private fun Iterable<String>.generateBannerLabel(): String {
         return "Replying to ${this.joinToString()}"
     }
-
-    private fun NoteView.parseVideoUrls(): Set<String> =
-        mediaUrlRegex.findAll(content).map { it.value }.toSet()
 }

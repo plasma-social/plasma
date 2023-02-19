@@ -5,7 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import social.plasma.PubKey
+import social.plasma.models.PubKey
 import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.ContactListRepository
 import social.plasma.repository.UserMetaDataRepository

@@ -1,18 +1,18 @@
-package social.plasma
+package social.plasma.models
 
 import fr.acinq.secp256k1.Hex
 import okio.ByteString.Companion.decodeHex
-import social.plasma.crypto.Bech32.toNpub
+import social.plasma.crypto.Bech32.toBech32
 
 data class PubKey(
     val hex: String,
 ) {
     val bech32 by lazy {
-        hex.decodeHex().toByteArray().toNpub()
+        hex.decodeHex().toByteArray().toBech32("npub")
     }
 
     val shortBech32 by lazy {
-        with(bech32.replace("npub", "")) {
+        with(bech32) {
             "${take(8)}:${takeLast(8)}"
         }
     }
@@ -23,3 +23,4 @@ data class PubKey(
         }
     }
 }
+

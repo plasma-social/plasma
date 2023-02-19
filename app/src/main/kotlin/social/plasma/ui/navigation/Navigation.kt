@@ -42,14 +42,14 @@ fun Navigation(
                     )
                 },
                 modifier = modifier,
-                onNavigateToThread = {
-                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                onNavigateToThread = { noteId ->
+                    navHostController.navigate(Screen.Thread.buildRoute(noteId.hex))
                 },
                 navigateToPost = {
                     navHostController.navigate(Screen.PostNote.route)
                 },
-                onNavigateToReply = {
-                    navHostController.navigate(Screen.Reply.buildRoute(it))
+                onNavigateToReply = { noteId ->
+                    navHostController.navigate(Screen.Reply.buildRoute(noteId.hex))
                 }
             )
         }
@@ -65,12 +65,18 @@ fun Navigation(
                         Screen.Profile.buildRoute(pubkey)
                     )
                 },
-                onNavigateToThread = {
-                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                onNavigateToThread = { noteId ->
+                    navHostController.navigate(Screen.Thread.buildRoute(noteId.hex))
                 },
                 modifier = modifier,
                 onNavigateToPostNote = { navHostController.navigate(Screen.PostNote.route) },
-                onNavigateToReply = { navHostController.navigate(Screen.Reply.buildRoute(it)) }
+                onNavigateToReply = { noteId ->
+                    navHostController.navigate(
+                        Screen.Reply.buildRoute(
+                            noteId.hex
+                        )
+                    )
+                }
             )
         }
 
@@ -78,11 +84,16 @@ fun Navigation(
             Profile(
                 modifier = modifier,
                 onNavigateBack = { navHostController.popBackStack() },
-                onNavigateToThread = {
-                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                onNavigateToThread = { noteId ->
+                    navHostController.navigate(Screen.Thread.buildRoute(noteId.hex))
                 },
-                onNavigateToReply = {
-                    navHostController.navigate(Screen.Reply.buildRoute(it))
+                onNavigateToReply = { noteId ->
+                    navHostController.navigate(Screen.Reply.buildRoute(noteId.hex))
+                },
+                onNavigateToProfile = {
+                    navHostController.navigate(
+                        Screen.Profile.buildRoute(it)
+                    )
                 }
             )
         }
@@ -91,16 +102,16 @@ fun Navigation(
             ThreadList(
                 modifier = modifier,
                 onNavigateBack = { navHostController.popBackStack() },
-                onNavigateToThread = {
-                    navHostController.navigate(Screen.Thread.buildRoute(it))
+                onNavigateToThread = { noteId ->
+                    navHostController.navigate(Screen.Thread.buildRoute(noteId.hex))
                 },
                 onNavigateToProfile = { pubkey ->
                     navHostController.navigate(
                         Screen.Profile.buildRoute(pubkey)
                     )
                 },
-                onNavigateToReply = {
-                    navHostController.navigate(Screen.Reply.buildRoute(it))
+                onNavigateToReply = { noteId ->
+                    navHostController.navigate(Screen.Reply.buildRoute(noteId.hex))
                 }
             )
         }

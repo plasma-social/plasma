@@ -1,6 +1,7 @@
 package social.plasma.ui.components.notes
 
-import social.plasma.PubKey
+import androidx.compose.ui.text.AnnotatedString
+import social.plasma.models.PubKey
 
 data class NoteUiModel(
     val id: String,
@@ -25,16 +26,8 @@ data class NoteUiModel(
 
         data class Carousel(val imageUrls: List<String>) : ContentBlock
 
-        data class Text(val text: String) : ContentBlock
+        data class Text(val content: AnnotatedString) : ContentBlock
 
         data class UrlPreview(val url: String) : ContentBlock
-
-        sealed class Mention : ContentBlock {
-            abstract val text: String
-        }
-
-        data class ProfileMention(override val text: String, val pubkey: String) : Mention()
-
-        data class NoteMention(override val text: String, val id: String) : Mention()
     }
 }

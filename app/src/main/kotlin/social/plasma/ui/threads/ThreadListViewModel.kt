@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
 import social.plasma.repository.ReactionsRepository
@@ -61,23 +62,23 @@ class ThreadListViewModel @Inject constructor(
             ThreadUiState(emptyList())
         )
 
-    fun onNoteDisplayed(noteId: String, pubkey: PubKey) {
+    fun onNoteDisplayed(noteId: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.syncUserMetadata(pubkey.hex)
-            reactionsRepository.syncNoteReactions(noteId)
+            reactionsRepository.syncNoteReactions(noteId.hex)
         }
     }
 
-    fun onNoteDisposed(noteId: String, pubkey: PubKey) {
+    fun onNoteDisposed(noteId: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.stopUserMetadataSync(pubkey.hex)
-            reactionsRepository.syncNoteReactions(noteId)
+            reactionsRepository.syncNoteReactions(noteId.hex)
         }
     }
 
-    fun onNoteReaction(noteId: String) {
+    fun onNoteReaction(noteId: NoteId) {
         viewModelScope.launch {
-            reactionsRepository.sendReaction(noteId)
+            reactionsRepository.sendReaction(noteId.hex)
         }
     }
 

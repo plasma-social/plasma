@@ -35,14 +35,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.R
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.ui.components.Avatar
@@ -51,6 +54,9 @@ import social.plasma.ui.components.InlineMediaPlayer
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ZoomableImage
 import social.plasma.ui.components.notes.NoteUiModel.ContentBlock
+import social.plasma.ui.components.richtext.NoteMention
+import social.plasma.ui.components.richtext.ProfileMention
+import social.plasma.ui.components.richtext.RichText
 import social.plasma.ui.theme.PlasmaTheme
 
 typealias GetOpenGraphMetadata = suspend (String) -> OpenGraphMetadata?
@@ -59,10 +65,12 @@ typealias GetOpenGraphMetadata = suspend (String) -> OpenGraphMetadata?
 fun NoteElevatedCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
-    onAvatarClick: ((PubKey) -> Unit)?,
+    onAvatarClick: (() -> Unit)?,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onProfileClick: (PubKey) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -77,6 +85,8 @@ fun NoteElevatedCard(
             onLikeClick = onLikeClick,
             onReplyClick = onReplyClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
+            onProfileClick = onProfileClick,
+            onNoteClick = onNoteClick,
         )
     }
 }
@@ -85,10 +95,12 @@ fun NoteElevatedCard(
 fun NoteFlatCard(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
-    onAvatarClick: ((PubKey) -> Unit)?,
+    onAvatarClick: (() -> Unit)?,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onProfileClick: (PubKey) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -103,6 +115,8 @@ fun NoteFlatCard(
             onLikeClick = onLikeClick,
             onReplyClick = onReplyClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
+            onProfileClick = onProfileClick,
+            onNoteClick = onNoteClick
         )
     }
 }
@@ -111,11 +125,13 @@ fun NoteFlatCard(
 fun ThreadNote(
     uiModel: NoteUiModel,
     modifier: Modifier = Modifier,
-    onAvatarClick: ((PubKey) -> Unit)?,
+    onAvatarClick: (() -> Unit)?,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
     showConnector: Boolean,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onProfileClick: (PubKey) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -150,6 +166,8 @@ fun ThreadNote(
                 onLikeClick = onLikeClick,
                 onReplyClick = onReplyClick,
                 getOpenGraphMetadata = getOpenGraphMetadata,
+                onProfileClick = onProfileClick,
+                onNoteClick = onNoteClick,
             )
         }
     }
@@ -162,6 +180,8 @@ private fun NoteContent(
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onProfileClick: (PubKey) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
 ) {
     if (uiModel.cardLabel != null) {
         Text(
@@ -175,12 +195,19 @@ private fun NoteContent(
         modifier = Modifier
             .padding(16.dp)
             .animateContentSize(),
+        mainAxisAlignment = FlowMainAxisAlignment.Start,
     ) {
         uiModel.content.forEach {
             when (it) {
                 is ContentBlock.Text -> {
-                    Text(
-                        text = it.text
+                    RichText(
+                        text = it.content,
+                        onMentionClick = { mention ->
+                            when (mention) {
+                                is NoteMention -> onNoteClick(mention.noteId)
+                                is ProfileMention -> onProfileClick(mention.pubkey)
+                            }
+                        },
                     )
                 }
 
@@ -199,7 +226,6 @@ private fun NoteContent(
                     )
                 }
 
-                is ContentBlock.Mention -> TODO()
                 is ContentBlock.Video -> InlineMediaPlayer(it.videoUrl)
                 is ContentBlock.UrlPreview -> OpenGraphPreviewCard(
                     it.url,
@@ -354,7 +380,7 @@ private fun NoteCardActionsRow(
 @Composable
 private fun NoteCardHeader(
     uiModel: NoteUiModel,
-    onAvatarClick: ((PubKey) -> Unit)?,
+    onAvatarClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -365,7 +391,7 @@ private fun NoteCardHeader(
                 modifier = Modifier.padding(end = 16.dp),
                 imageUrl = it,
                 contentDescription = uiModel.name,
-                onClick = onAvatarClick?.let { { onAvatarClick(uiModel.userPubkey) } }
+                onClick = onAvatarClick?.let { { it() } }
             )
         }
         Column(
@@ -408,7 +434,9 @@ private fun PreviewFeedCard() {
             onAvatarClick = {},
             onLikeClick = {},
             onReplyClick = {},
-            getOpenGraphMetadata = { null }
+            getOpenGraphMetadata = { null },
+            onNoteClick = {},
+            onProfileClick = {}
         )
     }
 }
@@ -423,7 +451,9 @@ private fun PreviewThreadCard() {
             onLikeClick = {},
             onReplyClick = {},
             showConnector = true,
-            getOpenGraphMetadata = { null }
+            getOpenGraphMetadata = { null },
+            onNoteClick = {},
+            onProfileClick = {}
         )
     }
 }
@@ -435,7 +465,7 @@ object NoteCardFakes {
         displayName = "Pleb",
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
         nip5 = "nostrplebs.com",
-        content = listOf(ContentBlock.Text("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19")),
+        content = listOf(ContentBlock.Text(AnnotatedString("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19"))),
         cardLabel = "Replying to Jack, JM, and 3 others",
         timePosted = "19m",
         replyCount = "352k",

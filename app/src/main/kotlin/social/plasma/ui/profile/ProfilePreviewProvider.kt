@@ -2,7 +2,7 @@ package social.plasma.ui.profile
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import kotlinx.coroutines.flow.flowOf
-import social.plasma.PubKey
+import social.plasma.models.PubKey
 import java.util.UUID
 
 class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {

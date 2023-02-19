@@ -7,11 +7,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
-import social.plasma.PubKey
 import social.plasma.crypto.KeyPair
 import social.plasma.db.notes.*
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.models.PubKey
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.models.Note
 import social.plasma.nostr.models.TypedEvent
@@ -146,7 +146,7 @@ class RealNoteRepository @Inject constructor(
     override suspend fun refreshContactsNotes(): List<NoteEntity> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
-        val latestRefresh = noteDao.getLatestNoteEpoch(myPubkey, NoteSource.Contacts)
+        val latestRefresh = noteDao.getLatestNoteEpoch(NoteSource.Contacts)
             .firstOrNull()
         val since = latestRefresh?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH
         val contacts = contactListRepository.syncContactList(pubkey = myPubkey).first()

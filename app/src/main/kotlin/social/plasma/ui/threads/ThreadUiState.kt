@@ -1,6 +1,6 @@
 package social.plasma.ui.threads
 
-import social.plasma.PubKey
+import social.plasma.models.PubKey
 import social.plasma.ui.components.notes.NoteUiModel
 
 data class ThreadUiState(

@@ -4,9 +4,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import social.plasma.models.PubKey
 import social.plasma.crypto.Bech32.bechToBytes
 import social.plasma.crypto.Bech32.pubkeyCreate
-import social.plasma.crypto.Bech32.toNpub
 
 @RunWith(AndroidJUnit4::class)
 class KeyConversionTest {
@@ -14,7 +14,7 @@ class KeyConversionTest {
     fun generatePubkeyFromSecretKey() {
         val privateKeyBytes = SECRET_KEY.bechToBytes()
 
-        val pubKey = pubkeyCreate(privateKeyBytes).toNpub()
+        val pubKey = PubKey.of(pubkeyCreate(privateKeyBytes)).bech32
 
         Assert.assertEquals(PUBLIC_KEY, pubKey)
     }
@@ -23,7 +23,7 @@ class KeyConversionTest {
     fun invalidKey() {
         val privateKeyBytes = INVALID_KEY.bechToBytes()
 
-        pubkeyCreate(privateKeyBytes).toNpub()
+        PubKey.of(pubkeyCreate(privateKeyBytes)).bech32
     }
 
     companion object {

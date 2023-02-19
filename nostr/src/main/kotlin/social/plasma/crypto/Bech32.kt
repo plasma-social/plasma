@@ -211,7 +211,8 @@ public object Bech32 {
         return output.toByteArray()
     }
 
-    fun ByteArray.toNpub() = encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
+    fun ByteArray.toBech32(hrp: String) =
+        encodeBytes(hrp = hrp, this, Encoding.Bech32)
 
     fun String.bechToBytes(hrp: String? = null): ByteArray {
 

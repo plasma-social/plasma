@@ -7,7 +7,8 @@ import androidx.paging.cachedIn
 import app.cash.molecule.RecompositionClock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
@@ -34,23 +35,23 @@ abstract class AbstractFeedViewModel(
         return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
     }
 
-    open fun onNoteDisposed(id: String, pubkey: PubKey) {
+    open fun onNoteDisposed(id: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.stopUserMetadataSync(pubkey.hex)
-            reactionsRepository.stopSyncNoteReactions(id)
+            reactionsRepository.stopSyncNoteReactions(id.hex)
         }
     }
 
-    open fun onNoteDisplayed(id: String, pubkey: PubKey) {
+    open fun onNoteDisplayed(id: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.syncUserMetadata(pubkey.hex)
-            reactionsRepository.syncNoteReactions(id)
+            reactionsRepository.syncNoteReactions(id.hex)
         }
     }
 
     fun onNoteReaction(noteId: NoteId) {
         viewModelScope.launch {
-            reactionsRepository.sendReaction(noteId)
+            reactionsRepository.sendReaction(noteId.hex)
         }
     }
 
