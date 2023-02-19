@@ -31,13 +31,16 @@ interface NoteDao {
     @Query("SELECT created_at FROM notes WHERE pubkey = :pubkey AND source = :source ORDER BY created_at DESC")
     fun getLatestNoteEpoch(pubkey: String, source: NoteSource = NoteSource.Profile): Flow<Long?>
 
+    @Query("SELECT created_at FROM notes WHERE source = :source ORDER BY created_at DESC")
+    fun getLatestNoteEpoch(source: NoteSource = NoteSource.Profile): Flow<Long?>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertNoteReference(references: Iterable<NoteReferenceEntity>)
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview WHERE id = :noteId")
-    fun observeThreadNotes(noteId: String): Flow<NoteThread>
+    fun observeThreadNotes(noteId: String): Flow<NoteThread?>
 
     @Query("SELECT targetNote FROM note_ref WHERE sourceNote = :noteId")
     fun getParentNoteIds(noteId: String): List<String>

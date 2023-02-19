@@ -1,7 +1,7 @@
 package social.plasma.ui.navigation
 
 import androidx.annotation.StringRes
-import social.plasma.PubKey
+import social.plasma.models.PubKey
 import social.plasma.R
 
 sealed class Screen(

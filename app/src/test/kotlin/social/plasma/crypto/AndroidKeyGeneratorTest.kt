@@ -1,9 +1,9 @@
 package social.plasma.crypto
 
 import fr.acinq.secp256k1.Secp256k1
-import junit.framework.TestCase.assertTrue
 import okio.ByteString.Companion.toByteString
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class AndroidKeyGeneratorTest {
@@ -17,8 +17,8 @@ class AndroidKeyGeneratorTest {
             val data = Random.Default.nextBytes(32)
             val sig = Secp256k1.get().signSchnorr(data, key.sec.toByteArray(), null)
             assertTrue(
-                "${data.toByteString()} signed by ${key.sec} should not be ${sig.toByteString()}",
-                Secp256k1.get().verifySchnorr(sig, data, key.pub.toByteArray())
+                Secp256k1.get().verifySchnorr(sig, data, key.pub.toByteArray()),
+                "${data.toByteString()} signed by ${key.sec} should not be ${sig.toByteString()}"
             )
         }
     }

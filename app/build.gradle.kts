@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.ui)
     implementation(libs.compose.ui.uitoolingpreview)
+    implementation(libs.compose.ui.util)
 
     implementation(libs.exoplayer.core)
     implementation(libs.exoplayer.ui)
@@ -126,6 +127,7 @@ dependencies {
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.slf4j.simple)
+    testImplementation(libs.truth)
     testImplementation(libs.turbine)
 
     androidTestImplementation(libs.androidx.test.espresso.core)

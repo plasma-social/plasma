@@ -1,6 +1,5 @@
 package social.plasma.ui.profile
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.border
@@ -33,7 +32,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,7 +41,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -51,12 +48,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.R
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ProgressIndicator
@@ -73,8 +70,9 @@ fun Profile(
     modifier: Modifier = Modifier,
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToThread: (String) -> Unit,
-    onNavigateToReply: (String) -> Unit,
+    onNavigateToThread: (NoteId) -> Unit,
+    onNavigateToReply: (NoteId) -> Unit,
+    onNavigateToProfile: (PubKey) -> Unit,
 ) {
     val uiState by profileViewModel.uiState.collectAsState(ProfileUiState.Loading)
 
@@ -88,6 +86,7 @@ fun Profile(
         onNoteReaction = profileViewModel::onNoteReaction,
         onReply = onNavigateToReply,
         getOpenGraphMetadata = profileViewModel::getOpenGraphMetadata,
+        onNavigateToProfile = onNavigateToProfile,
     )
 }
 
@@ -95,13 +94,14 @@ fun Profile(
 private fun Profile(
     uiState: ProfileUiState,
     modifier: Modifier = Modifier,
-    onNoteDisposed: (String) -> Unit,
-    onNoteDisplayed: (String) -> Unit,
+    onNoteDisposed: (NoteId) -> Unit,
+    onNoteDisplayed: (NoteId) -> Unit,
     onNavigateBack: () -> Unit,
-    onNoteClick: (String) -> Unit,
-    onNoteReaction: (String) -> Unit,
-    onReply: (String) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
+    onNoteReaction: (NoteId) -> Unit,
+    onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onNavigateToProfile: (PubKey) -> Unit,
 ) {
     when (uiState) {
         is ProfileUiState.Loading -> ProgressIndicator(modifier)
@@ -114,7 +114,8 @@ private fun Profile(
             onNoteClick = onNoteClick,
             onNoteReaction = onNoteReaction,
             onReply = onReply,
-            getOpenGraphMetadata = getOpenGraphMetadata
+            getOpenGraphMetadata = getOpenGraphMetadata,
+            onProfileClick = onNavigateToProfile
         )
     }
 }
@@ -123,24 +124,17 @@ private fun Profile(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileContent(
     uiState: ProfileUiState.Loaded,
-    onNoteDisplayed: (String) -> Unit,
-    onNoteDisposed: (String) -> Unit,
+    onNoteDisplayed: (NoteId) -> Unit,
+    onNoteDisposed: (NoteId) -> Unit,
     onNavigateBack: () -> Unit,
-    onNoteClick: (String) -> Unit,
-    onNoteReaction: (String) -> Unit,
-    onReply: (String) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
+    onNoteReaction: (NoteId) -> Unit,
+    onReply: (NoteId) -> Unit,
+    onProfileClick: (PubKey) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
-
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
 
     Scaffold(
         modifier = modifier,
@@ -167,25 +161,29 @@ private fun ProfileContent(
 
             items(lazyPagingItems, key = { it.id }) { cardUiModel ->
                 cardUiModel?.let {
+                    val noteId = NoteId(cardUiModel.id)
+
                     LaunchedEffect(Unit) {
-                        onNoteDisplayed(cardUiModel.id)
+                        onNoteDisplayed(noteId)
                     }
                     NoteElevatedCard(
                         uiModel = it,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .clickable {
-                                onNoteClick(cardUiModel.id)
+                                onNoteClick(noteId)
                             },
                         onAvatarClick = null,
-                        onLikeClick = { onNoteReaction(it.id) },
-                        onReplyClick = { onReply(it.id) },
-                        getOpenGraphMetadata = getOpenGraphMetadata
+                        onLikeClick = { onNoteReaction(noteId) },
+                        onReplyClick = { onReply(noteId) },
+                        getOpenGraphMetadata = getOpenGraphMetadata,
+                        onProfileClick = onProfileClick,
+                        onNoteClick = onNoteClick,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DisposableEffect(Unit) {
                         onDispose {
-                            onNoteDisposed(cardUiModel.id)
+                            onNoteDisposed(noteId)
                         }
                     }
                 }
@@ -384,13 +382,14 @@ private fun PreviewProfile(
     PlasmaTheme {
         Profile(
             uiState = uiState,
-            onNoteDisplayed = {},
             onNoteDisposed = {},
+            onNoteDisplayed = {},
             onNavigateBack = {},
             onNoteClick = {},
             onNoteReaction = {},
             onReply = {},
-            getOpenGraphMetadata = { null }
+            getOpenGraphMetadata = { null },
+            onNavigateToProfile = {}
         )
     }
 }

@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.nostr.models.UserMetaData
@@ -39,9 +40,6 @@ class ProfileViewModel @Inject constructor(
     private val reactionsRepository: ReactionsRepository,
     notePagingFlowMapper: NotePagingFlowMapper,
 ) : ViewModel() {
-    private val fakeProfile =
-        ProfilePreviewProvider().values.filterIsInstance(ProfileUiState.Loaded::class.java).first()
-
     private val profilePubKey: PubKey = PubKey(checkNotNull(savedStateHandle["pubkey"]))
 
     private val userNotesPagingFlow =
@@ -81,7 +79,7 @@ class ProfileViewModel @Inject constructor(
 
     private val initialState = ProfileUiState.Loaded(
         userNotesPagingFlow = userNotesPagingFlow,
-        statCards = fakeProfile.statCards,
+        statCards = emptyList(),
         userData = ProfileUiState.Loaded.UserData(
             petName = profilePubKey.shortBech32,
             username = null,
@@ -131,21 +129,21 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onNoteDisposed(id: String) {
+    fun onNoteDisposed(id: NoteId) {
         viewModelScope.launch {
-            reactionsRepository.stopSyncNoteReactions(id)
+            reactionsRepository.stopSyncNoteReactions(id.hex)
         }
     }
 
-    fun onNoteDisplayed(id: String) {
+    fun onNoteDisplayed(id: NoteId) {
         viewModelScope.launch {
-            reactionsRepository.syncNoteReactions(id)
+            reactionsRepository.syncNoteReactions(id.hex)
         }
     }
 
-    fun onNoteReaction(id: String) {
+    fun onNoteReaction(id: NoteId) {
         viewModelScope.launch {
-            reactionsRepository.sendReaction(id)
+            reactionsRepository.sendReaction(id.hex)
         }
     }
 

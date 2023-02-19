@@ -25,14 +25,13 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.R
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.notes.GetOpenGraphMetadata
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.notes.NoteUiModel
-
-typealias NoteId = String
 
 @Composable
 fun GlobalFeed(
@@ -165,25 +164,29 @@ private fun FeedList(
 
             items(pagingLazyItems, key = { it.id }) { note ->
                 note?.let {
+                    val noteId = NoteId(note.id)
+
                     LaunchedEffect(Unit) {
-                        onNoteDisplayed(note.id, note.userPubkey)
+                        onNoteDisplayed(noteId, note.userPubkey)
                     }
                     NoteElevatedCard(
                         uiModel = it,
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .clickable {
-                                onNoteClicked(it.id)
+                                onNoteClicked(noteId)
                             },
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
-                        onLikeClick = { onReactToNote(it.id) },
-                        onReplyClick = { onReply(it.id) },
+                        onLikeClick = { onReactToNote(noteId) },
+                        onReplyClick = { onReply(noteId) },
                         getOpenGraphMetadata = getOpenGraphMetadata,
+                        onProfileClick = onNavigateToProfile,
+                        onNoteClick = onNoteClicked,
                     )
 
                     DisposableEffect(Unit) {
                         onDispose {
-                            onNoteDisposed(note.id, note.userPubkey)
+                            onNoteDisposed(noteId, note.userPubkey)
                         }
                     }
                 }

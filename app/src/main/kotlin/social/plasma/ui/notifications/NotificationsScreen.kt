@@ -10,18 +10,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.R
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.FeedContent
-import social.plasma.ui.feed.NoteId
 import social.plasma.ui.feed.NotificationsFeedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
     onNavigateToProfile: (PubKey) -> Unit,
-    onNavigateToThread: (String) -> Unit,
+    onNavigateToThread: (NoteId) -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToPostNote: () -> Unit,
     viewModel: NotificationsFeedViewModel = hiltViewModel(),

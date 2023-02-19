@@ -26,7 +26,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import social.plasma.PubKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.R
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.ui.components.PlasmaTab
@@ -34,7 +35,6 @@ import social.plasma.ui.components.PlasmaTabRow
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.ContactsFeed
 import social.plasma.ui.feed.GlobalFeed
-import social.plasma.ui.feed.NoteId
 import social.plasma.ui.feed.RepliesFeed
 import social.plasma.ui.theme.PlasmaTheme
 
@@ -44,7 +44,7 @@ fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeScreenViewModel = hiltViewModel(),
-    onNavigateToThread: (String) -> Unit,
+    onNavigateToThread: (NoteId) -> Unit,
     navigateToPost: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
 ) {
@@ -68,7 +68,7 @@ fun HomeScreen(
 fun HomeScreen(
     onNavigateToProfile: (PubKey) -> Unit,
     modifier: Modifier = Modifier,
-    navigateToThread: (String) -> Unit,
+    navigateToThread: (NoteId) -> Unit,
     navigateToPost: () -> Unit,
     userMetaData: UserMetaData,
     userPubKey: PubKey,
