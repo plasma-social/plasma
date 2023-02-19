@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Plasma</string>
     <string name="add">Add</string>
     <string name="home">Home</string>
     <string name="messages">Messages</string>
@@ -9,12 +8,7 @@
     <string name="verified">verified</string>
     <string name="following">Following</string>
     <string name="profile">Profile</string>
-    <string name="login">Let\'s go</string>
-    <string name="private_or_public_key">nsec or npub</string>
-    <string name="login_tagline">A nostr client for Android</string>
     <string name="coming_soon">Coming Soon</string>
-    <string name="clear">Clear</string>
-    <string name="sign_in_with_a_public_or_secret_key">Sign in with a public or secret key</string>
     <string name="copy_public_key_to_clipboard">Copy public key to clipboard</string>
     <string name="back">Back</string>
     <string name="follow">Follow</string>

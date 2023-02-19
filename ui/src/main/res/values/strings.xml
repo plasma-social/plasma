@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Plasma</string>
+    <string name="login">Let\'s go</string>
+    <string name="private_or_public_key">nsec or npub</string>
+    <string name="login_tagline">A nostr client for Android</string>
+    <string name="clear">Clear</string>
+    <string name="sign_in_with_a_public_or_secret_key">Sign in with a public or secret key</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Plasma</string>
+    <string name="login">Acceder</string>
+    <string name="private_or_public_key">nsec o pubsec</string>
+    <string name="login_tagline">Un cliente de nostr</string>
+    <string name="clear">Borrar</string>
+    <string name="sign_in_with_a_public_or_secret_key">Inicie sesión con una clave pública o secreta</string>
+</resources>
