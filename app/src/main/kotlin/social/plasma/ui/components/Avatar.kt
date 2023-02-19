@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import social.plasma.R
+import social.plasma.ui.R as UiR
 
 @Composable
 fun Avatar(
@@ -33,8 +34,8 @@ fun Avatar(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
             .crossfade(true)
-            .error(R.drawable.plasma_logo)
-            .placeholder(R.drawable.plasma_logo)
+            .error(UiR.drawable.plasma_logo)
+            .placeholder(UiR.drawable.plasma_logo)
             .build(),
         contentScale = ContentScale.Crop,
         contentDescription = contentDescription

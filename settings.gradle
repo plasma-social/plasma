@@ -21,3 +21,4 @@ rootProject.name = "plasma"
 include ':app'
 include ':nostr'
 include ':opengraph'
+include ':ui'

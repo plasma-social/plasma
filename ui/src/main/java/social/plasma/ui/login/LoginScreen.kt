@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,7 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import social.plasma.R
+import social.plasma.ui.R
 import social.plasma.ui.theme.PlasmaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,12 +61,15 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(56.dp))
 
             Image(
-                modifier = Modifier.shadow(
-                    shape = CircleShape,
-                    elevation = 48.dp,
-                    ambientColor = MaterialTheme.colorScheme.primary,
-                    spotColor = MaterialTheme.colorScheme.primary,
-                ),
+                modifier = Modifier
+                    .width(52.dp)
+                    .shadow(
+                        shape = CircleShape,
+                        elevation = 48.dp,
+                        clip = false,
+                        ambientColor = MaterialTheme.colorScheme.primary,
+                        spotColor = MaterialTheme.colorScheme.primary,
+                    ),
                 painter = painterResource(id = R.drawable.plasma_logo),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)

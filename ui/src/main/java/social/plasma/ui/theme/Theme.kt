@@ -36,7 +36,8 @@ private val LightColorScheme = lightColorScheme(
 fun PlasmaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
+    dynamicStatusBar: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -49,7 +50,7 @@ fun PlasmaTheme(
         else -> LightColorScheme
     }
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (dynamicStatusBar && !view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
