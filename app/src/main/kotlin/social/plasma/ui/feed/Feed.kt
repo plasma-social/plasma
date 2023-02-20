@@ -25,13 +25,16 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.Flow
+import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.R
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.notes.GetOpenGraphMetadata
 import social.plasma.ui.components.notes.NoteElevatedCard
 import social.plasma.ui.components.notes.NoteUiModel
+import social.plasma.ui.feed.FeedUiEvent.OnNoteDisplayed
+import social.plasma.ui.feed.FeedUiEvent.OnNoteDisposed
+import social.plasma.ui.feed.FeedUiEvent.OnNoteReaction
 
 @Composable
 fun GlobalFeed(
@@ -47,12 +50,10 @@ fun GlobalFeed(
     FeedContent(
         modifier = modifier,
         uiState = uiState,
+        onEvent = viewModel::onEvent,
         onNavigateToProfile = onNavigateToProfile,
-        onNoteDisposed = viewModel::onNoteDisposed,
-        onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
-        onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
         getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
     )
@@ -73,13 +74,11 @@ fun RepliesFeed(
         modifier = modifier,
         uiState = uiState,
         onNavigateToProfile = onNavigateToProfile,
-        onNoteDisposed = viewModel::onNoteDisposed,
-        onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
-        onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
-        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -98,13 +97,11 @@ fun ContactsFeed(
         modifier = modifier,
         uiState = uiState,
         onNavigateToProfile = onNavigateToProfile,
-        onNoteDisposed = viewModel::onNoteDisposed,
-        onNoteDisplayed = viewModel::onNoteDisplayed,
         onNoteClicked = navigateToThread,
         onAddNote = onAddNote,
-        onReactToNote = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
-        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -113,13 +110,11 @@ fun FeedContent(
     modifier: Modifier = Modifier,
     uiState: FeedUiState,
     onNavigateToProfile: (PubKey) -> Unit,
-    onNoteDisposed: (NoteId, PubKey) -> Unit,
-    onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
-    onReactToNote: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onEvent: (FeedUiEvent) -> Unit,
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -127,11 +122,9 @@ fun FeedContent(
             modifier = modifier,
             noteList = uiState.feedPagingFlow,
             onNavigateToProfile = onNavigateToProfile,
-            onNoteDisplayed = onNoteDisplayed,
-            onNoteDisposed = onNoteDisposed,
+            onEvent = onEvent,
             onNoteClicked = onNoteClicked,
             onAddNote = onAddNote,
-            onReactToNote = onReactToNote,
             onReply = onReply,
             getOpenGraphMetadata = getOpenGraphMetadata,
         )
@@ -143,13 +136,11 @@ private fun FeedList(
     noteList: Flow<PagingData<NoteUiModel>>,
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
-    onNoteDisplayed: (NoteId, PubKey) -> Unit,
-    onNoteDisposed: (NoteId, PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
     onAddNote: () -> Unit,
-    onReactToNote: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onEvent: (FeedUiEvent) -> Unit,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -167,7 +158,7 @@ private fun FeedList(
                     val noteId = NoteId(note.id)
 
                     LaunchedEffect(Unit) {
-                        onNoteDisplayed(noteId, note.userPubkey)
+                        onEvent(OnNoteDisplayed(noteId, note.userPubkey))
                     }
                     NoteElevatedCard(
                         uiModel = it,
@@ -177,7 +168,7 @@ private fun FeedList(
                                 onNoteClicked(noteId)
                             },
                         onAvatarClick = { onNavigateToProfile(note.userPubkey) },
-                        onLikeClick = { onReactToNote(noteId) },
+                        onLikeClick = { onEvent(OnNoteReaction(noteId)) },
                         onReplyClick = { onReply(noteId) },
                         getOpenGraphMetadata = getOpenGraphMetadata,
                         onProfileClick = onNavigateToProfile,
@@ -186,7 +177,7 @@ private fun FeedList(
 
                     DisposableEffect(Unit) {
                         onDispose {
-                            onNoteDisposed(noteId, note.userPubkey)
+                            onEvent(OnNoteDisposed(noteId, note.userPubkey))
                         }
                     }
                 }

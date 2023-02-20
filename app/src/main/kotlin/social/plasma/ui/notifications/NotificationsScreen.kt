@@ -10,9 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.R
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.FeedContent
 import social.plasma.ui.feed.NotificationsFeedViewModel
@@ -46,13 +46,11 @@ fun NotificationsScreen(
             modifier = Modifier.padding(it),
             uiState = uiState,
             onNavigateToProfile = onNavigateToProfile,
-            onNoteDisposed = viewModel::onNoteDisposed,
-            onNoteDisplayed = viewModel::onNoteDisplayed,
             onNoteClicked = onNavigateToThread,
             onAddNote = onNavigateToPostNote,
-            onReactToNote = viewModel::onNoteReaction,
             onReply = onNavigateToReply,
-            getOpenGraphMetadata = viewModel::getOpenGraphMetadata
+            getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
+            onEvent = viewModel::onEvent
         )
     }
 }

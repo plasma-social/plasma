@@ -5,15 +5,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import app.cash.molecule.RecompositionClock
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import social.plasma.db.notes.NoteWithUser
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.db.notes.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
+import social.plasma.ui.base.EventsEffect
 import social.plasma.ui.base.MoleculeViewModel
 import social.plasma.ui.mappers.NotePagingFlowMapper
 import java.net.URL
@@ -32,24 +35,39 @@ abstract class AbstractFeedViewModel(
 
     @Composable
     override fun models(events: Flow<FeedUiEvent>): FeedUiState {
+        EventsEffect(events) { event ->
+            when (event) {
+                is FeedUiEvent.OnNoteDisposed -> onNoteDisposed(
+                    event.noteId,
+                    event.pubKey
+                )
+                is FeedUiEvent.OnNoteDisplayed -> onNoteDisplayed(
+                    event.noteId,
+                    event.pubKey,
+                )
+                is FeedUiEvent.OnNoteReaction -> onNoteReaction(
+                    event.noteId
+                )
+            }
+        }
         return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
     }
 
-    open fun onNoteDisposed(id: NoteId, pubkey: PubKey) {
+    private fun onNoteDisposed(id: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.stopUserMetadataSync(pubkey.hex)
             reactionsRepository.stopSyncNoteReactions(id.hex)
         }
     }
 
-    open fun onNoteDisplayed(id: NoteId, pubkey: PubKey) {
+    private fun onNoteDisplayed(id: NoteId, pubkey: PubKey) {
         viewModelScope.launch {
             userMetaDataRepository.syncUserMetadata(pubkey.hex)
             reactionsRepository.syncNoteReactions(id.hex)
         }
     }
 
-    fun onNoteReaction(noteId: NoteId) {
+    private fun onNoteReaction(noteId: NoteId) {
         viewModelScope.launch {
             reactionsRepository.sendReaction(noteId.hex)
         }
