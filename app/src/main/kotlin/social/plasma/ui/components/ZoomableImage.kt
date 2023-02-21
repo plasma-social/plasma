@@ -20,11 +20,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.load
+import coil.request.ImageRequest
 import com.ortiz.touchview.TouchImageView
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -33,6 +35,7 @@ fun ZoomableImage(
     imageUrl: String,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
+    options: ImageRequest.Builder.() -> Unit = {},
 ) {
 
     var showFullImage by remember { mutableStateOf(false) }
@@ -41,7 +44,10 @@ fun ZoomableImage(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable { showFullImage = true },
-        model = imageUrl,
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .apply(options)
+            .build(),
         contentScale = contentScale,
         contentDescription = null
     )
@@ -65,7 +71,7 @@ fun ZoomableImage(
                     modifier = Modifier.fillMaxSize(),
                     factory = { context ->
                         TouchImageView(context).apply {
-                            load(imageUrl)
+                            load(imageUrl, builder = options)
                         }
                     }
                 )

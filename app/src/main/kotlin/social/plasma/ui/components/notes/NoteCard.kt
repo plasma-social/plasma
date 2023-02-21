@@ -44,9 +44,9 @@ import coil.compose.AsyncImage
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
+import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.R
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ImageCarousel
