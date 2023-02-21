@@ -36,10 +36,9 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     bottomNavigationVisible = when (navBackStackEntry?.destination?.route) {
-        Screen.Home.route,
-        Screen.Messages.route,
-        Screen.Notifications.route -> true
-        else -> false
+        Screen.Profile.route,
+        Screen.PostNote.route -> false
+        else -> true
     }
     Scaffold(
         modifier = modifier,
