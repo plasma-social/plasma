@@ -121,6 +121,7 @@ fun FeedContent(
         is FeedUiState.Loaded -> FeedList(
             modifier = modifier,
             noteList = uiState.feedPagingFlow,
+            showPostButton = uiState.showPostButton,
             onNavigateToProfile = onNavigateToProfile,
             onEvent = onEvent,
             onNoteClicked = onNoteClicked,
@@ -134,6 +135,7 @@ fun FeedContent(
 @Composable
 private fun FeedList(
     noteList: Flow<PagingData<NoteUiModel>>,
+    showPostButton: Boolean,
     modifier: Modifier = Modifier,
     onNavigateToProfile: (PubKey) -> Unit,
     onNoteClicked: (NoteId) -> Unit,
@@ -187,17 +189,19 @@ private fun FeedList(
             // TODO move to the viewmodel
             CircularProgressIndicator()
         }
-        FloatingActionButton(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomEnd)
-                .padding(all = 16.dp),
-            onClick = onAddNote,
-            shape = CircleShape,
-        ) {
-            Icon(
-                painterResource(id = R.drawable.ic_plus),
-                contentDescription = stringResource(id = R.string.post_note)
-            )
+        if (showPostButton) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(alignment = Alignment.BottomEnd)
+                    .padding(all = 16.dp),
+                onClick = onAddNote,
+                shape = CircleShape,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.ic_plus),
+                    contentDescription = stringResource(id = R.string.post_note)
+                )
+            }
         }
     }
 }
