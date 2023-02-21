@@ -26,15 +26,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.R
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.ui.components.PlasmaTab
 import social.plasma.ui.components.PlasmaTabRow
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.ContactsFeed
-import social.plasma.ui.feed.GlobalFeed
 import social.plasma.ui.feed.RepliesFeed
 import social.plasma.ui.theme.PlasmaTheme
 
@@ -138,15 +137,15 @@ fun HomeScreen(
                 )
             }
 
-            composable(HomeTab.Global.name) {
-                GlobalFeed(
-                    modifier = Modifier.padding(paddingValues),
-                    onNavigateToProfile = onNavigateToProfile,
-                    navigateToThread = navigateToThread,
-                    onAddNote = navigateToPost,
-                    onNavigateToReply = onNavigateToReply,
-                )
-            }
+//            composable(HomeTab.Global.name) {
+//                GlobalFeed(
+//                    modifier = Modifier.padding(paddingValues),
+//                    onNavigateToProfile = onNavigateToProfile,
+//                    navigateToThread = navigateToThread,
+//                    onAddNote = navigateToPost,
+//                    onNavigateToReply = onNavigateToReply,
+//                )
+//            }
 
             composable(HomeTab.Replies.name) {
                 RepliesFeed(
@@ -185,10 +184,10 @@ enum class HomeTab(
         title = R.string.replies,
         icon = R.drawable.ic_plasma_replies,
     ),
-    Global(
-        title = R.string.global,
-        icon = R.drawable.ic_plasma_global_outline,
-    ),
+//    Global(
+//        title = R.string.global,
+//        icon = R.drawable.ic_plasma_global_outline,
+//    ),
     ;
 }
 
