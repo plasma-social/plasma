@@ -8,5 +8,6 @@ sealed interface FeedUiState {
     object Loading : FeedUiState
     data class Loaded(
         val feedPagingFlow: Flow<PagingData<NoteUiModel>>,
+        val showPostButton: Boolean,
     ) : FeedUiState
 }

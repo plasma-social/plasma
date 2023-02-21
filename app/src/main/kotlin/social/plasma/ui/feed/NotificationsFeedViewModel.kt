@@ -23,6 +23,7 @@ class NotificationsFeedViewModel @javax.inject.Inject constructor(
     notePagingFlowMapper: NotePagingFlowMapper,
     accountStateRepository: AccountStateRepository,
     openGraphParser: OpenGraphParser,
+    accountStateRepo: AccountStateRepository,
 ) : AbstractFeedViewModel(
     recompositionClock = recompositionClock,
     userMetaDataRepository = userMetaDataRepository,
@@ -30,6 +31,7 @@ class NotificationsFeedViewModel @javax.inject.Inject constructor(
     pagingFlow = noteRepository.observeMentions(),
     notePagingFlowMapper = notePagingFlowMapper,
     openGraphParser = openGraphParser,
+    accountStateRepo = accountStateRepo,
 ) {
     val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
 

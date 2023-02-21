@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import app.cash.molecule.RecompositionClock
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import social.plasma.db.notes.NoteWithUser
@@ -14,6 +12,7 @@ import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
+import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.base.EventsEffect
@@ -29,6 +28,7 @@ abstract class AbstractFeedViewModel(
     private val openGraphParser: OpenGraphParser,
     notePagingFlowMapper: NotePagingFlowMapper,
     pagingFlow: Flow<PagingData<NoteWithUser>>,
+    private val accountStateRepo: AccountStateRepository,
 ) : MoleculeViewModel<FeedUiState, FeedUiEvent>(recompositionClock) {
     private val feedPagingFlow = notePagingFlowMapper.map(pagingFlow)
         .cachedIn(viewModelScope)
@@ -50,7 +50,10 @@ abstract class AbstractFeedViewModel(
                 )
             }
         }
-        return FeedUiState.Loaded(feedPagingFlow = feedPagingFlow)
+        return FeedUiState.Loaded(
+            feedPagingFlow = feedPagingFlow,
+            showPostButton = accountStateRepo.getSecretKey() != null,
+        )
     }
 
     private fun onNoteDisposed(id: NoteId, pubkey: PubKey) {
