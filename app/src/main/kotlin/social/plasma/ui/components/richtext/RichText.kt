@@ -2,8 +2,10 @@ package social.plasma.ui.components.richtext
 
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +41,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
+import social.plasma.ui.components.notes.RichTextParser
 import kotlin.math.ceil
 
 object RichTextTag {
@@ -49,7 +52,8 @@ object RichTextTag {
 
 @Composable
 fun RichText(
-    text: AnnotatedString,
+    plainText: String,
+    mentions: Map<Int, Mention>,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     textAlign: TextAlign? = null,
@@ -61,6 +65,16 @@ fun RichText(
     onMentionClick: (Mention) -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
+    val linkColor = MaterialTheme.colorScheme.primary
+    val parser = remember(linkColor) { RichTextParser(linkColor) }
+
+    var richText by remember(plainText) {
+        mutableStateOf(AnnotatedString(""))
+    }
+
+    LaunchedEffect(plainText) {
+        richText = parser.parse(plainText, mentions)
+    }
 
     fun handleClick(tag: String, item: String) {
         when (tag) {
@@ -71,7 +85,7 @@ fun RichText(
         }
     }
 
-    val linkAnnotations = text.getStringAnnotations(0, text.length)
+    val linkAnnotations = richText.getStringAnnotations(0, richText.length)
 
     if (linkAnnotations.isNotEmpty()) {
         var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -82,7 +96,7 @@ fun RichText(
         Text(
             modifier = modifier
                 .then(linkify),
-            text = text,
+            text = richText,
             style = style,
             textAlign = textAlign,
             color = color,
@@ -98,7 +112,7 @@ fun RichText(
     } else {
         Text(
             modifier = modifier,
-            text = text,
+            text = richText,
             style = style,
             textAlign = textAlign,
             color = color,
