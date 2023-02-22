@@ -2,7 +2,6 @@ package social.plasma.ui.components.notes
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -192,22 +190,21 @@ private fun NoteContent(
     }
 
     FlowRow(
-        modifier = Modifier
-            .padding(16.dp)
-            .animateContentSize(),
+        modifier = Modifier.padding(16.dp),
         mainAxisAlignment = FlowMainAxisAlignment.Start,
     ) {
         uiModel.content.forEach {
             when (it) {
                 is ContentBlock.Text -> {
                     RichText(
-                        text = it.content,
+                        plainText = it.content,
                         onMentionClick = { mention ->
                             when (mention) {
                                 is NoteMention -> onNoteClick(mention.noteId)
                                 is ProfileMention -> onProfileClick(mention.pubkey)
                             }
                         },
+                        mentions = it.mentions,
                     )
                 }
 
@@ -465,7 +462,12 @@ object NoteCardFakes {
         displayName = "Pleb",
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
         nip5 = "nostrplebs.com",
-        content = listOf(ContentBlock.Text(AnnotatedString("Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19"))),
+        content = listOf(
+            ContentBlock.Text(
+                "Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19",
+                emptyMap(),
+            )
+        ),
         cardLabel = "Replying to Jack, JM, and 3 others",
         timePosted = "19m",
         replyCount = "352k",
