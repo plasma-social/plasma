@@ -4,10 +4,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.Relays
+import social.plasma.nostr.relay.message.EventRefiner
+import social.plasma.nostr.relay.message.RealEventRefiner
 import javax.inject.Singleton
 
 @Module
@@ -17,8 +17,8 @@ abstract class NostrModule {
     @Binds
     abstract fun bindsRelay(impl: Relays): Relay
 
-    companion object {
-        fun <T> Flow<T>.tap(f: (T) -> Unit): Flow<T> = this.map { f(it); it }
-    }
+    @Singleton
+    @Binds
+    internal abstract fun bindsEventRefined(impl: RealEventRefiner): EventRefiner
 }
 

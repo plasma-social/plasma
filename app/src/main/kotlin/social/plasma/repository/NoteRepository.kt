@@ -3,10 +3,12 @@ package social.plasma.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import fr.acinq.secp256k1.Hex
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
+import social.plasma.crypto.Bech32
 import social.plasma.crypto.KeyPair
 import social.plasma.db.notes.*
 import social.plasma.di.KeyType
@@ -21,6 +23,7 @@ import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
 import social.plasma.prefs.Preference
 import social.plasma.utils.chunked
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
@@ -45,6 +48,7 @@ interface NoteRepository {
     suspend fun getById(noteId: String): NoteWithUser?
 }
 
+
 class RealNoteRepository @Inject constructor(
     private val noteDao: NoteDao,
     private val contactListRepository: ContactListRepository,
@@ -54,6 +58,7 @@ class RealNoteRepository @Inject constructor(
     private val relay: Relay,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : NoteRepository {
+    private val bech32Regex = Regex("(@npub|@note|npub|note)[0-9a-z]{1,83}")
 
     private val myKeyPair by lazy {
         KeyPair(
@@ -186,24 +191,92 @@ class RealNoteRepository @Inject constructor(
     }
 
     override suspend fun postNote(content: String) = withContext(ioDispatcher) {
-        relay.sendNote(content.trim(), myKeyPair)
+        val (contentWithPlaceholders, tags) = replaceContentWithPlaceholders(content)
+
+        relay.sendNote(
+            contentWithPlaceholders.trim(),
+            myKeyPair,
+            tags,
+        )
     }
 
     override suspend fun replyToNote(noteId: String, content: String) = withContext(ioDispatcher) {
-        val note = noteDao.getById(noteId)?.noteEntity
-        note ?: return@withContext
+        val parentNote = noteDao.getById(noteId)?.noteEntity
+        parentNote ?: return@withContext
 
-        val tags = mutableSetOf(
-            listOf("e", note.id, "", if (note.isReply) "reply" else "root"),
-            listOf("p", note.pubkey)
-        ).apply {
-            val parentNoteTags = note.tags.filter {
-                it.first() == "e" || (it.first() == "p" && note.pubkey != it[1])
+        val replyTags = mutableSetOf<List<String>>().apply {
+            parentNote.tags.forEachIndexed { index, tag ->
+                if (tag.firstOrNull() == "p" || (tag.firstOrNull() == "e" && index == 0)) {
+                    add(tag)
+                }
             }
-            addAll(parentNoteTags)
+
+            add(listOf("e", parentNote.id))
+            add(listOf("p", parentNote.pubkey))
         }
 
-        relay.sendNote(content.trim(), myKeyPair, tags)
+        val (contentWithPlaceholders, tags) = replaceContentWithPlaceholders(content, replyTags)
+
+        relay.sendNote(contentWithPlaceholders.trim(), myKeyPair, tags)
+    }
+
+
+    private fun replaceContentWithPlaceholders(
+        content: String,
+        additionalTags: Set<List<String>> = emptySet(),
+    ): Pair<String, Set<List<String>>> {
+        // TODO Make it efficient 🤷🏽‍
+        val additionalPTags = additionalTags.filter { it.firstOrNull() == "p" }.toSet()
+        val additionalETags = additionalTags.filter { it.firstOrNull() == "e" }.toSet()
+
+        val npubMentions = extractBech32Mentions(content, type = "npub")
+        val noteMentions = extractBech32Mentions(content, type = "note")
+
+        val allPTags = additionalPTags + npubMentions.map { listOf("p", it.second) }
+        val allETags = additionalETags + noteMentions.map { listOf("e", it.second) }
+
+        var contentWithPlaceholders =
+            npubMentions.foldIndexed(content) { index, acc, (originalContent, hex) ->
+                val placeholderIndex =
+                    allETags.count() + allPTags.indexOfFirst { it.size >= 2 && it[1] == hex }
+                acc.replace(originalContent, "#[$placeholderIndex]")
+            }
+
+        contentWithPlaceholders =
+            noteMentions.foldIndexed(contentWithPlaceholders) { index, acc, (originalContent, hex) ->
+                val placeholderIndex = allETags.indexOfFirst { it.size >= 2 && it[1] == hex }
+                acc.replace(originalContent, "#[$placeholderIndex]")
+            }
+
+        val tags = allETags + allPTags
+
+        return Pair(contentWithPlaceholders, tags)
+    }
+
+
+    private fun extractBech32Mentions(content: String, type: String): Set<Pair<String, String>> {
+        return bech32Regex.findAll(content).map { matchResult ->
+            val matchValue = with(matchResult.value) {
+                if (this.startsWith("@"))
+                    this.drop(1)
+                else
+                    this
+            }
+
+            val (hrp, bytes) = try {
+                Bech32.decodeBytes(matchValue)
+            } catch (e: Exception) {
+                Timber.e("Invalid bech32")
+                Triple(null, null, null)
+            }
+
+            val hex = when (hrp) {
+                type -> Hex.encode(bytes!!)
+                else -> null
+            }
+
+            hex?.let { Pair(matchResult.value, it) }
+        }.filterNotNull().toSet()
     }
 
     override suspend fun getById(noteId: String): NoteWithUser? {

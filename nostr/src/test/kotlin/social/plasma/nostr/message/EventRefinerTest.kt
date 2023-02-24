@@ -19,7 +19,7 @@ import social.plasma.nostr.models.EventSerdeTest.Companion.arbEvent
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbVanillaString
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
-import social.plasma.nostr.relay.message.EventRefiner
+import social.plasma.nostr.relay.message.RealEventRefiner
 import social.plasma.nostr.relay.message.RelayMessage
 import java.time.Instant
 import java.util.UUID
@@ -29,7 +29,7 @@ class EventRefinerTest : StringSpec({
     "converts a flow of type 0 into user meta data" {
         checkAll(arbUserMetadataTestData) { (event, userMetaData) ->
             val flow = flow { emit(event) }
-            val refined = flow.map { EventRefiner(moshi).toUserMetaData(it) }.take(1).toList()
+            val refined = flow.map { RealEventRefiner(moshi).toUserMetaData(it) }.take(1).toList()
             refined shouldContainExactly listOf(
                 with(event.event) {
                     TypedEvent(id, pubKey, createdAt, Event.Kind.MetaData, tags, userMetaData, sig)
@@ -42,7 +42,7 @@ class EventRefinerTest : StringSpec({
         val message =
             createRelayMessage(content = "{\"wss://nostr-pub.semisol.dev\": { \"read\":true, \"write\":true}, \"wss://relay.damus.io\": { \"read\":true, \"write\":true}}")
 
-        val typed = EventRefiner(moshi).toRelayDetailList(message)
+        val typed = RealEventRefiner(moshi).toRelayDetailList(message)
 
         typed shouldNotBe null
         typed!!.content.count() shouldBe 2
@@ -52,7 +52,7 @@ class EventRefinerTest : StringSpec({
         val message =
             createRelayMessage(content = "")
 
-        val typed = EventRefiner(moshi).toRelayDetailList(message)
+        val typed = RealEventRefiner(moshi).toRelayDetailList(message)
 
         typed shouldBe null
     }
