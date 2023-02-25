@@ -12,6 +12,7 @@ sealed interface ProfileUiState {
         val statCards: List<ProfileStat>,
         val userData: UserData,
         val following: Boolean? = false,
+        val isNip5Valid: suspend (PubKey, String?) -> Boolean = { _, _ -> false },
     ) : ProfileUiState {
         data class ProfileStat(
             val label: String,
@@ -26,7 +27,8 @@ sealed interface ProfileUiState {
             val publicKey: PubKey,
             val about: String?,
             val avatarUrl: String,
-            val nip5: String?,
+            val nip5Identifier: String?,
+            val nip5Domain: String? = null,
             val lud: String?,
         )
     }

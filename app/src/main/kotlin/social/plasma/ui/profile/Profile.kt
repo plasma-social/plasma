@@ -34,6 +34,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,9 +53,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
+import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.R
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
@@ -152,7 +153,13 @@ private fun ProfileContent(
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            item { ProfileBio(uiState.userData, following = uiState.following) }
+            item {
+                ProfileBio(
+                    userData = uiState.userData,
+                    validateNip5 = uiState.isNip5Valid,
+                    following = uiState.following
+                )
+            }
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
@@ -299,8 +306,13 @@ private fun LightningButton(lud: String) {
 @Composable
 private fun ProfileBio(
     userData: UserData,
+    validateNip5: suspend (PubKey, String?) -> Boolean,
     following: Boolean?,
 ) {
+    val isNip5Valid by produceState(initialValue = false, userData.nip5Identifier) {
+        value = validateNip5(userData.publicKey, userData.nip5Identifier)
+    }
+
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
@@ -339,12 +351,12 @@ private fun ProfileBio(
             }
         }
 
+        if (isNip5Valid) {
+            userData.nip5Domain?.let {
+                Spacer(modifier = Modifier.height(8.dp))
 
-
-        userData.nip5?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Nip5Badge(identifier = it)
+                Nip5Badge(identifier = userData.nip5Domain)
+            }
         }
 
         userData.about?.let {
@@ -355,7 +367,6 @@ private fun ProfileBio(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
     }
 }
 

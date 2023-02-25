@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import social.plasma.models.NoteId
-import social.plasma.models.PubKey
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
@@ -84,7 +84,7 @@ class ProfileViewModel @Inject constructor(
             petName = profilePubKey.shortBech32,
             username = null,
             about = null,
-            nip5 = null,
+            nip5Identifier = null,
             avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
             publicKey = profilePubKey,
             website = null,
@@ -107,19 +107,21 @@ class ProfileViewModel @Inject constructor(
 
         ProfileUiState.Loaded(
             userNotesPagingFlow = userNotesPagingFlow,
+            statCards = profileStats,
             userData = ProfileUiState.Loaded.UserData(
                 petName = metadata.displayName ?: profilePubKey.shortBech32,
                 banner = metadata.banner ?: nostrichImage,
                 website = metadata.website,
                 username = metadata.name?.let { "@$it" },
                 about = metadata.about,
-                nip5 = metadata.nip05,
+                nip5Identifier = metadata.nip05,
+                nip5Domain = metadata.nip05?.split("@")?.getOrNull(1),
                 avatarUrl = metadata.picture ?: "",
                 publicKey = profilePubKey,
                 lud = metadata.lud,
             ),
             following = followState,
-            statCards = profileStats,
+            isNip5Valid = userMetaDataRepository::isNip5Valid
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialState)
 

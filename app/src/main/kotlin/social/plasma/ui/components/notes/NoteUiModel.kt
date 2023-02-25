@@ -8,7 +8,7 @@ data class NoteUiModel(
     val name: String,
     val displayName: String,
     val avatarUrl: String?,
-    val nip5: String?,
+    val nip5Identifier: String?,
     val content: List<ContentBlock>,
     val cardLabel: String?,
     val timePosted: String,
@@ -17,6 +17,8 @@ data class NoteUiModel(
     val likeCount: Int,
     val userPubkey: PubKey,
     val isLiked: Boolean = false,
+    val isNip5Valid: suspend (PubKey, String?) -> Boolean = { _, _ -> false },
+    val nip5Domain: String? = null,
 ) {
     sealed interface ContentBlock {
 

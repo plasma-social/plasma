@@ -6,10 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.ContactListRepository
+import social.plasma.repository.Nip5Validator
 import social.plasma.repository.NoteRepository
 import social.plasma.repository.ReactionsRepository
 import social.plasma.repository.RealAccountRepository
 import social.plasma.repository.RealContactListRepository
+import social.plasma.repository.RealNip5Validator
 import social.plasma.repository.RealNoteRepository
 import social.plasma.repository.RealReactionsRepository
 import social.plasma.repository.RealThreadRepository
@@ -39,9 +41,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindReactionsRepo(impl: RealReactionsRepository) : ReactionsRepository
+    abstract fun bindReactionsRepo(impl: RealReactionsRepository): ReactionsRepository
 
     @Binds
     @Singleton
-    abstract fun bindThreadRepo(impl: RealThreadRepository) : ThreadRepository
+    abstract fun bindThreadRepo(impl: RealThreadRepository): ThreadRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindNip5Validator(impl: RealNip5Validator): Nip5Validator
 }
