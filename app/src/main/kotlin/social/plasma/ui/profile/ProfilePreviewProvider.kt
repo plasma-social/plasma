@@ -34,7 +34,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
             ),
         ),
         userData = ProfileUiState.Loaded.UserData(
-            nip5 = nip5,
+            nip5Identifier = nip5,
             petName = "Satoshi",
             username = username,
             publicKey = PubKey(UUID.randomUUID().toString()),

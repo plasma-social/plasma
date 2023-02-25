@@ -127,6 +127,7 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.slf4j.simple)
     testImplementation(libs.testparameterinjector.junit5)
     testImplementation(libs.truth)

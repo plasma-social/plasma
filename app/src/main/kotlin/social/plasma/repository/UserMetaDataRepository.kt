@@ -1,10 +1,14 @@
 package social.plasma.repository
 
+import androidx.collection.LruCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.db.usermetadata.UserMetadataEntity
+import social.plasma.models.PubKey
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
@@ -27,6 +31,8 @@ interface UserMetaDataRepository {
 
     suspend fun stopUserMetadataSync(pubKey: String)
     suspend fun getById(pubkey: String): UserMetaData?
+
+    suspend fun isNip5Valid(pubKey: PubKey, identifier: String?): Boolean
 }
 
 @Singleton
@@ -34,12 +40,14 @@ class RealUserMetaDataRepository @Inject constructor(
     private val relays: Relay,
     private val metadataDao: UserMetadataDao,
     private val eventRefiner: EventRefiner,
+    private val nip5Validator: Nip5Validator,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : UserMetaDataRepository {
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val syncedIds = AtomicReference(setOf<String>())
     private val idsToSync = AtomicReference(setOf<String>())
     private val idsToSyncFlow = MutableSharedFlow<Set<String>>()
+    private val nip5ValidationCache: LruCache<String, String> = LruCache(1000)
 
     init {
         idsToSyncFlow
@@ -95,6 +103,31 @@ class RealUserMetaDataRepository @Inject constructor(
     override suspend fun getById(pubkey: String): UserMetaData? {
         return metadataDao.getById(pubkey).first()?.toUserMetadata()
     }
+
+    override suspend fun isNip5Valid(pubKey: PubKey, identifier: String?): Boolean =
+        withContext(ioDispatcher) {
+            identifier ?: return@withContext false
+
+            val parts = identifier.split("@")
+            if (parts.size != 2) return@withContext false
+
+            val name = parts[0]
+            val domain = parts[1]
+
+            val pubKeyHex = pubKey.hex
+
+            if (nip5ValidationCache.get(pubKeyHex) == domain) return@withContext true
+
+            val httpUrl = HttpUrl.Builder()
+                .scheme("https")
+                .host(domain)
+                .encodedPath("/.well-known/nostr.json")
+                .build()
+
+            nip5Validator.isValid(serverUrl = httpUrl, name = name, pubKeyHex = pubKeyHex).also {
+                nip5ValidationCache.put(pubKeyHex, domain)
+            }
+        }
 }
 
 private fun UserMetadataEntity.toUserMetadata(): UserMetaData = UserMetaData(
@@ -116,7 +149,7 @@ fun TypedEvent<UserMetaData>.toUserMetadataEntity(): UserMetadataEntity =
         picture = content.picture,
         displayName = content.displayName,
         banner = content.banner,
-        nip05 = content.nip05?.split("@")?.getOrNull(1), // TODO regex
+        nip05 = content.nip05,
         website = content.website,
         createdAt = createdAt.epochSecond,
         lud = content.lud,

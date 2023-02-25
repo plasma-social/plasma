@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -380,6 +381,10 @@ private fun NoteCardHeader(
     onAvatarClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
+    val isNip5Valid by produceState(initialValue = false, uiModel.nip5Identifier) {
+        value = uiModel.isNip5Valid(uiModel.userPubkey, uiModel.nip5Identifier)
+    }
+
     Row(
         modifier = modifier,
     ) {
@@ -415,8 +420,10 @@ private fun NoteCardHeader(
                 )
             }
 
-            uiModel.nip5?.let {
-                Nip5Badge(it)
+            if (isNip5Valid) {
+                uiModel.nip5Domain?.let {
+                    Nip5Badge(uiModel.nip5Domain)
+                }
             }
         }
     }
@@ -461,7 +468,7 @@ object NoteCardFakes {
         name = "@pleb",
         displayName = "Pleb",
         avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
-        nip5 = "nostrplebs.com",
+        nip5Identifier = "nostrplebs.com",
         content = listOf(
             ContentBlock.Text(
                 "Just a pleb doing pleb things. What’s your favorite nostr client, anon? \uD83E\uDD19",

@@ -2,13 +2,14 @@ package social.plasma.ui.mappers
 
 import android.text.format.DateUtils
 import kotlinx.coroutines.flow.firstOrNull
-import social.plasma.models.NoteId
-import social.plasma.models.PubKey
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.usermetadata.UserMetadataDao
+import social.plasma.models.NoteId
+import social.plasma.models.PubKey
 import social.plasma.repository.AccountStateRepository
+import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.components.notes.NoteContentParser
 import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.components.richtext.Mention
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class NoteCardMapper @Inject constructor(
     private val userMetadataDao: UserMetadataDao,
+    private val userMetaDataRepository: UserMetaDataRepository,
     private val accountStateRepository: AccountStateRepository,
     private val reactionDao: ReactionDao,
     private val noteContentParser: NoteContentParser,
@@ -42,11 +44,13 @@ class NoteCardMapper @Inject constructor(
             shareCount = "",
             likeCount = note.reactionCount,
             userPubkey = authorPubKey,
-            nip5 = author?.nip05,
+            nip5Identifier = author?.nip05,
+            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
             displayName = author?.displayName?.takeIf { it.isNotBlank() } ?: author?.name
             ?: authorPubKey.shortBech32,
             cardLabel = note.buildBannerLabel(),
-            isLiked = note.isLiked()
+            isLiked = note.isLiked(),
+            isNip5Valid = userMetaDataRepository::isNip5Valid
         )
     }
 
