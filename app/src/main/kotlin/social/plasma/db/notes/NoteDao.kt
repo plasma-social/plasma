@@ -19,14 +19,21 @@ interface NoteDao {
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey IN (:pubkey)")
-    fun userNotesAndRepliesPagingSource(pubkey: List<String>): PagingSource<Int, NoteWithUser>
+    @Query("SELECT * FROM noteview WHERE pubkey = :pubkey")
+    fun userNotesAndRepliesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query("SELECT * FROM noteview WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND NOT is_reply")
+    fun userContactNotesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser>
+
+    @Query("SELECT * FROM noteview WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey)")
+    fun userContactNotesAndRepliesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview")
     fun globalNotesPagingSource(): PagingSource<Int, NoteWithUser>
-
 
     @Query("SELECT created_at FROM notes WHERE pubkey = :pubkey AND source = :source ORDER BY created_at DESC")
     fun getLatestNoteEpoch(pubkey: String, source: NoteSource = NoteSource.Profile): Flow<Long?>
@@ -35,29 +42,28 @@ interface NoteDao {
     fun getLatestNoteEpoch(source: NoteSource = NoteSource.Profile): Flow<Long?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertNoteReference(references: Iterable<NoteReferenceEntity>)
+    fun insertNoteReferences(references: Iterable<NoteReferenceEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertPubkeyReferences(references: Iterable<PubkeyReferenceEntity>)
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview WHERE id = :noteId")
     fun observeThreadNotes(noteId: String): Flow<NoteThread?>
 
-    @Query("SELECT targetNote FROM note_ref WHERE sourceNote = :noteId")
-    fun getParentNoteIds(noteId: String): List<String>
-
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE NOT(is_reply) AND source = :source")
-    fun notesBySource(source: NoteSource): PagingSource<Int, NoteWithUser>
-
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE source = :source")
-    fun notesAndRepliesBySource(source: NoteSource): PagingSource<Int, NoteWithUser>
-
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview WHERE id = :noteId")
     suspend fun getById(noteId: String): NoteWithUser?
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "SELECT * FROM noteview n " +
+                "LEFT JOIN pubkey_ref pr ON pr.sourceNote = n.id " +
+                "WHERE pr.pubkey = :pubkey"
+    )
+    fun pubkeyMentions(pubkey: String): PagingSource<Int, NoteWithUser>
 }
 

@@ -10,6 +10,7 @@ import social.plasma.db.notes.NoteDao
 import social.plasma.db.notes.NoteEntity
 import social.plasma.db.notes.NoteReferenceEntity
 import social.plasma.db.notes.NoteView
+import social.plasma.db.notes.PubkeyReferenceEntity
 import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.reactions.ReactionEntity
 import social.plasma.db.usermetadata.UserMetadataDao
@@ -22,6 +23,7 @@ import social.plasma.db.usermetadata.UserMetadataEntity
         ReactionEntity::class,
         ContactEntity::class,
         NoteReferenceEntity::class,
+        PubkeyReferenceEntity::class,
     ],
     views = [
         NoteView::class,

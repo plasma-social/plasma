@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class FakeNoteDao : NoteDao {
     val noteWithUserTurbine = Turbine<NoteWithUser>()
+
     override fun insert(noteEntity: NoteEntity) {
         TODO("Not yet implemented")
     }
@@ -14,10 +15,18 @@ class FakeNoteDao : NoteDao {
         TODO("Not yet implemented")
     }
 
-    override fun userNotesAndRepliesPagingSource(pubkey: List<String>): PagingSource<Int, NoteWithUser> {
+    override fun userNotesAndRepliesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser> {
         TODO("Not yet implemented")
     }
 
+    override fun userContactNotesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
+
+    override fun userContactNotesAndRepliesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
+    
     override fun globalNotesPagingSource(): PagingSource<Int, NoteWithUser> {
         TODO("Not yet implemented")
     }
@@ -30,7 +39,11 @@ class FakeNoteDao : NoteDao {
         TODO("Not yet implemented")
     }
 
-    override fun insertNoteReference(references: Iterable<NoteReferenceEntity>) {
+    override fun insertNoteReferences(references: Iterable<NoteReferenceEntity>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun insertPubkeyReferences(references: Iterable<PubkeyReferenceEntity>) {
         TODO("Not yet implemented")
     }
 
@@ -38,20 +51,11 @@ class FakeNoteDao : NoteDao {
         TODO("Not yet implemented")
     }
 
-    override fun getParentNoteIds(noteId: String): List<String> {
-        TODO("Not yet implemented")
-    }
-
-    override fun notesBySource(source: NoteSource): PagingSource<Int, NoteWithUser> {
-        TODO("Not yet implemented")
-    }
-
-    override fun notesAndRepliesBySource(source: NoteSource): PagingSource<Int, NoteWithUser> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun getById(noteId: String): NoteWithUser? {
         return noteWithUserTurbine.awaitItem()
     }
 
+    override fun pubkeyMentions(pubkey: String): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
 }
