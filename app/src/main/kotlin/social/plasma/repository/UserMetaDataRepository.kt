@@ -87,6 +87,7 @@ class RealUserMetaDataRepository @Inject constructor(
             .distinctUntilChanged()
             .filterNotNull()
             .map { it.toUserMetadata() }
+            .flowOn(ioDispatcher)
 
     override suspend fun syncUserMetadata(pubKey: String, force: Boolean) {
         if (force || !syncedIds.get().contains(pubKey)) {

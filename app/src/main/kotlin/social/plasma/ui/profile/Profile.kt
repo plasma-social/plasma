@@ -337,7 +337,9 @@ private fun ProfileBio(
 
             OutlinedButton(
                 onClick = { /*TODO*/ },
-                enabled = following != null,
+                // TODO implement following/unfollowing
+                enabled = false,
+//                enabled = following != null,
                 border = ButtonDefaults.outlinedButtonBorder
                     .copy(brush = SolidColor(MaterialTheme.colorScheme.primary))
             ) {
