@@ -15,6 +15,7 @@ import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.components.richtext.Mention
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -101,7 +102,14 @@ class NoteCardMapper @Inject constructor(
 
                 "e" -> {
                     val noteId = NoteId(tag[1])
-                    val mentionText = "@${noteId.shortBech32}"
+                    val mentionText = try {
+                        "@${noteId.shortBech32}"
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                        null
+                    }
+
+                    mentionText ?: return@mapIndexed null
                     return@mapIndexed index to NoteMention(noteId = noteId, text = mentionText)
                 }
 

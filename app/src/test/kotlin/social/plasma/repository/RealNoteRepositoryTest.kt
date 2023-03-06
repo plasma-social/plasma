@@ -22,12 +22,11 @@ internal class RealNoteRepositoryTest {
 
     private val repo = RealNoteRepository(
         noteDao = noteDao,
-        ioDispatcher = testDispatcher,
         contactListRepository = FakeContactListRepo(),
-        eventRefiner = FakeEventRefiner(),
-        relay = relay,
         myPubKey = FakePreference(keys.pub.toByteArray()),
         mySecretKey = FakePreference(keys.sec.toByteArray()),
+        relay = relay,
+        ioDispatcher = testDispatcher,
     )
 
     @Test

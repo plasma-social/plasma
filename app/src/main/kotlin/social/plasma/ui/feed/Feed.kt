@@ -165,7 +165,7 @@ private fun FeedList(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
 
-            items(pagingLazyItems) { note ->
+            items(pagingLazyItems, key = { it.id }) { note ->
                 note?.let {
                     val noteId = NoteId(note.id)
 

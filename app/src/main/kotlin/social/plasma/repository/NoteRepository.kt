@@ -4,7 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import fr.acinq.secp256k1.Hex
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
@@ -15,20 +14,18 @@ import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.models.PubKey
 import social.plasma.nostr.models.Event
-import social.plasma.nostr.models.Note
-import social.plasma.nostr.models.TypedEvent
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
-import social.plasma.nostr.relay.message.EventRefiner
 import social.plasma.nostr.relay.message.Filter
+import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.prefs.Preference
-import social.plasma.utils.chunked
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
-import kotlin.streams.toList
+import kotlin.time.Duration.Companion.days
+import kotlin.time.toJavaDuration
 
 interface NoteRepository {
     fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>>
@@ -39,7 +36,7 @@ interface NoteRepository {
 
     fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>>
 
-    suspend fun refreshContactsNotes(): List<NoteEntity>
+    suspend fun refreshContactsNotes(): List<RelayMessage.EventRelayMessage>
 
     fun observeMentions(): Flow<PagingData<NoteWithUser>>
 
@@ -49,13 +46,11 @@ interface NoteRepository {
     suspend fun getById(noteId: String): NoteWithUser?
 }
 
-
 class RealNoteRepository @Inject constructor(
     private val noteDao: NoteDao,
     private val contactListRepository: ContactListRepository,
     @UserKey(KeyType.Public) private val myPubKey: Preference<ByteArray>,
     @UserKey(KeyType.Secret) private val mySecretKey: Preference<ByteArray>,
-    private val eventRefiner: EventRefiner,
     private val relay: Relay,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : NoteRepository {
@@ -71,36 +66,34 @@ class RealNoteRepository @Inject constructor(
     override fun observeGlobalNotes(): Flow<PagingData<NoteWithUser>> {
         return merge(
             Pager(
-                config = PagingConfig(pageSize = 25, maxSize = 500),
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
                 pagingSourceFactory = { noteDao.globalNotesPagingSource() }
             ).flow,
 
-            fetchWithNoteDbSync(
-                SubscribeMessage(Filter.globalFeedNotes),
-                NoteSource.Global
+            sync(
+                SubscribeMessage(Filter.globalFeedNotes)
             )
 
         ).filterIsInstance()
     }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeProfileNotes(pubkey: String): Flow<PagingData<NoteWithUser>> {
         return merge(
             Pager(
-                config = PagingConfig(pageSize = 25, maxSize = 500),
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
                 pagingSourceFactory = { noteDao.userNotesAndRepliesPagingSource(pubkey) }
             ).flow,
 
-            noteDao.getLatestNoteEpoch(pubkey).take(1)
-                .map { epoch -> epoch?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH }
-                .flatMapLatest { since ->
-                    fetchWithNoteDbSync(
-                        subscribeMessage = SubscribeMessage(Filter.userNotes(pubkey, since)),
-                        source = NoteSource.Profile
+            sync(
+                subscribeMessage = SubscribeMessage(
+                    Filter.userNotes(
+                        pubkey,
+                        Instant.now().minus(14.days.toJavaDuration())
                     )
-                }
-                .flowOn(ioDispatcher),
+                )
+            )
+
         ).filterIsInstance()
     }
 
@@ -110,17 +103,14 @@ class RealNoteRepository @Inject constructor(
 
         return merge(
             Pager(
-                config = PagingConfig(pageSize = 25, maxSize = 500),
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
                 pagingSourceFactory = {
                     noteDao.userContactNotesPagingSource(myPubkey)
                 }
             ).flow,
 
             contactListRepository.observeContactLists(myPubkey).flatMapLatest {
-                fetchWithNoteDbSync(
-                    SubscribeMessage(Filter.userNotes(it.map { it.pubKey.hex() }.toSet())),
-                    NoteSource.Contacts
-                )
+                sync(SubscribeMessage(Filter.userNotes(it.map { it.pubKey.hex() }.toSet())))
             }
 
         ).filterIsInstance()
@@ -131,7 +121,7 @@ class RealNoteRepository @Inject constructor(
 
         return merge(
             Pager(
-                config = PagingConfig(pageSize = 25, maxSize = 500),
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
                 pagingSourceFactory = {
                     noteDao.userContactNotesAndRepliesPagingSource(myPubkey)
                 }
@@ -141,32 +131,31 @@ class RealNoteRepository @Inject constructor(
                 .filter { it.isNotEmpty() }.distinctUntilChanged().flatMapLatest {
                     val contactNpubList = it.map { it.pubKey.hex() }
 
-                    fetchWithNoteDbSync(
-                        SubscribeMessage(Filter.userNotes(contactNpubList.toSet())),
-                        NoteSource.Contacts
-                    )
+                    sync(SubscribeMessage(Filter.userNotes(contactNpubList.toSet())))
                 }
         ).filterIsInstance()
 
     }
 
-    override suspend fun refreshContactsNotes(): List<NoteEntity> {
-        val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
-
-        val latestRefresh = noteDao.getLatestNoteEpoch(NoteSource.Contacts)
-            .firstOrNull()
-        val since = latestRefresh?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH
-        val contacts = contactListRepository.syncContactList(pubkey = myPubkey).first()
-        val contactNpubList = contacts.map { it.pubKey.hex() }
-        return fetchWithNoteDbSync(
-            SubscribeMessage(
-                Filter.userNotes(
-                    pubKeys = contactNpubList.toSet(),
-                    since = since,
-                )
-            ),
-            NoteSource.Contacts
-        ).first()
+    override suspend fun refreshContactsNotes(): List<RelayMessage.EventRelayMessage> {
+        // TODO Refresh contacts events
+//        val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
+//
+//        val latestRefresh = noteDao.getLatestNoteEpoch(NoteSource.Contacts)
+//            .firstOrNull()
+//        val since = latestRefresh?.let { Instant.ofEpochSecond(it) } ?: Instant.EPOCH
+//        val contacts = contactListRepository.syncContactList(pubkey = myPubkey).first()
+//        val contactNpubList = contacts.map { it.pubKey.hex() }
+//        return fetchWithNoteDbSync(
+//            SubscribeMessage(
+//                Filter.userNotes(
+//                    pubKeys = contactNpubList.toSet(),
+//                    since = since,
+//                )
+//            ),
+//            NoteSource.Contacts
+//        ).first()
+        return emptyList()
     }
 
     override fun observeMentions(): Flow<PagingData<NoteWithUser>> {
@@ -174,20 +163,23 @@ class RealNoteRepository @Inject constructor(
 
         return merge(
             Pager(
-                config = PagingConfig(pageSize = 25, maxSize = 500),
+                config = PagingConfig(
+                    pageSize = DEFAULT_PAGE_SIZE,
+                    maxSize = DEFAULT_MAX_SIZE,
+                    enablePlaceholders = true
+                ),
                 pagingSourceFactory = {
                     noteDao.pubkeyMentions(myPubkey)
                 }
             ).flow,
 
-            fetchWithNoteDbSync(
+            sync(
                 SubscribeMessage(
                     Filter(
                         pTags = setOf(myPubkey),
-                        kinds = setOf(Event.Kind.Note)
+                        kinds = setOf(Event.Kind.Note, Event.Kind.Repost, Event.Kind.Reaction)
                     )
-                ),
-                NoteSource.Notifications
+                )
             )
         ).filterIsInstance()
     }
@@ -285,51 +277,12 @@ class RealNoteRepository @Inject constructor(
         return noteDao.getById(noteId)
     }
 
-    private fun fetchWithNoteDbSync(subscribeMessage: SubscribeMessage, source: NoteSource) =
+    private fun sync(subscribeMessage: SubscribeMessage) =
         relay.subscribe(subscribeMessage)
-            .map { eventRefiner.toNote(it) }
-            .filterNotNull()
-            .map { it.toNoteEntity(source) }
-            .chunked(500, 200)
-            .onEach {
-                val noteReferences = it.parallelStream().flatMap { note ->
-                    val sourceNoteId = note.id
-
-                    note.tags.parallelStream().filter { it.firstOrNull() == "e" }.map {
-                        NoteReferenceEntity(sourceNoteId, targetNote = it[1])
-                    }
-                }
-
-                val pubkeyReferences = it.parallelStream().flatMap { note ->
-                    val sourceNoteId = note.id
-                    note.tags.parallelStream().filter { it.firstOrNull() == "p" }.map {
-                        PubkeyReferenceEntity(sourceNoteId, pubkey = it[1])
-                    }
-                }
-
-                noteDao.insertNoteReferences(noteReferences.toList())
-                noteDao.insertPubkeyReferences(pubkeyReferences.toList())
-                noteDao.insert(it)
-            }
-            .flowOn(ioDispatcher)
 
     companion object {
-        const val CHUNK_MAX_SIZE = 500
-        const val CHUNK_DELAY = 1000L
+        const val DEFAULT_PAGE_SIZE = 10
+        const val DEFAULT_MAX_SIZE = 150
     }
 }
 
-fun TypedEvent<Note>.toNoteEntity(
-    source: NoteSource,
-): NoteEntity = NoteEntity(
-    id = id.hex(),
-    pubkey = pubKey.hex(),
-    createdAt = createdAt.epochSecond,
-    content = content.text,
-    sig = sig.hex(),
-    source = source,
-    // TODO This isn't fool-proof.
-    //  What happens with notes that mention other notes but aren't replies?
-    isReply = tags.any { it.firstOrNull() == "e" },
-    tags = tags,
-)

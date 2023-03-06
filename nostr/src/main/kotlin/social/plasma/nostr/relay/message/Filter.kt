@@ -32,7 +32,7 @@ data class Filter(
         fun userNotes(pubKeys: Set<String>, since: Instant = Instant.EPOCH) = Filter(
             since = since,
             authors = pubKeys,
-            kinds = setOf(Event.Kind.Note),
+            kinds = setOf(Event.Kind.Note, Event.Kind.Repost),
             limit = 500,
         )
 
