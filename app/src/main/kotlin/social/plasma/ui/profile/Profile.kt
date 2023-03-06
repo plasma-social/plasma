@@ -26,6 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -35,6 +38,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
@@ -136,8 +142,11 @@ private fun ProfileContent(
     modifier: Modifier = Modifier,
 ) {
     val lazyPagingItems = uiState.userNotesPagingFlow.collectAsLazyPagingItems()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier,
         contentWindowInsets = WindowInsets(left = 0, right = 0, top = 0, bottom = 0),
     ) { paddingValues ->
@@ -157,7 +166,16 @@ private fun ProfileContent(
                 ProfileBio(
                     userData = uiState.userData,
                     validateNip5 = uiState.isNip5Valid,
-                    following = uiState.following
+                    following = uiState.following,
+                    onFollowClick = {
+                        scope.launch {
+                            // TODO implement following/unfollowing
+                            snackbarHostState.showSnackbar(
+                                "Coming Soon",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
                 )
             }
 
@@ -308,6 +326,7 @@ private fun ProfileBio(
     userData: UserData,
     validateNip5: suspend (PubKey, String?) -> Boolean,
     following: Boolean?,
+    onFollowClick: () -> Unit,
 ) {
     val isNip5Valid by produceState(initialValue = false, userData.nip5Identifier) {
         value = validateNip5(userData.publicKey, userData.nip5Identifier)
@@ -336,10 +355,8 @@ private fun ProfileBio(
             Spacer(modifier = Modifier.weight(1f))
 
             OutlinedButton(
-                onClick = { /*TODO*/ },
-                // TODO implement following/unfollowing
-                enabled = false,
-//                enabled = following != null,
+                onClick = onFollowClick,
+                enabled = following != null,
                 border = ButtonDefaults.outlinedButtonBorder
                     .copy(brush = SolidColor(MaterialTheme.colorScheme.primary))
             ) {
