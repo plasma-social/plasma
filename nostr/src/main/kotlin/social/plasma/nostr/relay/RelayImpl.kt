@@ -3,14 +3,23 @@ package social.plasma.nostr.relay
 import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
 import social.plasma.crypto.KeyPair
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
-import social.plasma.nostr.relay.message.ClientMessage.*
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
 import java.time.Instant
@@ -30,7 +39,7 @@ class RelayImpl(
             .filterNot { it is WebSocket.Event.OnMessageReceived }
             .map { Relay.RelayStatus(url, it.toStatus()) }
 
-    private val relayMessages = service.relayMessageFlow()
+    override val relayMessages = service.relayMessageFlow().asFlow()
     private val subscriptions: AtomicReference<Set<SubscribeMessage>> = AtomicReference(setOf())
     private val pendingSendEvents: AtomicReference<List<ClientMessage>> = AtomicReference(listOf())
     private val status = MutableStateFlow<Relay.Status?>(null)
@@ -46,7 +55,7 @@ class RelayImpl(
         logger.d("adding sub %s", subscribeMessage)
         logger.d("sub count %s", subscriptions.get().count())
 
-        return relayMessages.asFlow()
+        return relayMessages
             .onEach { if (it is RelayMessage.NoticeRelayMessage) logger.w(it.message) }
             .filterIsInstance<RelayMessage.EventRelayMessage>()
             .filter { it.subscriptionId == subscribeMessage.subscriptionId }

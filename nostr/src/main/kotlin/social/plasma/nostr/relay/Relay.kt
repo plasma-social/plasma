@@ -4,11 +4,14 @@ import kotlinx.coroutines.flow.Flow
 import social.plasma.crypto.KeyPair
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 
 interface Relay {
     val connectionStatus: Flow<RelayStatus>
 
+    val relayMessages: Flow<RelayMessage>
+    
     suspend fun connect()
 
     fun disconnect()

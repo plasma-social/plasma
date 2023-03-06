@@ -7,8 +7,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.db.PlasmaDb
-import social.plasma.db.converters.TagsTypeConverter
 import social.plasma.db.contacts.ContactsDao
+import social.plasma.db.converters.TagsTypeConverter
+import social.plasma.db.events.EventsDao
 import social.plasma.db.notes.NoteDao
 import social.plasma.db.reactions.ReactionDao
 import social.plasma.db.usermetadata.UserMetadataDao
@@ -47,4 +48,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providesContactsDao(db: PlasmaDb): ContactsDao = db.contactsDao()
+
+    @Provides
+    @Singleton
+    fun providesEventDao(db: PlasmaDb): EventsDao = db.eventsDao()
 }

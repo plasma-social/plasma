@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import social.plasma.crypto.KeyPair
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,6 +35,8 @@ class Relays @Inject constructor(
 
     override val connectionStatus: Flow<Relay.RelayStatus>
         get() = relayList.map { it.connectionStatus }.merge()
+    override val relayMessages: Flow<RelayMessage>
+        get() = relayList.map { it.relayMessages }.merge()
 
     override suspend fun connect() {
         relayList.forEach {
