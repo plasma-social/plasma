@@ -94,6 +94,7 @@ fun Profile(
         onReply = onNavigateToReply,
         getOpenGraphMetadata = profileViewModel::getOpenGraphMetadata,
         onNavigateToProfile = onNavigateToProfile,
+        onRepostClick = profileViewModel::onRepostClick,
     )
 }
 
@@ -106,6 +107,7 @@ private fun Profile(
     onNavigateBack: () -> Unit,
     onNoteClick: (NoteId) -> Unit,
     onNoteReaction: (NoteId) -> Unit,
+    onRepostClick: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onNavigateToProfile: (PubKey) -> Unit,
@@ -122,7 +124,8 @@ private fun Profile(
             onNoteReaction = onNoteReaction,
             onReply = onReply,
             getOpenGraphMetadata = getOpenGraphMetadata,
-            onProfileClick = onNavigateToProfile
+            onProfileClick = onNavigateToProfile,
+            onRepostClick = onRepostClick
         )
     }
 }
@@ -135,6 +138,7 @@ private fun ProfileContent(
     onNoteDisposed: (NoteId) -> Unit,
     onNavigateBack: () -> Unit,
     onNoteClick: (NoteId) -> Unit,
+    onRepostClick: (NoteId) -> Unit,
     onNoteReaction: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
     onProfileClick: (PubKey) -> Unit,
@@ -204,6 +208,7 @@ private fun ProfileContent(
                         getOpenGraphMetadata = getOpenGraphMetadata,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,
+                        onRepostClick = { onRepostClick(noteId) },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     DisposableEffect(Unit) {
@@ -419,7 +424,8 @@ private fun PreviewProfile(
             onNoteReaction = {},
             onReply = {},
             getOpenGraphMetadata = { null },
-            onNavigateToProfile = {}
+            onNavigateToProfile = {},
+            onRepostClick = {}
         )
     }
 }

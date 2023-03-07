@@ -17,4 +17,8 @@ sealed interface FeedUiEvent {
     data class OnNoteReaction(
         val noteId: NoteId,
     ) : FeedUiEvent
+
+    data class OnNoteRepost(
+        val noteId: NoteId,
+    ) : FeedUiEvent
 }

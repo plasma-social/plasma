@@ -1,11 +1,13 @@
 package social.plasma.repository
 
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
-import social.plasma.db.notes.NoteDao
+import social.plasma.db.events.EventEntity
+import social.plasma.db.events.EventsDao
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.nostr.models.Event
@@ -30,6 +32,8 @@ interface ReactionsRepository {
         noteId: String,
         reaction: String = "🤙",
     )
+
+    suspend fun repost(noteId: String)
 }
 
 @Singleton
@@ -38,7 +42,8 @@ class RealReactionsRepository @Inject constructor(
     private val relays: Relay,
     @UserKey(KeyType.Public) private val myPubkey: Preference<ByteArray>,
     @UserKey(KeyType.Secret) private val mySecretKey: Preference<ByteArray>,
-    private val noteDao: NoteDao,
+    private val moshi: Moshi,
+    private val eventsDao: EventsDao,
 ) : ReactionsRepository {
     private val noteIdsToObserve = AtomicReference<Set<String>>(emptySet())
     private val noteIdsFlow = MutableStateFlow<Set<String>>(emptySet())
@@ -79,11 +84,11 @@ class RealReactionsRepository @Inject constructor(
 
             secretKey ?: return@withContext
 
-            val note = noteDao.getById(noteId)
+            val note = eventsDao.getById(noteId)
 
             note ?: return@withContext
 
-            val noteTags = note.noteEntity.tags.filter {
+            val noteTags = note.tags.filter {
                 it.size >= 2 && (it[0] == "e" || it[0] == "p")
             }
 
@@ -94,7 +99,7 @@ class RealReactionsRepository @Inject constructor(
                 kind = Event.Kind.Reaction,
                 tags = noteTags + listOf(
                     listOf("e", noteId),
-                    listOf("p", note.noteEntity.pubkey)
+                    listOf("p", note.pubkey)
                 ),
                 content = reaction,
             )
@@ -102,4 +107,38 @@ class RealReactionsRepository @Inject constructor(
             relays.send(ClientMessage.EventMessage(event = event))
         }
     }
+
+    override suspend fun repost(noteId: String) = withContext(ioDispatcher) {
+        val secretKey = mySecretKey.get(null)
+        val pubKey = myPubkey.get(null)!!
+
+        secretKey ?: return@withContext
+
+        val note = eventsDao.getById(noteId)
+
+        note ?: return@withContext
+
+        val noteJson = note.toJson()
+
+        val noteTags = note.tags.filter {
+            it.size >= 2 && (it[0] == "e" || it[0] == "p")
+        }
+
+        val event = Event.createEvent(
+            pubKey = pubKey.toByteString(),
+            secretKey = secretKey.toByteString(),
+            createdAt = Instant.now(),
+            kind = Event.Kind.Repost,
+            tags = noteTags + listOf(
+                listOf("e", noteId, "", "root"),
+                listOf("p", note.pubkey)
+            ),
+            content = noteJson,
+        )
+
+        relays.send(ClientMessage.EventMessage(event = event))
+
+    }
+
+    private fun EventEntity.toJson(): String = moshi.adapter(EventEntity::class.java).toJson(this)
 }

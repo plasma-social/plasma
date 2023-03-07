@@ -64,7 +64,8 @@ fun ThreadList(
         onProfileClick = onNavigateToProfile,
         onNoteReaction = viewModel::onNoteReaction,
         onReply = onNavigateToReply,
-        getOpenGraphMetadata = viewModel::getOpenGraphMetadata
+        getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
+        onRepostClick = viewModel::onNoteRepost,
     )
 }
 
@@ -78,6 +79,7 @@ private fun ThreadList(
     onNoteDisplayed: (NoteId, PubKey) -> Unit,
     onNoteDisposed: (NoteId, PubKey) -> Unit,
     onProfileClick: (PubKey) -> Unit,
+    onRepostClick: (NoteId) -> Unit,
     onNoteReaction: (NoteId) -> Unit,
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
@@ -121,6 +123,7 @@ private fun ThreadList(
                             getOpenGraphMetadata = getOpenGraphMetadata,
                             onNoteClick = onNavigateToThread,
                             onProfileClick = onProfileClick,
+                            onRepostClick = { onRepostClick(noteId) },
                         )
                         Divider(modifier = Modifier.padding(horizontal = 16.dp))
                         Spacer(Modifier.height(32.dp))
@@ -135,7 +138,8 @@ private fun ThreadList(
                         showConnector = note.showConnector,
                         getOpenGraphMetadata = getOpenGraphMetadata,
                         onProfileClick = onProfileClick,
-                        onNoteClick = onNavigateToThread
+                        onNoteClick = onNavigateToThread,
+                        onRepostClick = { onRepostClick(noteId) },
                     )
                 }
 

@@ -48,6 +48,7 @@ abstract class AbstractFeedViewModel(
                 is FeedUiEvent.OnNoteReaction -> onNoteReaction(
                     event.noteId
                 )
+                is FeedUiEvent.OnNoteRepost -> onNoteRepost(event.noteId)
             }
         }
         return FeedUiState.Loaded(
@@ -73,6 +74,12 @@ abstract class AbstractFeedViewModel(
     private fun onNoteReaction(noteId: NoteId) {
         viewModelScope.launch {
             reactionsRepository.sendReaction(noteId.hex)
+        }
+    }
+
+    private fun onNoteRepost(noteId: NoteId) {
+        viewModelScope.launch {
+            reactionsRepository.repost(noteId.hex)
         }
     }
 

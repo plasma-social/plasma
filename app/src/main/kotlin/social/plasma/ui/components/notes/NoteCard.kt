@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
@@ -35,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,6 +72,7 @@ fun NoteElevatedCard(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
+    onRepostClick: () -> Unit,
 ) {
     ElevatedCard(
         modifier = modifier,
@@ -86,6 +89,7 @@ fun NoteElevatedCard(
             getOpenGraphMetadata = getOpenGraphMetadata,
             onProfileClick = onProfileClick,
             onNoteClick = onNoteClick,
+            onRepostClick = onRepostClick,
         )
     }
 }
@@ -100,6 +104,7 @@ fun NoteFlatCard(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
+    onRepostClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -115,7 +120,8 @@ fun NoteFlatCard(
             onReplyClick = onReplyClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
             onProfileClick = onProfileClick,
-            onNoteClick = onNoteClick
+            onNoteClick = onNoteClick,
+            onRepostClick = onRepostClick,
         )
     }
 }
@@ -131,6 +137,7 @@ fun ThreadNote(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
+    onRepostClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -167,6 +174,7 @@ fun ThreadNote(
                 getOpenGraphMetadata = getOpenGraphMetadata,
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
+                onRepostClick = onRepostClick,
             )
         }
     }
@@ -181,6 +189,7 @@ private fun NoteContent(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
+    onRepostClick: () -> Unit,
 ) {
     if (uiModel.cardLabel != null) {
         Text(
@@ -241,6 +250,7 @@ private fun NoteContent(
         isLiked = uiModel.isLiked,
         onLikeClick = onLikeClick,
         onReplyClick = onReplyClick,
+        onRepostClick = onRepostClick,
     )
 }
 
@@ -309,9 +319,11 @@ private fun NoteCardActionsRow(
     isLiked: Boolean,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
+    onRepostClick: () -> Unit,
 ) {
     val optimisticLikeState = remember(isLiked) { mutableStateOf(isLiked) }
     val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
+    var showRepostAlert by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -338,7 +350,7 @@ private fun NoteCardActionsRow(
         }
 
         TextButton(
-            onClick = { /*TODO*/ },
+            onClick = { showRepostAlert = true },
             colors = colors
         ) {
             Icon(painterResource(R.drawable.ic_plasma_rocket_outline), contentDescription = "")
@@ -372,6 +384,27 @@ private fun NoteCardActionsRow(
                 style = MaterialTheme.typography.labelMedium
             )
         }
+    }
+
+    if (showRepostAlert) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.repost_this_note)) },
+            text = { Text(stringResource(R.string.repost_notes_to_share_them_with_your_network)) },
+            onDismissRequest = { showRepostAlert = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRepostAlert = false
+                    onRepostClick()
+                }) {
+                    Text(stringResource(R.string.repost))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRepostAlert = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 
@@ -440,7 +473,8 @@ private fun PreviewFeedCard() {
             onReplyClick = {},
             getOpenGraphMetadata = { null },
             onNoteClick = {},
-            onProfileClick = {}
+            onProfileClick = {},
+            onRepostClick = {},
         )
     }
 }
@@ -457,7 +491,8 @@ private fun PreviewThreadCard() {
             showConnector = true,
             getOpenGraphMetadata = { null },
             onNoteClick = {},
-            onProfileClick = {}
+            onProfileClick = {},
+            onRepostClick = {},
         )
     }
 }
