@@ -2,6 +2,7 @@ package social.plasma.db.events
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 
 /**
  * Defines a reference between two events.
@@ -12,7 +13,11 @@ import androidx.room.Entity
  * @property relayUrl is the URL of a recommended relay associated with the reference
  * @property marker is optional and if present is one of "reply", "root", or "mention".
  */
-@Entity(tableName = "event_ref", primaryKeys = ["source_event", "target_event"])
+@Entity(
+    tableName = "event_ref",
+    primaryKeys = ["source_event", "target_event"],
+    indices = [Index("target_event"), Index("source_event")]
+)
 data class EventReferenceEntity(
     @ColumnInfo("source_event")
     val sourceEvent: String,
