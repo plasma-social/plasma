@@ -21,7 +21,6 @@ internal class RealNoteRepositoryTest {
 
     private val repo = RealNoteRepository(
         noteDao = noteDao,
-        contactListRepository = FakeContactListRepo(),
         myPubKey = FakePreference(keys.pub.toByteArray()),
         mySecretKey = FakePreference(keys.sec.toByteArray()),
         relay = relay,

@@ -1,11 +1,21 @@
 package social.plasma.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import social.plasma.crypto.Bech32
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.models.PubKey
+import social.plasma.nostr.models.Event
+import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.Filter
 import social.plasma.prefs.Preference
 import javax.inject.Inject
 
@@ -19,8 +29,9 @@ interface AccountStateRepository {
     fun clearKeys()
 
     fun getPublicKey(): ByteArray?
-    
+
     fun getSecretKey(): ByteArray?
+    fun syncMyData(): Flow<Unit>
 }
 
 class RealAccountRepository @Inject constructor(
@@ -28,6 +39,8 @@ class RealAccountRepository @Inject constructor(
     private val secretKey: Preference<ByteArray>,
     @UserKey(KeyType.Public)
     private val publicKey: Preference<ByteArray>,
+    private val relay: Relay,
+    private val contactListRepository: ContactListRepository,
 ) : AccountStateRepository {
     private val _isLoggedIn = MutableStateFlow(secretKey.isSet() || publicKey.isSet())
 
@@ -60,4 +73,24 @@ class RealAccountRepository @Inject constructor(
         return secretKey.get(default = null)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun syncMyData(): Flow<Unit> {
+        // TODO change this from a flow
+        val myPubkey = PubKey.of(publicKey.get(null)!!).hex
+        return contactListRepository.syncContactList(myPubkey).distinctUntilChanged()
+            .filterNot { it.isEmpty() }.flatMapLatest {
+                val contactNpubList = it.map { it.pubKey.hex() }.toSet()
+
+                relay.subscribe(
+                    SubscribeMessage(
+                        filter = Filter(authors = setOf(myPubkey), limit = 1000),
+                        Filter(
+                            authors = contactNpubList,
+                            kinds = setOf(Event.Kind.Repost, Event.Kind.Note)
+                        ),
+                        Filter(pTags = setOf(myPubkey)),
+                    )
+                )
+            }.map { }
+    }
 }
