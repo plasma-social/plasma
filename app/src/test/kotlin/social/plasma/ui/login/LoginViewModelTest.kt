@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import social.plasma.prefs.Preference
-import social.plasma.repository.FakeContactListRepo
-import social.plasma.repository.FakeRelay
 import social.plasma.repository.RealAccountRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -145,8 +143,6 @@ private fun createViewModel(
     accountStateRepo = RealAccountRepository(
         secretKey = secretKeyPref,
         publicKey = pubKeyPref,
-        relay = FakeRelay(),
-        contactListRepository = FakeContactListRepo()
     ),
     defaultDispatcher = StandardTestDispatcher()
 )

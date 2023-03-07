@@ -23,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -187,6 +188,16 @@ private fun ProfileContent(
 
             item { ProfileStatsRow(uiState.statCards) }
             item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            if (lazyPagingItems.itemCount == 0) {
+                item {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
+                }
+            }
 
             items(lazyPagingItems, key = { it.id }) { cardUiModel ->
                 cardUiModel?.let {
