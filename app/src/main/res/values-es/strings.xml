@@ -23,4 +23,8 @@
     <string name="reply">Responder</string>
     <string name="replying_to_author">Respondiendo a %1$s</string>
     <string name="create_reply">Crear Respuesta</string>
+    <string name="repost_this_note">Repost this note</string>
+    <string name="repost_notes_to_share_them_with_your_network">Repost notes to share them with your network</string>
+    <string name="repost">Repost</string>
+    <string name="cancel">Cancel</string>
 </resources>

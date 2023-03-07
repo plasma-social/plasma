@@ -160,6 +160,12 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun onRepostClick(noteId: NoteId) {
+        viewModelScope.launch {
+            reactionsRepository.repost(noteId.hex)
+        }
+    }
+
     companion object {
         private const val nostrichImage =
             "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096"

@@ -37,6 +37,7 @@ import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.ui.feed.FeedUiEvent.OnNoteDisposed
 import social.plasma.ui.feed.FeedUiEvent.OnNoteReaction
+import social.plasma.ui.feed.FeedUiEvent.OnNoteRepost
 
 @Composable
 fun GlobalFeed(
@@ -185,6 +186,7 @@ private fun FeedList(
                         getOpenGraphMetadata = getOpenGraphMetadata,
                         onProfileClick = onNavigateToProfile,
                         onNoteClick = onNoteClicked,
+                        onRepostClick = { onEvent(OnNoteRepost(noteId)) }
                     )
 
                     DisposableEffect(Unit) {

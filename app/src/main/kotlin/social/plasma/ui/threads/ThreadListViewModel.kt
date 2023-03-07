@@ -85,4 +85,10 @@ class ThreadListViewModel @Inject constructor(
     suspend fun getOpenGraphMetadata(url: String): OpenGraphMetadata? {
         return runCatching { openGraphParser.parse(URL(url)) }.getOrNull()
     }
+
+    fun onNoteRepost(noteId: NoteId) {
+        viewModelScope.launch {
+            reactionsRepository.repost(noteId.hex)
+        }
+    }
 }
