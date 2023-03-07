@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -67,6 +69,7 @@ fun RepliesFeed(
     navigateToThread: (NoteId) -> Unit,
     onAddNote: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
+    state: LazyListState,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -78,7 +81,8 @@ fun RepliesFeed(
         onAddNote = onAddNote,
         onReply = onNavigateToReply,
         getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        state = state,
     )
 }
 
@@ -90,6 +94,7 @@ fun ContactsFeed(
     navigateToThread: (NoteId) -> Unit,
     onAddNote: () -> Unit,
     onNavigateToReply: (NoteId) -> Unit,
+    state: LazyListState,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -101,7 +106,8 @@ fun ContactsFeed(
         onAddNote = onAddNote,
         onReply = onNavigateToReply,
         getOpenGraphMetadata = viewModel::getOpenGraphMetadata,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        state = state,
     )
 }
 
@@ -115,6 +121,7 @@ fun FeedContent(
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onEvent: (FeedUiEvent) -> Unit,
+    state: LazyListState = rememberLazyListState(),
 ) {
     when (uiState) {
         is FeedUiState.Loading -> ProgressIndicator(modifier = modifier)
@@ -128,6 +135,7 @@ fun FeedContent(
             onAddNote = onAddNote,
             onReply = onReply,
             getOpenGraphMetadata = getOpenGraphMetadata,
+            state = state,
         )
     }
 }
@@ -143,6 +151,7 @@ private fun FeedList(
     onReply: (NoteId) -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onEvent: (FeedUiEvent) -> Unit,
+    state: LazyListState,
 ) {
     val pagingLazyItems = noteList.collectAsLazyPagingItems()
 
@@ -152,10 +161,11 @@ private fun FeedList(
     ) {
         LazyColumn(
             modifier = modifier,
+            state = state,
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
 
-            items(pagingLazyItems, key = { it.id }) { note ->
+            items(pagingLazyItems) { note ->
                 note?.let {
                     val noteId = NoteId(note.id)
 

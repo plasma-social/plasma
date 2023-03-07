@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 abstract class MoleculeViewModel<S, E>(
     private val recompositionClock: RecompositionClock,
 ) : ViewModel() {
-    private val events = MutableSharedFlow<E>(extraBufferCapacity = 50)
+    private val events = MutableSharedFlow<E>(extraBufferCapacity = 500)
 
     private val moleculeScope =
         CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)

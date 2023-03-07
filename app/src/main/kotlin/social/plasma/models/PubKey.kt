@@ -12,7 +12,7 @@ data class PubKey(
     }
 
     val shortBech32 by lazy {
-        with(bech32) {
+        with(bech32.drop(5)) {
             "${take(8)}:${takeLast(8)}"
         }
     }

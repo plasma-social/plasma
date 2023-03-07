@@ -1,6 +1,7 @@
 package social.plasma.ui.notifications
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -43,7 +44,7 @@ fun NotificationsScreen(
         val uiState by viewModel.uiState.collectAsState()
 
         FeedContent(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.fillMaxSize().padding(it),
             uiState = uiState,
             onNavigateToProfile = onNavigateToProfile,
             onNoteClicked = onNavigateToThread,

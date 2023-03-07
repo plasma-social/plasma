@@ -6,6 +6,7 @@ import social.plasma.db.notes.NoteDao
 import social.plasma.db.notes.NoteReferenceEntity
 import social.plasma.db.notes.NoteSource
 import social.plasma.db.notes.NoteWithUser
+import social.plasma.db.notes.PubkeyReferenceEntity
 import social.plasma.db.usermetadata.UserMetadataDao
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.Relay
@@ -17,6 +18,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.streams.toList
 
 interface ThreadRepository {
     fun observeThreadNotes(noteId: String): Flow<List<NoteWithUser>>
@@ -95,16 +97,25 @@ class RealThreadRepository @Inject constructor(
             .map { eventRefiner.toNote(it) }
             .filterNotNull()
             .chunked(maxSize = 100, checkIntervalMillis = 100)
-            .onEach { eventList ->
-                eventList.forEach { event ->
-                    val sourceNoteId = event.id.hex()
+            .onEach { it ->
+                val noteReferences = it.parallelStream().flatMap { note ->
+                    val sourceNoteId = note.id.hex()
 
-                    val noteReferences = event.tags.filter { it.firstOrNull() == "e" }.map {
+                    note.tags.parallelStream().filter { it.firstOrNull() == "e" }.map {
                         NoteReferenceEntity(sourceNoteId, targetNote = it[1])
                     }
-
-                    noteDao.insertNoteReference(noteReferences)
                 }
+
+                val pubkeyReferences = it.parallelStream().flatMap { note ->
+                    val sourceNoteId = note.id.hex()
+                    
+                    note.tags.parallelStream().filter { it.firstOrNull() == "p" }.map {
+                        PubkeyReferenceEntity(sourceNoteId, pubkey = it[1])
+                    }
+                }
+
+                noteDao.insertNoteReferences(noteReferences.toList())
+                noteDao.insertPubkeyReferences(pubkeyReferences.toList())
             }
             .map { eventList -> eventList.map { it.toNoteEntity(NoteSource.Thread) } }
             .map { entityList ->
