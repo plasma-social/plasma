@@ -5,7 +5,7 @@ import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.Flow
 
 class FakeNoteDao : NoteDao {
-    val noteWithUserTurbine = Turbine<NoteWithUser>()
+    val noteWithUserTurbine = Turbine<NoteWithUser?>()
 
     override fun userNotesAndRepliesPagingSource(pubkey: String): PagingSource<Int, NoteWithUser> {
         TODO("Not yet implemented")

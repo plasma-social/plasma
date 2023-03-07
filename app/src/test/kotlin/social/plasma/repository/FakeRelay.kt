@@ -10,8 +10,11 @@ import social.plasma.nostr.relay.message.RelayMessage
 // TODO move to a common module
 class FakeRelay : Relay {
     val sendNoteTurbine = Turbine<SendNote>()
+    val sendEventTurbine = Turbine<ClientMessage.EventMessage>()
 
     override val connectionStatus: Flow<Relay.RelayStatus>
+        get() = TODO("Not yet implemented")
+    override val relayMessages: Flow<RelayMessage>
         get() = TODO("Not yet implemented")
 
     override suspend fun connect() {
@@ -27,7 +30,7 @@ class FakeRelay : Relay {
     }
 
     override suspend fun send(event: ClientMessage.EventMessage) {
-        TODO("Not yet implemented")
+        sendEventTurbine.add(event)
     }
 
     override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) {
@@ -35,4 +38,5 @@ class FakeRelay : Relay {
     }
 
     data class SendNote(val text: String, val keyPair: KeyPair, val tags: Set<List<String>>)
+
 }

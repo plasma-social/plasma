@@ -7,7 +7,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import social.plasma.crypto.KeyGenerator
 import social.plasma.db.notes.FakeNoteDao
-import social.plasma.db.notes.NoteSource
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.prefs.FakePreference
@@ -173,7 +172,6 @@ internal class RealNoteRepositoryTest {
             Instant.now().epochSecond,
             isReply = isReply,
             pubkey = pubKey,
-            source = NoteSource.Thread,
             tags = tags,
             reactionCount = 0,
         )

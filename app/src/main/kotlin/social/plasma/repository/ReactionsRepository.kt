@@ -5,11 +5,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
+import social.plasma.db.notes.NoteDao
+import social.plasma.di.KeyType
+import social.plasma.di.UserKey
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
+import social.plasma.prefs.Preference
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
@@ -32,7 +36,9 @@ interface ReactionsRepository {
 class RealReactionsRepository @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
     private val relays: Relay,
-    private val accountStateRepository: AccountStateRepository,
+    @UserKey(KeyType.Public) private val myPubkey: Preference<ByteArray>,
+    @UserKey(KeyType.Secret) private val mySecretKey: Preference<ByteArray>,
+    private val noteDao: NoteDao,
 ) : ReactionsRepository {
     private val noteIdsToObserve = AtomicReference<Set<String>>(emptySet())
     private val noteIdsFlow = MutableStateFlow<Set<String>>(emptySet())
@@ -67,18 +73,28 @@ class RealReactionsRepository @Inject constructor(
 
     override suspend fun sendReaction(noteId: String, reaction: String) {
         withContext(ioDispatcher) {
-            val myPubkey = accountStateRepository.getPublicKey()!!
-            val mySecretKey = accountStateRepository.getSecretKey()
 
-            mySecretKey ?: return@withContext
+            val secretKey = mySecretKey.get(null)
+            val pubKey = myPubkey.get(null)!!
+
+            secretKey ?: return@withContext
+
+            val note = noteDao.getById(noteId)
+
+            note ?: return@withContext
+
+            val noteTags = note.noteEntity.tags.filter {
+                it.size >= 2 && (it[0] == "e" || it[0] == "p")
+            }
 
             val event = Event.createEvent(
-                pubKey = myPubkey.toByteString(),
-                secretKey = mySecretKey.toByteString(),
+                pubKey = pubKey.toByteString(),
+                secretKey = secretKey.toByteString(),
                 createdAt = Instant.now(),
                 kind = Event.Kind.Reaction,
-                tags = listOf(
-                    listOf("e", noteId)
+                tags = noteTags + listOf(
+                    listOf("e", noteId),
+                    listOf("p", note.noteEntity.pubkey)
                 ),
                 content = reaction,
             )
