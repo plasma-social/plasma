@@ -2,8 +2,6 @@ package social.plasma.db.notes
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
@@ -31,7 +29,7 @@ interface NoteDao {
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview")
     fun globalNotesPagingSource(): PagingSource<Int, NoteWithUser>
-    
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview WHERE id = :noteId")
@@ -45,9 +43,9 @@ interface NoteDao {
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
-        "SELECT * FROM noteview n " +
+        "SELECT n.* FROM noteview n " +
                 "LEFT JOIN pubkey_ref pr ON pr.source_event = n.id " +
-                "WHERE pr.pubkey = :pubkey"
+                "WHERE pr.pubkey = :pubkey ORDER BY n.created_at DESC"
     )
     fun pubkeyMentions(pubkey: String): PagingSource<Int, NoteWithUser>
 }

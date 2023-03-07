@@ -2,6 +2,7 @@ package social.plasma.db.events
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 
 /**
  *  Defines a reference between an event and a pubkey.
@@ -10,7 +11,11 @@ import androidx.room.Entity
  *  @property pubkey the pubkey being referenced
  *  @property relayUrl recommended relay for the pubkey
  */
-@Entity(tableName = "pubkey_ref", primaryKeys = ["source_event", "pubkey"])
+@Entity(
+    tableName = "pubkey_ref",
+    primaryKeys = ["source_event", "pubkey"],
+    indices = [Index("source_event"), Index("pubkey")]
+)
 data class PubkeyReferenceEntity(
     @ColumnInfo("source_event")
     val sourceEvent: String,
