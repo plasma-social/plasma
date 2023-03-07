@@ -16,10 +16,18 @@ object DarkThemeColors {
     val fillPage = Color(0xFF141316)
     val strokesAndDividersDefault = Color(0xFF393248)
     val fillElevation = Color(0xFF161519)
-    val fillPrimary = Color(0xFF02E887)
-    val textPrimary = Color(0xFFE1E3DE)
-    val textLink = Color(0xFF02E887)
+    val fillPrimary = Color(0xFF593E9D)
+    val textSecondary = Color(0xFF524E55)
+    val textPrimary = Color(0xFF593E9D)
+    val textLink = Color(0xFFE1E3DE)
     val textHint = Color(0xFF4D4D4D)
-    val textSecondary = Color(0xFF608A78)
     val strokesAndDividersButton = Color(0xFF608A78)
+}
+
+object LightThemeColors {
+    val fillPage = Color(0xFFF5F5F5)
+    val strokesAndDividersDefault = Color(0xFFE0E0E0)
+    val fillElevation = Color(0xFFFFFFFF)
+    val fillPrimary = Color(0xFF593E9D)
+    val textSecondary = Color(0xFF736379)
 }

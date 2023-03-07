@@ -26,11 +26,17 @@ private val DarkColorScheme = with(DarkThemeColors) {
     )
 }
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-)
+private val LightColorScheme = with(LightThemeColors) {
+    lightColorScheme(
+        background = fillPage,
+        surface = fillElevation,
+        primary = fillPrimary,
+        primaryContainer = fillPrimary,
+        onPrimaryContainer = fillPage,
+        secondary = textSecondary,
+        outline = strokesAndDividersDefault,
+    )
+}
 
 @Composable
 fun PlasmaTheme(
