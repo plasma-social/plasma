@@ -13,6 +13,7 @@ import social.plasma.db.notes.*
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.models.PubKey
+import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
@@ -47,6 +48,7 @@ interface NoteRepository {
 
 class RealNoteRepository @Inject constructor(
     private val noteDao: NoteDao,
+    private val contactListRepository: ContactListRepository,
     @UserKey(KeyType.Public) private val myPubKey: Preference<ByteArray>,
     @UserKey(KeyType.Secret) private val mySecretKey: Preference<ByteArray>,
     private val relay: Relay,
@@ -99,24 +101,39 @@ class RealNoteRepository @Inject constructor(
     override fun observeContactsNotes(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
-        return Pager(
-            config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
-            pagingSourceFactory = {
-                noteDao.userContactNotesPagingSource(myPubkey)
-            }
-        ).flow
+        return merge(
+            Pager(
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
+                pagingSourceFactory = {
+                    noteDao.userContactNotesPagingSource(myPubkey)
+                }
+            ).flow,
 
+            contactListRepository.observeContactLists(myPubkey).flatMapLatest {
+                sync(SubscribeMessage(Filter.userNotes(it.map { it.pubKey.hex() }.toSet())))
+            }
+
+        ).filterIsInstance()
     }
 
     override fun observeContactsNotesAndReplies(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
-        return Pager(
-            config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
-            pagingSourceFactory = {
-                noteDao.userContactNotesAndRepliesPagingSource(myPubkey)
-            }
-        ).flow
+        return merge(
+            Pager(
+                config = PagingConfig(pageSize = DEFAULT_PAGE_SIZE, maxSize = DEFAULT_MAX_SIZE),
+                pagingSourceFactory = {
+                    noteDao.userContactNotesAndRepliesPagingSource(myPubkey)
+                }
+            ).flow,
+
+            contactListRepository.observeContactLists(myPubkey)
+                .filter { it.isNotEmpty() }.distinctUntilChanged().flatMapLatest {
+                    val contactNpubList = it.map { it.pubKey.hex() }
+
+                    sync(SubscribeMessage(Filter.userNotes(contactNpubList.toSet())))
+                }
+        ).filterIsInstance()
 
     }
 
@@ -144,17 +161,27 @@ class RealNoteRepository @Inject constructor(
     override fun observeMentions(): Flow<PagingData<NoteWithUser>> {
         val myPubkey = PubKey.of(myPubKey.get(null)!!).hex
 
-        return Pager(
-            config = PagingConfig(
-                pageSize = DEFAULT_PAGE_SIZE,
-                maxSize = DEFAULT_MAX_SIZE,
-                enablePlaceholders = true
-            ),
-            pagingSourceFactory = {
-                noteDao.pubkeyMentions(myPubkey)
-            }
-        ).flow
+        return merge(
+            Pager(
+                config = PagingConfig(
+                    pageSize = DEFAULT_PAGE_SIZE,
+                    maxSize = DEFAULT_MAX_SIZE,
+                    enablePlaceholders = true
+                ),
+                pagingSourceFactory = {
+                    noteDao.pubkeyMentions(myPubkey)
+                }
+            ).flow,
 
+            sync(
+                SubscribeMessage(
+                    Filter(
+                        pTags = setOf(myPubkey),
+                        kinds = setOf(Event.Kind.Note, Event.Kind.Repost, Event.Kind.Reaction)
+                    )
+                )
+            )
+        ).filterIsInstance()
     }
 
     override suspend fun postNote(content: String) = withContext(ioDispatcher) {
