@@ -10,14 +10,12 @@ import kotlinx.coroutines.launch
 import social.plasma.db.EventStore
 import social.plasma.models.PubKey
 import social.plasma.repository.AccountStateRepository
-import social.plasma.repository.ContactListRepository
 import social.plasma.repository.UserMetaDataRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
     accountStateRepository: AccountStateRepository,
-    contactListRepository: ContactListRepository,
     userMetaDataRepository: UserMetaDataRepository,
     eventStore: EventStore,
 ) : ViewModel() {
@@ -33,7 +31,7 @@ class AppViewModel @Inject constructor(
         if (loggedIn) {
             val publicKey = PubKey.of(accountStateRepository.getPublicKey()!!)
             userMetaDataRepository.syncUserMetadata(publicKey.hex)
-            contactListRepository.syncContactList(publicKey.hex)
+            accountStateRepository.syncMyData()
         } else {
             emptyFlow()
         }

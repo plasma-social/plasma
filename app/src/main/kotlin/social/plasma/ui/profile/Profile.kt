@@ -188,6 +188,10 @@ private fun ProfileContent(
             item { ProfileStatsRow(uiState.statCards) }
             item { Spacer(modifier = Modifier.height(32.dp)) }
 
+            if (lazyPagingItems.itemCount == 0) {
+                item { ProgressIndicator() }
+            }
+
             items(lazyPagingItems, key = { it.id }) { cardUiModel ->
                 cardUiModel?.let {
                     val noteId = NoteId(cardUiModel.id)
