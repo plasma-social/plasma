@@ -281,8 +281,8 @@ class RealNoteRepository @Inject constructor(
         relay.subscribe(subscribeMessage)
 
     companion object {
-        const val DEFAULT_PAGE_SIZE = 10
-        const val DEFAULT_MAX_SIZE = 150
+        const val DEFAULT_PAGE_SIZE = 25
+        const val DEFAULT_MAX_SIZE = 500
     }
 }
 
