@@ -3,11 +3,10 @@ package social.plasma.db
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
-import social.plasma.db.events.EventEntity
 import social.plasma.db.events.EventReferenceEntity
 import social.plasma.db.events.EventsDao
 import social.plasma.db.events.PubkeyReferenceEntity
-import social.plasma.nostr.models.Event
+import social.plasma.db.ext.toEventEntity
 import social.plasma.nostr.relay.Relays
 import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.utils.chunked
@@ -62,13 +61,3 @@ class EventStore @Inject constructor(
         else -> null
     }
 }
-
-private fun Event.toEventEntity() = EventEntity(
-    id = id.hex(),
-    pubkey = pubKey.hex(),
-    createdAt = createdAt.epochSecond,
-    kind = kind,
-    tags = tags,
-    content = content,
-    sig = sig.hex(),
-)

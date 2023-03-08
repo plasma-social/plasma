@@ -6,8 +6,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
-import social.plasma.db.events.EventEntity
 import social.plasma.db.events.EventsDao
+import social.plasma.db.ext.toNostrEvent
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.nostr.models.Event
@@ -118,7 +118,7 @@ class RealReactionsRepository @Inject constructor(
 
         note ?: return@withContext
 
-        val noteJson = note.toJson()
+        val noteJson = note.toNostrEvent().toJson()
 
         val noteTags = note.tags.filter {
             it.size >= 2 && (it[0] == "e" || it[0] == "p")
@@ -140,5 +140,5 @@ class RealReactionsRepository @Inject constructor(
 
     }
 
-    private fun EventEntity.toJson(): String = moshi.adapter(EventEntity::class.java).toJson(this)
+    private fun Event.toJson(): String = moshi.adapter(Event::class.java).toJson(this)
 }

@@ -6,24 +6,30 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import social.plasma.crypto.KeyGenerator
-import social.plasma.db.events.EventEntity
+import social.plasma.db.ext.toEventEntity
 import social.plasma.nostr.models.Event
+import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.prefs.FakePreference
 import java.time.Instant
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class RealReactionsRepositoryTest {
     private val keys = KeyGenerator().generateKeyPair()
+    private val mySecretKey = keys.sec.toByteArray()
+    private val myPubKey = keys.pub.toByteArray()
+
     private val relay = FakeRelay()
     private val testDispatcher = StandardTestDispatcher()
     private val eventsDao = FakeEventsDao()
-    private val mySecretKeyPref = FakePreference(keys.sec.toByteArray())
-    private val myPubKey = keys.pub.toByteArray()
-    private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+    private val mySecretKeyPref = FakePreference(mySecretKey)
+    private val moshi =
+        Moshi.Builder().add(NostrMessageAdapter()).addLast(KotlinJsonAdapterFactory()).build()
 
     private val repo: RealReactionsRepository
         get() {
@@ -39,12 +45,12 @@ internal class RealReactionsRepositoryTest {
 
     @BeforeEach
     fun setup() {
-        mySecretKeyPref.value = keys.sec.toByteArray()
+        mySecretKeyPref.value = mySecretKey
     }
 
     @Test
     fun `reacting to a note without tags`() = runTest(testDispatcher) {
-        eventsDao.eventsByIdTurbine.add(createEvent())
+        eventsDao.eventsByIdTurbine.add(createEvent().toEventEntity())
 
         repo.sendReaction(NOTE_HEX)
 
@@ -69,7 +75,7 @@ internal class RealReactionsRepositoryTest {
                     listOf("p", "test"),
                     listOf("p", "test2")
                 )
-            )
+            ).toEventEntity()
         )
 
         repo.sendReaction(NOTE_HEX)
@@ -106,13 +112,14 @@ internal class RealReactionsRepositoryTest {
     @Test
     fun `reposting a note`() = runTest(testDispatcher) {
         val note = createEvent()
-        eventsDao.eventsByIdTurbine.add(note)
+        val noteJsonString = moshi.adapter(Event::class.java).toJson(note)
+        eventsDao.eventsByIdTurbine.add(note.toEventEntity())
 
         repo.repost(NOTE_HEX)
 
         with(relay.sendEventTurbine.awaitItem().event) {
             assertThat(kind).isEqualTo(Event.Kind.Repost)
-            assertThat(content).isEqualTo(moshi.adapter(EventEntity::class.java).toJson(note))
+            assertThat(content).isEqualTo(noteJsonString)
             assertThat(tags).containsExactly(
                 listOf("e", NOTE_HEX, "", "root"),
                 listOf("p", NPUB_HEX),
@@ -129,13 +136,14 @@ internal class RealReactionsRepositoryTest {
                 listOf("p", "test2")
             )
         )
-        eventsDao.eventsByIdTurbine.add(note)
+        val noteJsonString = moshi.adapter(Event::class.java).toJson(note)
+        eventsDao.eventsByIdTurbine.add(note.toEventEntity())
 
         repo.repost(NOTE_HEX)
 
         with(relay.sendEventTurbine.awaitItem().event) {
             assertThat(kind).isEqualTo(Event.Kind.Repost)
-            assertThat(content).isEqualTo(moshi.adapter(EventEntity::class.java).toJson(note))
+            assertThat(content).isEqualTo(noteJsonString)
             assertThat(tags).containsExactly(
                 listOf("e", "test"),
                 listOf("p", "test"),
@@ -165,16 +173,14 @@ internal class RealReactionsRepositoryTest {
     }
 
     private fun createEvent(
-        id: String = NOTE_HEX,
         pubKey: String = NPUB_HEX,
         tags: List<List<String>> = emptyList(),
-    ) = EventEntity(
-        id = id,
-        pubkey = pubKey,
+    ) = Event.createEvent(
+        pubKey = pubKey.decodeHex(),
         tags = tags,
-        sig = "",
         content = "test",
-        createdAt = Instant.now().epochSecond,
+        createdAt = Instant.now(),
+        secretKey = mySecretKey.toByteString(),
         kind = 1,
     )
 
