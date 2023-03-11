@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -74,8 +76,11 @@ fun NoteElevatedCard(
     onNoteClick: (NoteId) -> Unit,
     onRepostClick: () -> Unit,
 ) {
-    ElevatedCard(
+    Card(
         modifier = modifier,
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        )
     ) {
         NoteCardHeader(
             uiModel,
@@ -195,7 +200,7 @@ private fun NoteContent(
         Text(
             text = uiModel.cardLabel,
             modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 
@@ -334,7 +339,7 @@ private fun NoteCardActionsRow(
         val colors =
             ButtonDefaults.textButtonColors(
                 // TODO figure out the right colors for like/unliked
-                contentColor = MaterialTheme.colorScheme.primary.copy(alpha = .5f),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 disabledContentColor = MaterialTheme.colorScheme.primary
             )
 
@@ -342,26 +347,31 @@ private fun NoteCardActionsRow(
             onClick = onReplyClick,
             colors = colors
         ) {
-            Icon(painterResource(R.drawable.ic_plasma_replies), contentDescription = "")
+            Icon(
+                modifier = Modifier.size(16.dp),
+                painter = painterResource(id = R.drawable.ic_plasma_replies),
+                contentDescription = ""
+            )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = replyCount, style = MaterialTheme.typography.labelMedium
             )
         }
-
         TextButton(
             onClick = { showRepostAlert = true },
             colors = colors
         ) {
-            Icon(painterResource(R.drawable.ic_plasma_rocket_outline), contentDescription = "")
+            Icon(
+                modifier = Modifier.size(16.dp),
+                painter = painterResource(id = R.drawable.ic_plasma_rocket_outline),
+                contentDescription = ""
+            )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = shareCount,
                 style = MaterialTheme.typography.labelMedium
             )
         }
-
-
         TextButton(
             onClick = {
                 optimisticLikeState.value = true
@@ -372,7 +382,8 @@ private fun NoteCardActionsRow(
             enabled = !optimisticLikeState.value
         ) {
             Icon(
-                painterResource(R.drawable.ic_plasma_shaka_outline),
+                modifier = Modifier.size(16.dp),
+                painter = painterResource(id = R.drawable.ic_plasma_shaka_outline),
                 contentDescription = "",
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -449,7 +460,8 @@ private fun NoteCardHeader(
                 Text(
                     text = uiModel.timePosted,
                     textAlign = TextAlign.End,
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 

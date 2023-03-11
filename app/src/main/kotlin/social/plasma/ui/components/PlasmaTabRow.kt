@@ -16,5 +16,6 @@ fun PlasmaTabRow(
         containerColor = Color.Transparent,
         selectedTabIndex = selectedTabIndex,
         tabs = tabs,
+        divider = {},
     )
 }

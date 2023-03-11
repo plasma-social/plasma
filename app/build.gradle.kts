@@ -14,8 +14,8 @@ android {
         applicationId = "social.plasma"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "0.0.3"
+        versionCode = 4
+        versionName = "0.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
 
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.workmanager)
 
     implementation(libs.coil.compose)

@@ -396,11 +396,7 @@ private fun ProfileBio(
 
         userData.about?.let {
             Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(it)
         }
     }
 }

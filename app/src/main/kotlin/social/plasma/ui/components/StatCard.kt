@@ -3,8 +3,8 @@ package social.plasma.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +17,7 @@ fun StatCard(
     label: String,
     value: String,
 ) {
-    ElevatedCard(
+    OutlinedCard(
         modifier = modifier,
     ) {
         Column(
@@ -27,7 +27,11 @@ fun StatCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(value, style = MaterialTheme.typography.displaySmall)
-            Text(label, style = MaterialTheme.typography.labelSmall)
+            Text(
+                label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

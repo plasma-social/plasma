@@ -2,6 +2,7 @@ package social.plasma.ui.components.richtext
 
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,7 +62,7 @@ fun RichText(
     softWrap: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
     onTextLayout: (TextLayoutResult) -> Unit = {},
-    style: TextStyle = TextStyle.Default,
+    style: TextStyle = LocalTextStyle.current,
     onMentionClick: (Mention) -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
