@@ -30,6 +30,7 @@ fun Nip5Badge(
             identifier,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

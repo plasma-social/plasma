@@ -17,11 +17,13 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = with(DarkThemeColors) {
     darkColorScheme(
         background = fillPage,
-        surface = fillElevation,
+        surface = fillPage,
+        surfaceVariant = fillElevation,
+        onSurface = textPrimary,
+        onSurfaceVariant = textHint,
         primary = fillPrimary,
-        primaryContainer = fillPrimary,
-        onPrimaryContainer = fillPage,
-        secondary = textSecondary,
+        onPrimary = onPrimary,
+        onSecondary = textSecondary,
         outline = strokesAndDividersDefault,
     )
 }
@@ -29,11 +31,13 @@ private val DarkColorScheme = with(DarkThemeColors) {
 private val LightColorScheme = with(LightThemeColors) {
     lightColorScheme(
         background = fillPage,
-        surface = fillElevation,
+        surface = fillPage,
+        surfaceVariant = fillElevation,
+        onSurface = textPrimary,
+        onSurfaceVariant = textHint,
         primary = fillPrimary,
-        primaryContainer = fillPrimary,
-        onPrimaryContainer = fillPage,
-        secondary = textSecondary,
+        onPrimary = onPrimary,
+        onSecondary = textSecondary,
         outline = strokesAndDividersDefault,
     )
 }

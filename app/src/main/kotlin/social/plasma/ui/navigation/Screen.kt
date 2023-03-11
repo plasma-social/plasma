@@ -1,8 +1,8 @@
 package social.plasma.ui.navigation
 
 import androidx.annotation.StringRes
-import social.plasma.models.PubKey
 import social.plasma.R
+import social.plasma.models.PubKey
 
 sealed class Screen(
     val route: String,
@@ -20,7 +20,7 @@ sealed class Screen(
         fun buildRoute(noteId: String): String = route.replace("{noteId}", noteId)
     }
 
-    object Home : Screen(route = "home", name = R.string.home)
+    object Home : Screen(route = "home", name = R.string.feed)
 
     object Messages : Screen(route = "messages", name = R.string.messages)
 

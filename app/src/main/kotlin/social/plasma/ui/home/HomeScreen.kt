@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -17,10 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -73,7 +69,7 @@ fun HomeScreen(
     userPubKey: PubKey,
     onNavigateToReply: (NoteId) -> Unit,
 ) {
-    val tabs = remember { HomeTab.values() }
+    val tabs = remember { HomeTab.values().asList() }
 
     val pagerState = rememberPagerState()
 
@@ -86,49 +82,29 @@ fun HomeScreen(
         modifier = modifier,
         contentWindowInsets = WindowInsets.statusBars,
         topBar = {
-            ElevatedCard(
-                shape = RectangleShape,
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 3.dp,
-                )
-            ) {
-                Column {
-                    RootScreenToolbar(
-                        title = stringResource(R.string.feed),
-                        avatarUrl = userMetaData.picture ?: "",
-                        onAvatarClick = { onNavigateToProfile(userPubKey) },
-                    )
-                    PlasmaTabRow(
-                        selectedTabIndex = selectedTab,
-                    ) {
-                        val coroutineScope = rememberCoroutineScope()
+            val coroutineScope = rememberCoroutineScope()
 
-                        tabs.forEachIndexed { index, tab ->
-                            val isSelected = selectedTab == index
-
-                            PlasmaTab(
-                                selected = isSelected,
-                                title = tab.title,
-                                icon = tab.icon,
-                            ) {
-                                if (isSelected) {
-                                    coroutineScope.launch {
-                                        val listState = when (tab) {
-                                            HomeTab.Following -> followingListState
-                                            HomeTab.Replies -> repliesListState
-                                        }
-                                        listState.scrollToItem(0)
-                                    }
-                                } else {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                }
+            HomeScreenTopBar(
+                tabs = tabs,
+                userMetaData = userMetaData,
+                onNavigateToProfile = { onNavigateToProfile(userPubKey) },
+                selectedTabIndex = selectedTab,
+                onTabSelected = { index ->
+                    if (selectedTab == index) {
+                        coroutineScope.launch {
+                            val listState = when (tabs[index]) {
+                                HomeTab.Following -> followingListState
+                                HomeTab.Replies -> repliesListState
                             }
+                            listState.scrollToItem(0)
+                        }
+                    } else {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
                         }
                     }
                 }
-            }
+            )
         }) { paddingValues ->
 
         HorizontalPager(count = tabs.size, state = pagerState) {
@@ -149,6 +125,37 @@ fun HomeScreen(
                     onAddNote = navigateToPost,
                     onNavigateToReply = onNavigateToReply,
                     state = repliesListState,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeScreenTopBar(
+    userMetaData: UserMetaData,
+    onNavigateToProfile: () -> Unit,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+    tabs: List<HomeTab>,
+) {
+    Column {
+        RootScreenToolbar(
+            title = stringResource(R.string.feed),
+            avatarUrl = userMetaData.picture ?: "",
+            onAvatarClick = onNavigateToProfile,
+        )
+        PlasmaTabRow(
+            selectedTabIndex = selectedTabIndex,
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                val isSelected = selectedTabIndex == index
+
+                PlasmaTab(
+                    selected = isSelected,
+                    title = tab.title,
+                    icon = tab.icon,
+                    onClick = { onTabSelected(index) }
                 )
             }
         }
