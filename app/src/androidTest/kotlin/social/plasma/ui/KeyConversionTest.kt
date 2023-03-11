@@ -5,8 +5,8 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.models.PubKey
-import social.plasma.crypto.Bech32.bechToBytes
-import social.plasma.crypto.Bech32.pubkeyCreate
+import social.plasma.models.crypto.Bech32.bechToBytes
+import social.plasma.models.crypto.Bech32.pubkeyCreate
 
 @RunWith(AndroidJUnit4::class)
 class KeyConversionTest {

@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.reactive.asFlow
-import social.plasma.crypto.KeyPair
+import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
@@ -69,7 +69,11 @@ class RelayImpl(
         else pendingSendEvents.updateAndGet { it.plus(event) }
     }
 
-    override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) =
+    override suspend fun sendNote(
+        text: String,
+        keyPair: social.plasma.models.crypto.KeyPair,
+        tags: Set<List<String>>,
+    ) =
         send(
             EventMessage(
                 Event.createEvent(

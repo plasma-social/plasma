@@ -23,6 +23,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import social.plasma.R
+import social.plasma.ui.R as UiR
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.nostr.models.UserMetaData
@@ -168,12 +169,12 @@ enum class HomeTab(
 ) {
 
     Following(
-        title = R.string.following,
-        icon = R.drawable.ic_plasma_follow,
+        title = UiR.string.following,
+        icon = UiR.drawable.ic_plasma_follow,
     ),
     Replies(
         title = R.string.replies,
-        icon = R.drawable.ic_plasma_replies,
+        icon = UiR.drawable.ic_plasma_replies,
     ),
 //    Global(
 //        title = R.string.global,

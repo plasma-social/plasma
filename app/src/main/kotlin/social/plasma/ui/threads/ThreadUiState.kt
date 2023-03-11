@@ -1,7 +1,7 @@
 package social.plasma.ui.threads
 
 import social.plasma.models.PubKey
-import social.plasma.ui.components.notes.NoteUiModel
+import social.plasma.ui.notes.NoteUiModel
 
 data class ThreadUiState(
     val noteUiModels: List<ThreadNoteUiModel>,

@@ -10,8 +10,8 @@ import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import social.plasma.crypto.KeyGenerator
 import social.plasma.db.ext.toEventEntity
+import social.plasma.models.crypto.KeyGenerator
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.prefs.FakePreference

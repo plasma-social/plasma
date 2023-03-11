@@ -41,13 +41,16 @@ abstract class AbstractFeedViewModel(
                     event.noteId,
                     event.pubKey
                 )
+
                 is FeedUiEvent.OnNoteDisplayed -> onNoteDisplayed(
                     event.noteId,
                     event.pubKey,
                 )
+
                 is FeedUiEvent.OnNoteReaction -> onNoteReaction(
                     event.noteId
                 )
+
                 is FeedUiEvent.OnNoteRepost -> onNoteRepost(event.noteId)
             }
         }

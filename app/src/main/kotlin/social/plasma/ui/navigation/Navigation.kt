@@ -22,7 +22,7 @@ import social.plasma.ui.post.Post
 import social.plasma.ui.post.PostUiEvent.OnNoteChange
 import social.plasma.ui.post.PostUiEvent.PostNote
 import social.plasma.ui.post.PostViewModel
-import social.plasma.ui.profile.Profile
+import social.plasma.ui.profilescreen.ProfileScreen
 import social.plasma.ui.reply.ReplyViewModel
 
 @Composable
@@ -81,7 +81,7 @@ fun Navigation(
         }
 
         composable(Screen.Profile.route) {
-            Profile(
+            ProfileScreen(
                 modifier = modifier,
                 onNavigateBack = { navHostController.popBackStack() },
                 onNavigateToThread = { noteId ->

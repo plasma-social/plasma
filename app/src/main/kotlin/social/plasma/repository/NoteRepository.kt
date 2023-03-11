@@ -7,12 +7,12 @@ import fr.acinq.secp256k1.Hex
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
-import social.plasma.crypto.Bech32
-import social.plasma.crypto.KeyPair
 import social.plasma.db.notes.*
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
 import social.plasma.models.PubKey
+import social.plasma.models.crypto.Bech32
+import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage

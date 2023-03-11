@@ -51,6 +51,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.models)
     implementation(projects.nostr)
     implementation(projects.opengraph)
     implementation(projects.ui)

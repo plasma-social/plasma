@@ -2,7 +2,7 @@ package social.plasma.repository
 
 import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.Flow
-import social.plasma.crypto.KeyPair
+import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.RelayMessage
