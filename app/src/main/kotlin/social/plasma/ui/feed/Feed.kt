@@ -31,13 +31,13 @@ import social.plasma.R
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.ui.components.ProgressIndicator
-import social.plasma.ui.components.notes.GetOpenGraphMetadata
-import social.plasma.ui.components.notes.NoteElevatedCard
-import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.ui.feed.FeedUiEvent.OnNoteDisposed
 import social.plasma.ui.feed.FeedUiEvent.OnNoteReaction
 import social.plasma.ui.feed.FeedUiEvent.OnNoteRepost
+import social.plasma.ui.notes.GetOpenGraphMetadata
+import social.plasma.ui.notes.NoteElevatedCard
+import social.plasma.ui.notes.NoteUiModel
 
 @Composable
 fun GlobalFeed(

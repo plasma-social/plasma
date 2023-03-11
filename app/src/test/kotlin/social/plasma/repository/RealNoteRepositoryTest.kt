@@ -5,10 +5,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
-import social.plasma.crypto.KeyGenerator
 import social.plasma.db.notes.FakeNoteDao
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
+import social.plasma.models.crypto.KeyGenerator
 import social.plasma.prefs.FakePreference
 import java.time.Instant
 

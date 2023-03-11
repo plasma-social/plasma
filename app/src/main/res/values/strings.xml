@@ -5,13 +5,8 @@
     <string name="global">Global</string>
     <string name="notifications">Notifications</string>
     <string name="main">Main</string>
-    <string name="verified">verified</string>
-    <string name="following">Following</string>
     <string name="profile">Profile</string>
     <string name="coming_soon">Coming Soon</string>
-    <string name="copy_public_key_to_clipboard">Copy public key to clipboard</string>
-    <string name="back">Back</string>
-    <string name="follow">Follow</string>
     <string name="feed">Feed</string>
     <string name="replies">Replies</string>
     <string name="thread">thread</string>
@@ -23,8 +18,4 @@
     <string name="reply">Reply</string>
     <string name="replying_to_author">Replying to %1$s</string>
     <string name="create_reply">Create Reply</string>
-    <string name="repost_this_note">Repost this note</string>
-    <string name="repost_notes_to_share_them_with_your_network">Repost notes to share them with your network</string>
-    <string name="repost">Repost</string>
-    <string name="cancel">Cancel</string>
 </resources>

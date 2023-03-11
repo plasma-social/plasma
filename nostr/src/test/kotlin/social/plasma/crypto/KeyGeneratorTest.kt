@@ -20,7 +20,8 @@ class KeyGeneratorTest : StringSpec({
 
 }) {
     companion object {
-        private val arbKey = arbitrary { KeyGenerator().generateKeyPair() }
+        private val arbKey =
+            arbitrary { social.plasma.models.crypto.KeyGenerator().generateKeyPair() }
         val arbTestData = Arb.pair(arbKey, Arb.string())
     }
 }

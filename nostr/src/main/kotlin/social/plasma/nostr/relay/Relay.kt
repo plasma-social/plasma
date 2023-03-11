@@ -1,7 +1,7 @@
 package social.plasma.nostr.relay
 
 import kotlinx.coroutines.flow.Flow
-import social.plasma.crypto.KeyPair
+import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
@@ -11,7 +11,7 @@ interface Relay {
     val connectionStatus: Flow<RelayStatus>
 
     val relayMessages: Flow<RelayMessage>
-    
+
     suspend fun connect()
 
     fun disconnect()
@@ -19,7 +19,11 @@ interface Relay {
     fun subscribe(subscribeMessage: SubscribeMessage): Flow<EventRelayMessage>
 
     suspend fun send(event: EventMessage)
-    suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>> = emptySet())
+    suspend fun sendNote(
+        text: String,
+        keyPair: social.plasma.models.crypto.KeyPair,
+        tags: Set<List<String>> = emptySet(),
+    )
 
     data class RelayStatus(
         val url: String,

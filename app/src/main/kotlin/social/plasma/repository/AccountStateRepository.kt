@@ -3,9 +3,9 @@ package social.plasma.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import social.plasma.crypto.Bech32
 import social.plasma.di.KeyType
 import social.plasma.di.UserKey
+import social.plasma.models.crypto.Bech32
 import social.plasma.prefs.Preference
 import javax.inject.Inject
 
@@ -19,7 +19,7 @@ interface AccountStateRepository {
     fun clearKeys()
 
     fun getPublicKey(): ByteArray?
-    
+
     fun getSecretKey(): ByteArray?
 }
 

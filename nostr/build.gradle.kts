@@ -1,5 +1,8 @@
-import com.bmuschko.gradle.docker.tasks.container.*
-import com.bmuschko.gradle.docker.tasks.image.*
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import java.net.ServerSocket
 
 plugins {
@@ -40,7 +43,7 @@ android {
 }
 
 dependencies {
-
+    implementation(projects.models)
     implementation(libs.androidx.core.ktx)
     implementation(libs.coroutines.android)
 

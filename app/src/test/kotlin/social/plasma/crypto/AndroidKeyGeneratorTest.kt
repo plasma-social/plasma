@@ -4,6 +4,7 @@ import fr.acinq.secp256k1.Secp256k1
 import okio.ByteString.Companion.toByteString
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import social.plasma.models.crypto.KeyGenerator
 import kotlin.random.Random
 
 class AndroidKeyGeneratorTest {
