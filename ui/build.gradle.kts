@@ -45,10 +45,14 @@ android {
 }
 
 dependencies {
+    implementation(projects.models)
+    implementation(projects.opengraph)
+
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.paging.compose)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
@@ -65,8 +69,12 @@ dependencies {
     implementation(libs.exoplayer.core)
     implementation(libs.exoplayer.ui)
 
+    implementation(libs.okhttp.core)
     implementation(libs.timber)
     implementation(libs.touchimageview)
+
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     debugImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.uitooling)

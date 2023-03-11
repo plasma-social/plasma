@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import social.plasma.db.notes.NoteWithUser
-import social.plasma.ui.components.notes.NoteUiModel
+import social.plasma.ui.notes.NoteUiModel
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton

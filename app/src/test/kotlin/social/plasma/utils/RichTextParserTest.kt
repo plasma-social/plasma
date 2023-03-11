@@ -5,9 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.Test
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.ui.components.notes.RichTextParser
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
+import social.plasma.ui.notes.RichTextParser
 
 class RichTextParserTest {
     private val parser = RichTextParser(linkColor = Color.Blue)

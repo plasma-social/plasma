@@ -10,11 +10,11 @@ import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.repository.AccountStateRepository
 import social.plasma.repository.UserMetaDataRepository
-import social.plasma.ui.components.notes.NoteContentParser
-import social.plasma.ui.components.notes.NoteUiModel
 import social.plasma.ui.components.richtext.Mention
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
+import social.plasma.ui.notes.NoteContentParser
+import social.plasma.ui.notes.NoteUiModel
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject

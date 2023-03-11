@@ -44,7 +44,9 @@ fun NotificationsScreen(
         val uiState by viewModel.uiState.collectAsState()
 
         FeedContent(
-            modifier = Modifier.fillMaxSize().padding(it),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it),
             uiState = uiState,
             onNavigateToProfile = onNavigateToProfile,
             onNoteClicked = onNavigateToThread,

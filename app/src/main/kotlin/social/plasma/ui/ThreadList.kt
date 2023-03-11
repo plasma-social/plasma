@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.ui.components.notes.GetOpenGraphMetadata
-import social.plasma.ui.components.notes.NoteFlatCard
-import social.plasma.ui.components.notes.ThreadNote
+import social.plasma.ui.notes.GetOpenGraphMetadata
+import social.plasma.ui.notes.NoteFlatCard
+import social.plasma.ui.notes.ThreadNote
 import social.plasma.ui.theme.PlasmaTheme
 import social.plasma.ui.threads.ThreadListViewModel
 import social.plasma.ui.threads.ThreadNoteUiModel.LeafNote

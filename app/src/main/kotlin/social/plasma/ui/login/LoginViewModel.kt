@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import social.plasma.crypto.Bech32.bechToBytes
+import social.plasma.models.crypto.Bech32.bechToBytes
 import social.plasma.repository.AccountStateRepository
 import javax.inject.Inject
 import javax.inject.Named
