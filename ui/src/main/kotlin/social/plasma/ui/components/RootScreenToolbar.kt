@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 fun RootScreenToolbar(
     title: String,
-    avatarUrl: String,
+    avatarUrl: String?,
     onAvatarClick: () -> Unit,
 ) {
     CenterAlignedTopAppBar(

@@ -329,6 +329,7 @@ private fun NoteCardActionsRow(
     val optimisticLikeState = remember(isLiked) { mutableStateOf(isLiked) }
     val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
     var showRepostAlert by remember { mutableStateOf(false) }
+    val iconSize = remember { 20.dp }
 
     Row(
         modifier = Modifier
@@ -348,7 +349,7 @@ private fun NoteCardActionsRow(
             colors = colors
         ) {
             Icon(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
                 painter = painterResource(id = R.drawable.ic_plasma_replies),
                 contentDescription = ""
             )
@@ -362,7 +363,7 @@ private fun NoteCardActionsRow(
             colors = colors
         ) {
             Icon(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
                 painter = painterResource(id = R.drawable.ic_plasma_rocket_outline),
                 contentDescription = ""
             )
@@ -382,7 +383,7 @@ private fun NoteCardActionsRow(
             enabled = !optimisticLikeState.value
         ) {
             Icon(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
                 painter = painterResource(id = R.drawable.ic_plasma_shaka_outline),
                 contentDescription = "",
             )
@@ -432,14 +433,12 @@ private fun NoteCardHeader(
     Row(
         modifier = modifier,
     ) {
-        uiModel.avatarUrl?.let {
-            Avatar(
-                modifier = Modifier.padding(end = 16.dp),
-                imageUrl = it,
-                contentDescription = uiModel.name,
-                onClick = onAvatarClick?.let { { it() } }
-            )
-        }
+        Avatar(
+            modifier = Modifier.padding(end = 16.dp),
+            imageUrl = uiModel.avatarUrl,
+            contentDescription = uiModel.name,
+            onClick = onAvatarClick?.let { { it() } }
+        )
         Column(
             modifier = Modifier
                 .weight(1f)

@@ -38,8 +38,7 @@ class NoteCardMapper @Inject constructor(
             id = note.id,
             name = author?.name ?: authorPubKey.shortBech32,
             content = noteContentParser.parseNote(note.content, note.tags.toIndexedMap()),
-            avatarUrl = author?.picture
-                ?: "https://api.dicebear.com/5.x/bottts/jpg?seed=${authorPubKey.hex}",
+            avatarUrl = author?.picture,
             timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
             replyCount = "",
             shareCount = "",
