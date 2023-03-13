@@ -32,6 +32,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 molecule = { id = "app.cash.molecule", version = "0.7.1" }
 paparazzi = { id = "app.cash.paparazzi", version = "1.2.0" }
+sentry = { id = "io.sentry.android.gradle", version = "3.4.2" }
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }

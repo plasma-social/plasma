@@ -26,7 +26,7 @@ class HomeScreenViewModel @Inject constructor(
         userPubkey = myPubKey,
         userMetadata = UserMetaData(
             name = null,
-            picture = "https://api.dicebear.com/5.x/bottts/jpg?seed=${myPubKey.hex}",
+            picture = null,
             displayName = myPubKey.shortBech32,
             about = null,
             nip05 = null,

@@ -26,7 +26,7 @@ sealed interface ProfileUiState {
             val username: String?,
             val publicKey: PubKey,
             val about: String?,
-            val avatarUrl: String,
+            val avatarUrl: String?,
             val nip5Identifier: String?,
             val nip5Domain: String? = null,
             val lud: String?,

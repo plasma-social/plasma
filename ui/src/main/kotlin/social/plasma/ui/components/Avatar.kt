@@ -18,7 +18,7 @@ import social.plasma.ui.R
 
 @Composable
 fun Avatar(
-    imageUrl: String,
+    imageUrl: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
@@ -44,7 +44,7 @@ fun Avatar(
 
 @Composable
 fun ZoomableAvatar(
-    imageUrl: String,
+    imageUrl: String?,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
 ) {

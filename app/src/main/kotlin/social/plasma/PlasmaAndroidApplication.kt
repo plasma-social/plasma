@@ -10,6 +10,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 import social.plasma.sync.ContactListFeedSyncWorker
+import social.plasma.utils.CrashReportingTree
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -23,7 +24,11 @@ class PlasmaAndroidApplication : Application(), ImageLoaderFactory, Configuratio
 
     override fun onCreate() {
         super.onCreate()
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        } else {
+            Timber.plant(CrashReportingTree())
+        }
 
         val workManager = WorkManager.getInstance(this)
         // TODO move this to a better place

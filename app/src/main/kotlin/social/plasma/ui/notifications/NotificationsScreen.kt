@@ -37,7 +37,7 @@ fun NotificationsScreen(
 
             RootScreenToolbar(
                 title = stringResource(id = R.string.notifications),
-                avatarUrl = userMetadata?.picture ?: " https://api.dicebear.com/5.x/bottts/jpg",
+                avatarUrl = userMetadata?.picture,
                 onAvatarClick = { onNavigateToProfile(viewModel.pubkey) },
             )
         }) {

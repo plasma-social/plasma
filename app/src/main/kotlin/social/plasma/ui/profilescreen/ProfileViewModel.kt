@@ -86,7 +86,7 @@ class ProfileViewModel @Inject constructor(
             username = null,
             about = null,
             nip5Identifier = null,
-            avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg?seed=${profilePubKey.hex}",
+            avatarUrl = null,
             publicKey = profilePubKey,
             website = null,
             banner = nostrichImage,

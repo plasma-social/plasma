@@ -32,7 +32,7 @@ import com.ortiz.touchview.TouchImageView
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ZoomableImage(
-    imageUrl: String,
+    imageUrl: String?,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     options: ImageRequest.Builder.() -> Unit = {},
