@@ -1,40 +1,49 @@
 package social.plasma.ui.mappers
 
-import android.text.format.DateUtils
+import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.firstOrNull
-import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.db.reactions.ReactionDao
-import social.plasma.db.usermetadata.UserMetadataDao
+import social.plasma.di.KeyType
+import social.plasma.di.UserKey
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
-import social.plasma.repository.AccountStateRepository
+import social.plasma.nostr.models.Event
+import social.plasma.prefs.Preference
 import social.plasma.repository.UserMetaDataRepository
 import social.plasma.ui.components.richtext.Mention
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
 import social.plasma.ui.notes.NoteContentParser
 import social.plasma.ui.notes.NoteUiModel
+import social.plasma.ui.util.InstantFormatter
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class NoteCardMapper @Inject constructor(
-    private val userMetadataDao: UserMetadataDao,
     private val userMetaDataRepository: UserMetaDataRepository,
-    private val accountStateRepository: AccountStateRepository,
+    @UserKey(KeyType.Public) private val myPubkeyPref: Preference<ByteArray>,
     private val reactionDao: ReactionDao,
     private val noteContentParser: NoteContentParser,
+    private val moshi: Moshi,
+    private val instantFormatter: InstantFormatter,
 ) {
 
     suspend fun toNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
+        return when (noteWithUser.noteEntity.kind) {
+            Event.Kind.Repost -> createRepostUiModel(noteWithUser)
+            else -> createNoteUiModel(noteWithUser)
+        }
+    }
+
+    private suspend fun createNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
         val note = noteWithUser.noteEntity
         val author = noteWithUser.userMetadataEntity
         val authorPubKey = PubKey(note.pubkey)
 
         return NoteUiModel(
+            key = note.id,
             id = note.id,
             name = author?.name ?: authorPubKey.shortBech32,
             content = noteContentParser.parseNote(note.content, note.tags.toIndexedMap()),
@@ -48,40 +57,93 @@ class NoteCardMapper @Inject constructor(
             nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
             displayName = author?.displayName?.takeIf { it.isNotBlank() } ?: author?.name
             ?: authorPubKey.shortBech32,
-            cardLabel = note.buildBannerLabel(),
-            isLiked = note.isLiked(),
+            cardLabel = buildBannerLabel(note.tags),
+            isLiked = isLiked(note.id),
             isNip5Valid = userMetaDataRepository::isNip5Valid
         )
     }
 
-    private suspend fun NoteView.isLiked(): Boolean {
-        val myPubkey = accountStateRepository.getPublicKey()!!
+    private suspend fun createRepostUiModel(
+        noteWithUser: NoteWithUser,
+    ): NoteUiModel {
+        val note = noteWithUser.noteEntity
+        val repostedNote = try {
+            moshi.adapter(Event::class.java).fromJson(note.content)
+        } catch (e: Exception) {
+            Timber.w("Unable to parse reposted note content: %s", note.content)
+            null
+        }
 
-        // TODO what if the post is liked but we haven't fetched the reaction from relays yet?
-        return reactionDao.isNoteLiked(PubKey.of(myPubkey).hex, id)
+        // The paging library doesn't allow mapping to nullables, so instead we'll return a "hidden" note
+        repostedNote ?: return NoteUiModel(
+            id = note.id,
+            hidden = true,
+            userPubkey = PubKey(note.pubkey)
+        )
+
+        val authorPubKey = PubKey(repostedNote.pubKey.hex())
+        val author = userMetaDataRepository.getById(repostedNote.pubKey.hex())
+
+        return NoteUiModel(
+            key = note.id,
+            id = repostedNote.id.hex(),
+            name = author?.name ?: authorPubKey.shortBech32,
+            content = noteContentParser.parseNote(
+                repostedNote.content,
+                repostedNote.tags.toIndexedMap()
+            ),
+            avatarUrl = author?.picture,
+            timePosted = Instant.ofEpochSecond(repostedNote.createdAt.epochSecond)
+                .relativeTime(),
+            replyCount = "",
+            shareCount = "",
+            likeCount = 0,
+            userPubkey = authorPubKey,
+            nip5Identifier = author?.nip05,
+            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
+            displayName = author?.displayName?.takeIf { it.isNotBlank() } ?: author?.name
+            ?: authorPubKey.shortBech32,
+            headerContent = NoteUiModel.ContentBlock.Text(
+                "Boosted by #[0]",
+                mentions = mapOf(
+                    0 to ProfileMention(
+                        text = noteWithUser.userMetadataEntity?.name
+                            ?: PubKey(note.pubkey).shortBech32,
+                        pubkey = PubKey(note.pubkey)
+                    )
+                )
+            ),
+            cardLabel = buildBannerLabel(repostedNote.tags),
+            isLiked = isLiked(repostedNote.id.hex()),
+            isNip5Valid = userMetaDataRepository::isNip5Valid
+        )
     }
 
-    private suspend fun NoteView.buildBannerLabel(): String? {
-        val referencedNames = getReferencedNames(this)
+    private suspend fun isLiked(id: String): Boolean {
+        val myPubkey = myPubkeyPref.get(null)
+        return reactionDao.isNoteLiked(PubKey.of(myPubkey!!).hex, id)
+    }
+
+    private suspend fun buildBannerLabel(tags: List<List<String>>): String? {
+        val referencedNames = getReferencedNames(tags)
 
         return if (referencedNames.isNotEmpty()) {
             referencedNames.generateBannerLabel()
         } else null
     }
 
-    private suspend fun getReferencedNames(note: NoteView): MutableSet<String> {
+    private suspend fun getReferencedNames(tags: List<List<String>>): MutableSet<String> {
         val referencedNames = mutableSetOf<String>()
 
-        note.tags.forEachIndexed { index, it ->
+        tags.forEachIndexed { index, it ->
             if (it.firstOrNull() == "p") {
                 val pubkey = PubKey(it[1])
 
-                val userName = (userMetadataDao.getById(pubkey.hex).firstOrNull()?.name
-                    ?: pubkey.shortBech32)
+                val userName =
+                    (userMetaDataRepository.observeUserMetaData(pubkey.hex).firstOrNull()?.name
+                        ?: pubkey.shortBech32)
 
-                if (pubkey.hex != note.pubkey) {
-                    referencedNames.add(userName)
-                }
+                referencedNames.add(userName)
             }
         }
         return referencedNames
@@ -93,8 +155,9 @@ class NoteCardMapper @Inject constructor(
                 "p" -> {
                     val pubkey = PubKey(tag[1])
 
-                    val userName = (userMetadataDao.getById(pubkey.hex).firstOrNull()?.name
-                        ?: pubkey.shortBech32)
+                    val userName =
+                        (userMetaDataRepository.observeUserMetaData(pubkey.hex).firstOrNull()?.name
+                            ?: pubkey.shortBech32)
 
                     return@mapIndexed index to ProfileMention(pubkey = pubkey, text = "@$userName")
                 }
@@ -117,12 +180,8 @@ class NoteCardMapper @Inject constructor(
         }.filterNotNull().toMap()
 
     private fun Instant.relativeTime(): String {
-        return DateUtils.getRelativeTimeSpanString(
-            this.toEpochMilli(),
-            Instant.now().toEpochMilli(),
-            DateUtils.SECOND_IN_MILLIS,
-            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL
-        ).toString()
+        return instantFormatter.getRelativeTime(this)
+
     }
 
 

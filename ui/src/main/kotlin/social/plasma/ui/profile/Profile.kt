@@ -171,15 +171,15 @@ private fun ProfileContent(
                 }
             }
 
-            items(lazyPagingItems, key = { it.id }) { cardUiModel ->
-                cardUiModel?.let {
+            items(lazyPagingItems, key = { it.key }) { cardUiModel ->
+                if (cardUiModel?.hidden == false) {
                     val noteId = NoteId(cardUiModel.id)
 
                     LaunchedEffect(Unit) {
                         onNoteDisplayed(noteId)
                     }
                     NoteElevatedCard(
-                        uiModel = it,
+                        uiModel = cardUiModel,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .clickable {

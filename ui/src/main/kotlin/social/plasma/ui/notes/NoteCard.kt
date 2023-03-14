@@ -20,11 +20,13 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,7 +87,9 @@ fun NoteElevatedCard(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            onNoteClick = onNoteClick,
+            onProfileClick = onProfileClick,
         )
         NoteContent(
             uiModel,
@@ -117,7 +121,9 @@ fun NoteFlatCard(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onProfileClick = onProfileClick,
+            onNoteClick = onNoteClick,
         )
         NoteContent(
             uiModel,
@@ -150,7 +156,9 @@ fun ThreadNote(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+            onNoteClick = onNoteClick,
+            onProfileClick = onProfileClick,
         )
         val borderColor = DividerDefaults.color
         val borderThickness = DividerDefaults.Thickness
@@ -424,10 +432,28 @@ private fun NoteCardActionsRow(
 private fun NoteCardHeader(
     uiModel: NoteUiModel,
     onAvatarClick: (() -> Unit)?,
+    onProfileClick: (PubKey) -> Unit,
+    onNoteClick: (NoteId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isNip5Valid by produceState(initialValue = false, uiModel.nip5Identifier) {
         value = uiModel.isNip5Valid(uiModel.userPubkey, uiModel.nip5Identifier)
+    }
+
+    uiModel.headerContent?.let {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+            RichText(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                plainText = it.content,
+                mentions = it.mentions,
+                onMentionClick = {
+                    when (it) {
+                        is ProfileMention -> onProfileClick(it.pubkey)
+                        is NoteMention -> onNoteClick(it.noteId)
+                    }
+                }
+            )
+        }
     }
 
     Row(

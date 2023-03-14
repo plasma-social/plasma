@@ -11,8 +11,9 @@
     <string name="login_tagline">A nostr client for Android</string>
     <string name="clear">Clear</string>
     <string name="sign_in_with_a_public_or_secret_key">Sign in with your npub or nsec</string>
-    <string name="repost_this_note">Repost this note</string>
-    <string name="repost_notes_to_share_them_with_your_network">Repost notes to share them with your network</string>
-    <string name="repost">Repost</string>
+    <string name="repost_this_note">Boost this note</string>
+    <string name="repost_notes_to_share_them_with_your_network">Boost notes to share them with your network</string>
+    <string name="repost">Boost</string>
     <string name="cancel">Cancel</string>
+    <string name="boosted_by">Boosted by %1$s</string>
 </resources>

@@ -174,6 +174,7 @@ internal class RealNoteRepositoryTest {
             pubkey = pubKey,
             tags = tags,
             reactionCount = 0,
+            kind = 1,
         )
     )
 

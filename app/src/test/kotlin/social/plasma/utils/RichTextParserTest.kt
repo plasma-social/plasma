@@ -2,6 +2,8 @@ package social.plasma.utils
 
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
@@ -9,11 +11,12 @@ import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
 import social.plasma.ui.notes.RichTextParser
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class RichTextParserTest {
     private val parser = RichTextParser(linkColor = Color.Blue)
 
     @Test
-    fun `note with multiline note mentions`() {
+    fun `note with multiline note mentions`() = runTest {
         val plainText =
             "Some text \n\nhttps://apidocs.imgur.com/\n\n#[0]\n#[1] \n#[2] \n#[3] \n#[4]"
 
@@ -28,7 +31,7 @@ class RichTextParserTest {
     }
 
     @Test
-    fun `note with multiline profile mentions`() {
+    fun `note with multiline profile mentions`() = runTest {
         val plainText =
             "Some text \n\nhttps://apidocs.imgur.com/\n\n#[0]\n#[1] \n#[2] \n#[3] \n#[4]"
 
@@ -43,7 +46,7 @@ class RichTextParserTest {
     }
 
     @Test
-    fun `note with characters after mention`() {
+    fun `note with characters after mention`() = runTest {
         val plainText =
             "Hey #[0], have you considered collaborating with #[1]?"
 
@@ -60,7 +63,7 @@ class RichTextParserTest {
     }
 
     @Test
-    fun `note with characters before mention`() {
+    fun `note with characters before mention`() = runTest {
         val plainText =
             "Best people to follow:#[0] and #[1]."
 

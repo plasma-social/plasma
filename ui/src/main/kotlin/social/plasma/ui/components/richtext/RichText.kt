@@ -6,6 +6,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,13 +69,13 @@ fun RichText(
     val linkColor = MaterialTheme.colorScheme.primary
     val parser = remember(linkColor) { RichTextParser(linkColor) }
 
-    val richText by remember(plainText) {
-        mutableStateOf(parser.parse(plainText, mentions))
+    var richText by remember {
+        mutableStateOf(AnnotatedString(plainText))
     }
 
-//    LaunchedEffect(plainText) {
-//        richText = parser.parse(plainText, mentions)
-//    }
+    LaunchedEffect(plainText) {
+        richText = parser.parse(plainText, mentions)
+    }
 
     fun handleClick(tag: String, item: String) {
         when (tag) {

@@ -3,6 +3,8 @@ package social.plasma.ui.notes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import social.plasma.ui.components.richtext.Mention
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
@@ -19,33 +21,34 @@ class RichTextParser constructor(
     /**
      * Builds an annotated string using the note's mentions.
      */
-    fun parse(
+    suspend fun parse(
         input: String,
         mentions: Map<Int, Mention>,
-    ): AnnotatedString = buildAnnotatedString {
-        val lines = input.split("\n")
+    ): AnnotatedString = withContext(Dispatchers.Default) {
+        buildAnnotatedString {
+            val lines = input.split("\n")
 
-        lines.forEachIndexed { lineIndex, line ->
-            val words = line.split(" ")
+            lines.forEachIndexed { lineIndex, line ->
+                val words = line.split(" ")
 
-            words.forEachIndexed { wordIndex, word ->
+                words.forEachIndexed { wordIndex, word ->
 
-                when {
-                    urlRegex.matches(word) -> appendUrl(word)
-                    mentionRegex.containsMatchIn(word) -> appendMention(word, mentions)
-                    else -> append(word)
+                    when {
+                        urlRegex.matches(word) -> appendUrl(word)
+                        mentionRegex.containsMatchIn(word) -> appendMention(word, mentions)
+                        else -> append(word)
+                    }
+
+                    if (wordIndex != words.lastIndex) {
+                        append(" ")
+                    }
                 }
 
-                if (wordIndex != words.lastIndex) {
-                    append(" ")
+                if (lineIndex != lines.lastIndex) {
+                    append("\n")
                 }
-            }
-
-            if (lineIndex != lines.lastIndex) {
-                append("\n")
             }
         }
-
     }
 
     private fun AnnotatedString.Builder.appendUrl(word: String) {

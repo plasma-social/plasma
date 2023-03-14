@@ -1,5 +1,6 @@
 package social.plasma.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -27,7 +28,10 @@ import social.plasma.db.usermetadata.UserMetadataEntity
     views = [
         NoteView::class,
     ],
-    version = 1
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 )
 @TypeConverters(TagsTypeConverter::class)
 abstract class PlasmaDb : RoomDatabase() {

@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.DatabaseView
 
 @DatabaseView(
-    "SELECT events.id, events.pubkey, events.content, events.created_at, events.tags, " +
+    "SELECT events.id, events.pubkey, events.content, events.created_at, events.tags, events.kind, " +
             "COUNT(reactions.id) AS reactionCount, " +
             "EXISTS( SELECT 1 from event_ref WHERE source_event = events.id) as is_reply " +
             "FROM events " +
@@ -19,6 +19,7 @@ data class NoteView(
     val content: String,
     @ColumnInfo(name = "created_at")
     val createdAt: Long,
+    val kind: Int,
     val reactionCount: Int,
     val pubkey: String,
     @ColumnInfo(name = "is_reply")

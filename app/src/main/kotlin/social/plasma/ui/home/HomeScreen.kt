@@ -23,7 +23,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import social.plasma.R
-import social.plasma.ui.R as UiR
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.nostr.models.UserMetaData
@@ -31,8 +30,11 @@ import social.plasma.ui.components.PlasmaTab
 import social.plasma.ui.components.PlasmaTabRow
 import social.plasma.ui.components.RootScreenToolbar
 import social.plasma.ui.feed.ContactsFeed
+import social.plasma.ui.feed.FollowingFeedViewModel
 import social.plasma.ui.feed.RepliesFeed
+import social.plasma.ui.feed.RepliesFeedViewModel
 import social.plasma.ui.theme.PlasmaTheme
+import social.plasma.ui.R as UiR
 
 
 @Composable
@@ -69,6 +71,8 @@ fun HomeScreen(
     userMetaData: UserMetaData,
     userPubKey: PubKey,
     onNavigateToReply: (NoteId) -> Unit,
+    followingFeedViewModel: FollowingFeedViewModel = hiltViewModel(),
+    repliesFeedViewModel: RepliesFeedViewModel = hiltViewModel(),
 ) {
     val tabs = remember { HomeTab.values().asList() }
 
@@ -91,18 +95,8 @@ fun HomeScreen(
                 onNavigateToProfile = { onNavigateToProfile(userPubKey) },
                 selectedTabIndex = selectedTab,
                 onTabSelected = { index ->
-                    if (selectedTab == index) {
-                        coroutineScope.launch {
-                            val listState = when (tabs[index]) {
-                                HomeTab.Following -> followingListState
-                                HomeTab.Replies -> repliesListState
-                            }
-                            listState.scrollToItem(0)
-                        }
-                    } else {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
                 }
             )
@@ -117,6 +111,7 @@ fun HomeScreen(
                     onAddNote = navigateToPost,
                     onNavigateToReply = onNavigateToReply,
                     state = followingListState,
+                    viewModel = followingFeedViewModel,
                 )
 
                 HomeTab.Replies -> RepliesFeed(
@@ -126,6 +121,7 @@ fun HomeScreen(
                     onAddNote = navigateToPost,
                     onNavigateToReply = onNavigateToReply,
                     state = repliesListState,
+                    viewModel = repliesFeedViewModel,
                 )
             }
         }

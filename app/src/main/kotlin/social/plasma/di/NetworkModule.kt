@@ -15,6 +15,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.logging.HttpLoggingInterceptor.Level.BASIC
+import okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+import social.plasma.BuildConfig.DEBUG
 import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.utils.ApplicationResumedLifecycle
 import social.plasma.utils.ConnectivityOnLifecycle
@@ -44,7 +47,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providesOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+        .addInterceptor(HttpLoggingInterceptor().setLevel(if (DEBUG) BODY else BASIC))
         .build()
 
     @Provides
