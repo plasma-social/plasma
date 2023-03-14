@@ -25,7 +25,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 interface UserMetaDataRepository {
-    fun observeUserMetaData(pubKey: String): Flow<UserMetaData>
+    fun observeUserMetaData(pubKey: String): Flow<UserMetaData?>
 
     suspend fun syncUserMetadata(pubKey: String, force: Boolean = false)
 
@@ -82,11 +82,10 @@ class RealUserMetaDataRepository @Inject constructor(
             .launchIn(scope)
     }
 
-    override fun observeUserMetaData(pubKey: String): Flow<UserMetaData> =
+    override fun observeUserMetaData(pubKey: String): Flow<UserMetaData?> =
         metadataDao.observeUserMetadata(pubKey)
             .distinctUntilChanged()
-            .filterNotNull()
-            .map { it.toUserMetadata() }
+            .map { it?.toUserMetadata() }
             .flowOn(ioDispatcher)
 
     override suspend fun syncUserMetadata(pubKey: String, force: Boolean) {

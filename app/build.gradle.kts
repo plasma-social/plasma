@@ -22,6 +22,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                compilerArgumentProviders(
+                    RoomSchemaArgProvider(File(projectDir, "schemas"))
+                )
+            }
+        }
     }
 
     buildTypes {
@@ -158,3 +166,17 @@ android.testOptions {
         it.useJUnitPlatform()
     }
 }
+
+class RoomSchemaArgProvider(
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val schemaDir: File,
+) : CommandLineArgumentProvider {
+
+    override fun asArguments(): Iterable<String> {
+        // Note: If we migrate to use KSP, we should change the line below to return
+        // listOf("room.schemaLocation=${schemaDir.path}")
+        return listOf("-Aroom.schemaLocation=${schemaDir.path}")
+    }
+}
+

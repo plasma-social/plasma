@@ -16,26 +16,10 @@
         android:theme="@style/Theme.App.Starting"
         android:largeHeap="true"
         tools:targetApi="31">
-        
-        <!-- sentry.io project identifier (DSN) -->
-        <meta-data
-            android:name="io.sentry.dsn"
-            android:value="https://7effa811298d4e0699a82c2b183e3298@o1070658.ingest.sentry.io/4504828647374848" />
 
-        <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
         <meta-data
-            android:name="io.sentry.traces.user-interaction.enable"
-            android:value="true" />
-
-        <!-- enable the performance API by setting a sample-rate -->
-        <meta-data
-            android:name="io.sentry.traces.sample-rate"
-            android:value="0.5" />
-
-        <!-- enable profiling when starting transactions -->
-        <meta-data
-            android:name="io.sentry.traces.profiling.sample-rate"
-            android:value="0.5" />
+            android:name="io.sentry.auto-init"
+            android:value="false" />
 
         <activity
             android:name=".ui.MainActivity"

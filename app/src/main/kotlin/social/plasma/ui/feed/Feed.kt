@@ -166,15 +166,15 @@ private fun FeedList(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
 
-            items(pagingLazyItems, key = { it.id }) { note ->
-                note?.let {
+            items(pagingLazyItems, key = { it.key }) { note ->
+                if (note?.hidden == false) {
                     val noteId = NoteId(note.id)
 
                     LaunchedEffect(Unit) {
                         onEvent(OnNoteDisplayed(noteId, note.userPubkey))
                     }
                     NoteElevatedCard(
-                        uiModel = it,
+                        uiModel = note,
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .clickable {
