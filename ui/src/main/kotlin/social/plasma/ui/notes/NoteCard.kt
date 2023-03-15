@@ -1,33 +1,24 @@
 package social.plasma.ui.notes
 
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -38,14 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -53,7 +42,9 @@ import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.ui.R
+import social.plasma.ui.components.OpenGraphPreviewCard
 import social.plasma.ui.components.Avatar
+import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.ImageCarousel
 import social.plasma.ui.components.InlineMediaPlayer
 import social.plasma.ui.components.Nip5Badge
@@ -267,63 +258,6 @@ private fun NoteContent(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun OpenGraphPreviewCard(
-    url: String,
-    getOpenGraphMetadata: GetOpenGraphMetadata,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    var openGraphMetadata by remember { mutableStateOf<OpenGraphMetadata?>(null) }
-
-    LaunchedEffect(url) {
-        openGraphMetadata = getOpenGraphMetadata(url)
-    }
-
-    openGraphMetadata?.let { metadata ->
-        OutlinedCard(
-            modifier = modifier.clickable {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            }
-        ) {
-            Column {
-                metadata.image?.let {
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f),
-                        contentScale = ContentScale.Crop,
-                        model = it,
-                        contentDescription = null,
-                    )
-                }
-                ListItem(
-                    headlineText = {
-                        metadata.title?.let {
-                            Text(it)
-                        }
-                    },
-                    supportingText = {
-                        metadata.description?.let {
-                            Text(
-                                it,
-                                maxLines = 4,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    },
-                    overlineText = {
-                        metadata.siteName?.let {
-                            Text(it)
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun NoteCardActionsRow(
     likeCount: Int,
@@ -407,23 +341,16 @@ private fun NoteCardActionsRow(
     }
 
     if (showRepostAlert) {
-        AlertDialog(
-            title = { Text(stringResource(R.string.repost_this_note)) },
-            text = { Text(stringResource(R.string.repost_notes_to_share_them_with_your_network)) },
-            onDismissRequest = { showRepostAlert = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    showRepostAlert = false
-                    onRepostClick()
-                }) {
-                    Text(stringResource(R.string.repost))
-                }
+        ConfirmationDialog(
+            title = stringResource(R.string.repost_this_note),
+            subtitle = stringResource(R.string.repost_notes_to_share_them_with_your_network),
+            icon = painterResource(id = R.drawable.ic_plasma_rocket_outline),
+            confirmLabel = stringResource(R.string.repost),
+            onConfirm = {
+                showRepostAlert = false
+                onRepostClick()
             },
-            dismissButton = {
-                TextButton(onClick = { showRepostAlert = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onDismiss = { showRepostAlert = false }
         )
     }
 }

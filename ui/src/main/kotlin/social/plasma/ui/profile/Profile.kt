@@ -1,7 +1,9 @@
 package social.plasma.ui.profile
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,9 +39,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +65,7 @@ import kotlinx.coroutines.launch
 import social.plasma.models.NoteId
 import social.plasma.models.PubKey
 import social.plasma.ui.R
+import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
@@ -70,6 +75,7 @@ import social.plasma.ui.notes.NoteElevatedCard
 import social.plasma.ui.profile.ProfileUiState.Loaded.ProfileStat
 import social.plasma.ui.profile.ProfileUiState.Loaded.UserData
 import social.plasma.ui.theme.PlasmaTheme
+import timber.log.Timber
 
 @Composable
 fun Profile(
@@ -128,8 +134,7 @@ private fun ProfileContent(
         contentWindowInsets = WindowInsets(left = 0, right = 0, top = 0, bottom = 0),
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
+            modifier = Modifier.padding(paddingValues)
         ) {
             item {
                 ProfileAppBar(
@@ -140,20 +145,17 @@ private fun ProfileContent(
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
-                ProfileBio(
-                    userData = uiState.userData,
+                ProfileBio(userData = uiState.userData,
                     validateNip5 = uiState.isNip5Valid,
                     following = uiState.following,
                     onFollowClick = {
                         scope.launch {
                             // TODO implement following/unfollowing
                             snackbarHostState.showSnackbar(
-                                "Coming Soon",
-                                duration = SnackbarDuration.Short
+                                "Coming Soon", duration = SnackbarDuration.Short
                             )
                         }
-                    }
-                )
+                    })
             }
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
@@ -240,7 +242,12 @@ fun ProfileAppBar(
                 actionIconContentColor = Color.White
             ),
             navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .buttonOverlay()
+                ) {
                     Icon(
                         Icons.Default.ChevronLeft,
                         stringResource(R.string.back)
@@ -250,8 +257,10 @@ fun ProfileAppBar(
             actions = {
                 userData.lud?.let {
                     LightningButton(lud = it)
+                    Spacer(modifier = Modifier.width(12.dp))
                 }
                 SharePubkeyButton(pubKey = userData.publicKey)
+                Spacer(modifier = Modifier.width(16.dp))
             },
             title = { },
         )
@@ -264,8 +273,7 @@ fun ProfileAppBar(
                     top.linkTo(coverImage.bottom)
                     bottom.linkTo(coverImage.bottom)
                     start.linkTo(parent.start, margin = 16.dp)
-                },
-            contentAlignment = Alignment.Center
+                }, contentAlignment = Alignment.Center
         ) {
             ZoomableAvatar(
                 imageUrl = userData.avatarUrl,
@@ -281,9 +289,12 @@ private fun SharePubkeyButton(
 ) {
     val clipboardManager = LocalClipboardManager.current
 
-    IconButton(onClick = {
-        clipboardManager.setText(AnnotatedString(pubKey.bech32))
-    }) {
+    IconButton(
+        modifier = Modifier.buttonOverlay(),
+        onClick = {
+            clipboardManager.setText(AnnotatedString(pubKey.bech32))
+        }
+    ) {
         Icon(
             painterResource(R.drawable.ic_plasma_key),
             stringResource(R.string.copy_public_key_to_clipboard)
@@ -293,21 +304,43 @@ private fun SharePubkeyButton(
 
 @Composable
 private fun LightningButton(lud: String) {
+    var walletRequiredDialogVisible by remember { mutableStateOf(false) }
     val currentContext = LocalContext.current
-    IconButton(onClick = {
-        currentContext.startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("lightning:$lud")
+
+    IconButton(modifier = Modifier.buttonOverlay(), onClick = {
+        try {
+            currentContext.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW, Uri.parse("lightning:$lud")
+                )
             )
-        )
+        } catch (e: ActivityNotFoundException) {
+            walletRequiredDialogVisible = true
+            Timber.w(e)
+        }
     }) {
         Icon(
-            painterResource(id = R.drawable.ic_plasma_lightning_bolt),
-            null
+            painterResource(id = R.drawable.ic_plasma_lightning_bolt), null
+        )
+    }
+
+    fun closeDialog() {
+        walletRequiredDialogVisible = false
+    }
+
+    if (walletRequiredDialogVisible) {
+        ConfirmationDialog(
+            title = stringResource(R.string.wallet_required),
+            subtitle = stringResource(R.string.install_a_lightning_wallet_and_fund_it_with_bitcoin_before_zapping_users),
+            confirmLabel = stringResource(R.string.okay),
+            onConfirm = ::closeDialog,
+            onDismiss = ::closeDialog
         )
     }
 }
+
+private fun Modifier.buttonOverlay() =
+    background(Color.Black.copy(alpha = 0.3f), shape = CircleShape)
 
 @Composable
 private fun ProfileBio(
@@ -345,8 +378,7 @@ private fun ProfileBio(
             OutlinedButton(
                 onClick = onFollowClick,
                 enabled = following != null,
-                border = ButtonDefaults.outlinedButtonBorder
-                    .copy(brush = SolidColor(MaterialTheme.colorScheme.primary))
+                border = ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(MaterialTheme.colorScheme.primary))
             ) {
                 Icon(painterResource(R.drawable.ic_plasma_follow), null)
                 Spacer(modifier = Modifier.width(4.dp))
@@ -394,8 +426,7 @@ private fun PreviewProfile(
     @PreviewParameter(ProfilePreviewProvider::class) uiState: ProfileUiState,
 ) {
     PlasmaTheme {
-        Profile(
-            uiState = uiState,
+        Profile(uiState = uiState,
             onNoteDisposed = {},
             onNoteDisplayed = {},
             onNavigateBack = {},
@@ -404,7 +435,6 @@ private fun PreviewProfile(
             onReply = {},
             getOpenGraphMetadata = { null },
             onNavigateToProfile = {},
-            onRepostClick = {}
-        )
+            onRepostClick = {})
     }
 }

@@ -16,4 +16,7 @@
     <string name="repost">Boost</string>
     <string name="cancel">Cancel</string>
     <string name="boosted_by">Boosted by %1$s</string>
+    <string name="wallet_required">Wallet Required</string>
+    <string name="install_a_lightning_wallet_and_fund_it_with_bitcoin_before_zapping_users"><![CDATA[Install a lightning wallet and fund it with bitcoin before zapping users]]></string>
+    <string name="okay">Okay</string>
 </resources>
