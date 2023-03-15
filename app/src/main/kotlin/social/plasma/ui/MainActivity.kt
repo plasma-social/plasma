@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            PlasmaTheme {
+            PlasmaTheme(dynamicStatusBar = true) {
                 PlasmaApp()
             }
         }
