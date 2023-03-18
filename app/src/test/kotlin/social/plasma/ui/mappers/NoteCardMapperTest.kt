@@ -7,6 +7,7 @@ import fakes.FakeByteArrayPreference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import social.plasma.R
 import social.plasma.db.notes.NoteView
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.db.reactions.FakeReactionDao
@@ -16,6 +17,7 @@ import social.plasma.models.crypto.KeyGenerator
 import social.plasma.nostr.models.Event
 import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.repository.FakeUserMetadataRepo
+import social.plasma.ui.FakeStringManager
 import social.plasma.ui.components.richtext.ProfileMention
 import social.plasma.ui.notes.NoteContentParser
 import social.plasma.ui.notes.NoteUiModel
@@ -25,8 +27,18 @@ import java.time.Instant
 @OptIn(ExperimentalCoroutinesApi::class)
 class NoteCardMapperTest {
     private val instantFormatter = FakeInstantFormatter()
+    private val stringManager = FakeStringManager(
+        R.string.replying_to_single to "Replying to {user}",
+        R.string.replying_to_many to "{additionalUserCount, plural,\n" +
+                "            =0 {Replying to {firstUser} and {secondUser}}\n" +
+                "            =1 {Replying to {firstUser}, {secondUser}, and 1 other}\n" +
+                "            other {Replying to {firstUser}, {secondUser}, and {additionalUserCount} others}" +
+                "        }",
+    )
+
     private val mapper: NoteCardMapper
         get() {
+
             return NoteCardMapper(
                 userMetaDataRepository = FakeUserMetadataRepo(),
                 reactionDao = FakeReactionDao(),
@@ -35,6 +47,7 @@ class NoteCardMapperTest {
                     .addLast(KotlinJsonAdapterFactory()).build(),
                 myPubkeyPref = FakeByteArrayPreference(keyGenerator.generateKeyPair().pub.toByteArray()),
                 instantFormatter = instantFormatter,
+                stringManager = stringManager
             )
         }
 
@@ -87,6 +100,78 @@ class NoteCardMapperTest {
             assertThat(likeCount).isEqualTo(40)
             assertThat(userPubkey).isEqualTo(pubkey)
             assertThat(nip5Domain).isNull()
+        }
+    }
+
+    @Test
+    fun `Reply with a single p tag uses correct string`() = runTest {
+        val referencedPubkey = PubKey(keyGenerator.generateKeyPair().pub.hex())
+
+        val noteWithUser = NoteWithUser(
+            noteEntity = createNoteView(
+                tags = listOf(
+                    listOf("p", referencedPubkey.hex)
+                ),
+                isReply = true,
+            ), userMetadataEntity = createUserMetadata()
+        )
+
+        with(mapper.toNoteUiModel(noteWithUser)) {
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkey.shortBech32}")
+        }
+    }
+
+    @Test
+    fun `Reply note with many tags only shows the first two`() = runTest {
+        val referencedPubkeys = (1..50).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+
+        val noteWithUser = NoteWithUser(
+            noteEntity = createNoteView(
+                tags = referencedPubkeys.map {
+                    listOf("p", it.hex)
+                },
+                isReply = true,
+            ), userMetadataEntity = createUserMetadata()
+        )
+
+        with(mapper.toNoteUiModel(noteWithUser)) {
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32}, ${referencedPubkeys[1].shortBech32}, and 48 others")
+        }
+    }
+
+    @Test
+    fun `Reply note with two tags shows correct text`() = runTest {
+        val referencedPubkeys = (1..2).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+
+        val noteWithUser = NoteWithUser(
+            noteEntity = createNoteView(
+                tags = referencedPubkeys.map {
+                    listOf("p", it.hex)
+                },
+                isReply = true,
+            ), userMetadataEntity = createUserMetadata()
+        )
+
+        with(mapper.toNoteUiModel(noteWithUser)) {
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32} and ${referencedPubkeys[1].shortBech32}")
+        }
+    }
+
+    @Test
+    fun `Reply note with 1 "other" tag shows singular text`() = runTest {
+        val referencedPubkeys = (1..3).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+
+        val noteWithUser = NoteWithUser(
+            noteEntity = createNoteView(
+                tags = referencedPubkeys.map {
+                    listOf("p", it.hex)
+                },
+                isReply = true,
+            ), userMetadataEntity = createUserMetadata()
+        )
+
+        with(mapper.toNoteUiModel(noteWithUser)) {
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32}, ${referencedPubkeys[1].shortBech32}, and 1 other")
         }
     }
 

@@ -15,8 +15,8 @@ android {
         applicationId = "social.plasma"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 6
-        versionName = "0.0.6"
+        versionCode = 7
+        versionName = "0.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -107,6 +107,7 @@ dependencies {
     kapt(libs.hilt.compiler)
     kapt(libs.androidx.hilt.compiler)
 
+    implementation(libs.icu4j)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodelcompose)
 

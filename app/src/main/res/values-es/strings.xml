@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="add">Agregar</string>
     <string name="home">Inicio</string>
     <string name="messages">Mensajes</string>
@@ -18,4 +18,12 @@
     <string name="reply">Responder</string>
     <string name="replying_to_author">Respondiendo a %1$s</string>
     <string name="create_reply">Crear Respuesta</string>
+    <string name="replying_to_single">Respondiendole a <xliff:g id="user" example="Pedro">{user}</xliff:g></string>
+    <string name="replying_to_many">
+        {additionalUserCount, plural,
+            =0 {Respondiendole a <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g>, <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>}
+            =1 {Respondiendole a <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g>, <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>, y 1 más}
+            other {Respondiendole a <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g>, <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>, y <xliff:g id="additionalUserCount" example="3">{additionalUserCount}</xliff:g> más}
+        }
+    </string>
 </resources>
