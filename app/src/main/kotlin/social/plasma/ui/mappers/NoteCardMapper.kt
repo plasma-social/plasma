@@ -2,6 +2,7 @@ package social.plasma.ui.mappers
 
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.firstOrNull
+import social.plasma.R
 import social.plasma.db.notes.NoteWithUser
 import social.plasma.db.reactions.ReactionDao
 import social.plasma.di.KeyType
@@ -11,6 +12,7 @@ import social.plasma.models.PubKey
 import social.plasma.nostr.models.Event
 import social.plasma.prefs.Preference
 import social.plasma.repository.UserMetaDataRepository
+import social.plasma.ui.StringManager
 import social.plasma.ui.components.richtext.Mention
 import social.plasma.ui.components.richtext.NoteMention
 import social.plasma.ui.components.richtext.ProfileMention
@@ -21,6 +23,9 @@ import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 
+
+private const val MAX_P_TAGS_TO_DISPLAY = 2
+
 class NoteCardMapper @Inject constructor(
     private val userMetaDataRepository: UserMetaDataRepository,
     @UserKey(KeyType.Public) private val myPubkeyPref: Preference<ByteArray>,
@@ -28,6 +33,7 @@ class NoteCardMapper @Inject constructor(
     private val noteContentParser: NoteContentParser,
     private val moshi: Moshi,
     private val instantFormatter: InstantFormatter,
+    private val stringManager: StringManager,
 ) {
 
     suspend fun toNoteUiModel(noteWithUser: NoteWithUser): NoteUiModel {
@@ -125,26 +131,35 @@ class NoteCardMapper @Inject constructor(
     }
 
     private suspend fun buildBannerLabel(tags: List<List<String>>): String? {
-        val referencedNames = getReferencedNames(tags)
+        val pTags = tags.filter { it.firstOrNull() == "p" && it.size >= 2 }
 
-        return if (referencedNames.isNotEmpty()) {
-            referencedNames.generateBannerLabel()
-        } else null
+        val referencedNames = getReferencedNames(pTags).toList()
+
+        return when {
+            referencedNames.isEmpty() -> null
+            referencedNames.size == 1 -> stringManager.getFormattedString(R.string.replying_to_single, mapOf("user" to referencedNames[0]))
+            else -> {
+                val additionalReferencedNames = pTags.size - 2
+                stringManager.getFormattedString(R.string.replying_to_many, mapOf(
+                    "additionalUserCount" to additionalReferencedNames,
+                    "firstUser" to referencedNames[0],
+                    "secondUser" to referencedNames[1],
+                ))
+            }
+        }
     }
 
     private suspend fun getReferencedNames(tags: List<List<String>>): MutableSet<String> {
         val referencedNames = mutableSetOf<String>()
 
-        tags.forEachIndexed { index, it ->
-            if (it.firstOrNull() == "p") {
-                val pubkey = PubKey(it[1])
+        tags.take(MAX_P_TAGS_TO_DISPLAY).forEach { tag ->
+            val pubkey = PubKey(tag[1])
 
-                val userName =
-                    (userMetaDataRepository.observeUserMetaData(pubkey.hex).firstOrNull()?.name
-                        ?: pubkey.shortBech32)
+            val userMetaData = userMetaDataRepository.observeUserMetaData(pubkey.hex).firstOrNull()
+            val userName = (userMetaData?.displayName?.takeIf { it.isNotBlank() }
+                ?: userMetaData?.name?.takeIf { it.isNotBlank() } ?: pubkey.shortBech32)
 
-                referencedNames.add(userName)
-            }
+            referencedNames.add(userName)
         }
         return referencedNames
     }
@@ -182,10 +197,5 @@ class NoteCardMapper @Inject constructor(
     private fun Instant.relativeTime(): String {
         return instantFormatter.getRelativeTime(this)
 
-    }
-
-
-    private fun Iterable<String>.generateBannerLabel(): String {
-        return "Replying to ${this.joinToString()}"
     }
 }

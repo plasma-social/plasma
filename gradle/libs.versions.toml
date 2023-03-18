@@ -87,6 +87,7 @@ exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.r
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
 
+icu4j = { module = "com.ibm.icu:icu4j", version = "72.1" }
 jsoup = "org.jsoup:jsoup:1.15.3"
 junit = "junit:junit:4.13.2"
 
