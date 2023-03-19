@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="replying_to_single">Replying to <xliff:g id="user" example="Pedro">{user}</xliff:g></string>
+    <string name="replying_to_many">
+        {additionalUserCount, plural,
+            =0 {Replying to <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g> and <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>}
+            =1 {Replying to <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g>, <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>, and 1 other }
+            other {Replying to <xliff:g id="firstUser" example="Jack">{firstUser}</xliff:g>, <xliff:g id="secondUser" example="Pedro">{secondUser}</xliff:g>, and <xliff:g id="additionalUserCount" example="3">{additionalUserCount}</xliff:g> others}
+        }
+    </string>
+</resources>

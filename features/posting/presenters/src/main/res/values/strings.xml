@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="post">Post</string>
+    <string name="new_note">New Note</string>
+    <string name="your_message">Your message</string>
+</resources>
