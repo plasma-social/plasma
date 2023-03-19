@@ -60,10 +60,25 @@ android {
 }
 
 dependencies {
-    implementation(projects.models)
-    implementation(projects.nostr)
-    implementation(projects.opengraph)
-    implementation(projects.ui)
+    implementation(projects.data.daos)
+    implementation(projects.repositories.real)
+    implementation(projects.common.utils.real)
+    implementation(projects.features.feeds.screens)
+    implementation(projects.features.feeds.presenters)
+    implementation(projects.features.feeds.ui)
+    implementation(projects.features.posting.ui)
+    implementation(projects.features.posting.presenters)
+    implementation(projects.features.posting.screens)
+    implementation(projects.features.onboarding.screens)
+    implementation(projects.features.onboarding.presenters)
+    implementation(projects.features.onboarding.ui)
+    implementation(projects.features.profile.screens)
+    implementation(projects.features.profile.presenters)
+    implementation(projects.features.profile.ui)
+    implementation(projects.data.models)
+    implementation(projects.data.nostr)
+    implementation(projects.data.opengraph)
+    implementation(projects.common.ui)
 
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)
@@ -87,6 +102,8 @@ dependencies {
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.workmanager)
 
+    implementation(libs.circuit.core)
+    implementation(libs.circuit.overlay)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
@@ -133,6 +150,7 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.uitooling)
 
+    testImplementation(projects.common.utils.fakes)
     testImplementation(libs.androidx.paging.common)
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.junit)

@@ -4,22 +4,24 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import social.plasma.db.contacts.ContactEntity
-import social.plasma.db.contacts.ContactsDao
+import social.plasma.data.daos.NotesDao
+import social.plasma.data.daos.UserMetadataDao
+import social.plasma.models.ContactEntity
+import social.plasma.data.daos.ContactsDao
 import social.plasma.db.converters.TagsTypeConverter
-import social.plasma.db.events.EventEntity
-import social.plasma.db.events.EventReferenceEntity
-import social.plasma.db.events.EventsDao
-import social.plasma.db.events.PubkeyReferenceEntity
-import social.plasma.db.notes.NoteDao
-import social.plasma.db.notes.NoteView
-import social.plasma.db.reactions.ReactionDao
-import social.plasma.db.usermetadata.UserMetadataDao
-import social.plasma.db.usermetadata.UserMetadataEntity
+import social.plasma.models.events.EventEntity
+import social.plasma.models.events.EventReferenceEntity
+import social.plasma.data.daos.EventsDao
+import social.plasma.data.daos.LastRequestDao
+import social.plasma.models.events.PubkeyReferenceEntity
+import social.plasma.models.NoteView
+import social.plasma.models.LastRequestEntity
+import social.plasma.models.UserMetadataEntity
 
 @Database(
     entities = [
         EventEntity::class,
+        LastRequestEntity::class,
         EventReferenceEntity::class,
         PubkeyReferenceEntity::class,
         UserMetadataEntity::class,
@@ -28,19 +30,18 @@ import social.plasma.db.usermetadata.UserMetadataEntity
     views = [
         NoteView::class,
     ],
-    version = 2,
+    version = 3,
     autoMigrations = [
-        AutoMigration(from = 1, to = 2)
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
     ]
 )
 @TypeConverters(TagsTypeConverter::class)
 abstract class PlasmaDb : RoomDatabase() {
-    abstract fun noteDao(): NoteDao
-
-    abstract fun userMetadataDao(): UserMetadataDao
-    abstract fun reactionsDao(): ReactionDao
-
     abstract fun contactsDao(): ContactsDao
 
     abstract fun eventsDao(): EventsDao
+    abstract fun notesDao(): NotesDao
+    abstract fun userMetadataDao(): UserMetadataDao
+    abstract fun lastRequestDao() : LastRequestDao
 }

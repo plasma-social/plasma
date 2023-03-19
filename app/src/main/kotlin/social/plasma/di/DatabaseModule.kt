@@ -6,13 +6,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import social.plasma.data.daos.NotesDao
+import social.plasma.data.daos.UserMetadataDao
 import social.plasma.db.PlasmaDb
-import social.plasma.db.contacts.ContactsDao
+import social.plasma.data.daos.ContactsDao
 import social.plasma.db.converters.TagsTypeConverter
-import social.plasma.db.events.EventsDao
-import social.plasma.db.notes.NoteDao
-import social.plasma.db.reactions.ReactionDao
-import social.plasma.db.usermetadata.UserMetadataDao
+import social.plasma.data.daos.EventsDao
+import social.plasma.data.daos.LastRequestDao
 import javax.inject.Singleton
 
 @Module
@@ -32,19 +32,6 @@ object DatabaseModule {
             .fallbackToDestructiveMigration()
             .build()
     }
-
-    @Provides
-    @Singleton
-    fun providesNotesDao(db: PlasmaDb): NoteDao = db.noteDao()
-
-    @Provides
-    @Singleton
-    fun providesUserMetadataDao(db: PlasmaDb): UserMetadataDao = db.userMetadataDao()
-
-    @Provides
-    @Singleton
-    fun providesReactionsDao(db: PlasmaDb): ReactionDao = db.reactionsDao()
-
     @Provides
     @Singleton
     fun providesContactsDao(db: PlasmaDb): ContactsDao = db.contactsDao()
@@ -52,4 +39,15 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providesEventDao(db: PlasmaDb): EventsDao = db.eventsDao()
+
+    @Provides
+    @Singleton
+    fun providesNotesDao(db: PlasmaDb) : NotesDao = db.notesDao()
+
+    @Provides
+    @Singleton
+    fun providesUserMetadataDao(db: PlasmaDb) : UserMetadataDao = db.userMetadataDao()
+
+    @Provides @Singleton
+    fun providesLastRequestDao(db: PlasmaDb) : LastRequestDao = db.lastRequestDao()
 }
