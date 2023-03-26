@@ -1,6 +1,8 @@
 package social.plasma.features.posting.presenters
 
 import com.google.common.truth.Truth.assertThat
+import com.slack.circuit.test.FakeNavigator
+import com.slack.circuit.test.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -9,7 +11,8 @@ import social.plasma.domain.interactors.SendNote
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnSubmitPost
-import social.plasma.navigation.fakes.FakeNavigator
+import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import social.plasma.shared.utils.fakes.FakeStringManager
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -20,13 +23,21 @@ class ComposingScreenPresenterTest {
         R.string.new_note to "new_note",
         R.string.your_message to "your_message",
     )
+    private val noteRepository = FakeNoteRepository()
 
     private val TestScope.presenter: ComposingScreenPresenter
-        get() = ComposingScreenPresenter(
-            navigator = navigator,
-            stringManager = stringManager,
-            sendNote = SendNote(coroutineContext)
-        )
+        get() {
+            return ComposingScreenPresenter(
+                navigator = navigator,
+                stringManager = stringManager,
+                sendNote = SendNote(
+                    ioDispatcher = coroutineContext,
+                    noteRepository = noteRepository
+                ),
+                args = ComposingScreen(),
+                noteRepository = noteRepository
+            )
+        }
 
     @Test
     fun `emits default state`() = runTest {

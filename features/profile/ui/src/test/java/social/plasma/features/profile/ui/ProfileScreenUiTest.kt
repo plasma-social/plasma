@@ -108,7 +108,10 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
             ProfileUiState.Loaded(
                 userData = userData,
                 statCards = statCards,
-                feedState = FeedUiState(userNotesPagingFlow, onEvent = {}),
+                feedState = FeedUiState(
+                    userNotesPagingFlow,
+                    onEvent = {},
+                    getOpenGraphMetadata = { null }),
                 onEvent = {},
             )
         )

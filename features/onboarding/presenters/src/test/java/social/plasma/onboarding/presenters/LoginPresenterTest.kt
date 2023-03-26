@@ -99,7 +99,7 @@ class LoginPresenterTest {
 
             awaitItem().onEvent(OnLogin)
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
             assertThat(accountStateRepository.getPublicKey()).isNotNull()
         }
     }
@@ -112,7 +112,7 @@ class LoginPresenterTest {
 
             awaitItem().onEvent(OnLogin)
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
             assertThat(accountStateRepository.getSecretKey()).isNotNull()
         }
     }
