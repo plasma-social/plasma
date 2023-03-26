@@ -39,6 +39,7 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
     fun ListContent(
         state: FeedUiState,
         modifier: Modifier,
+        contentPadding: PaddingValues = PaddingValues(vertical = 8.dp),
         headerContent: LazyListScope.() -> Unit = {},
     ) {
         val onEvent = state.onEvent
@@ -59,7 +60,7 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 8.dp)
+                contentPadding = contentPadding,
             ) {
 
                 headerContent()
