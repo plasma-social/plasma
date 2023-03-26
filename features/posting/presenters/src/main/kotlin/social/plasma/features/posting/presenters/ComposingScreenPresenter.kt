@@ -13,7 +13,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import okio.ByteString.Companion.decodeHex
-import social.plasma.data.daos.NotesDao
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
@@ -22,12 +21,13 @@ import social.plasma.features.posting.screens.ComposePostUiEvent
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.models.NoteWithUser
+import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
 
 class ComposingScreenPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val sendNote: SendNote,
-    private val notesDao: NotesDao,
+    private val noteRepository: NoteRepository,
     @Assisted private val args: ComposingScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ComposePostUiState> {
@@ -39,8 +39,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
         var noteContent by remember { mutableStateOf("") }
 
         val rootNote by produceState<NoteWithUser?>(initialValue = null) {
-            args.parentNote?.hex?.let { noteId ->
-                value = notesDao.getById(noteId)
+            args.parentNote?.let { noteId ->
+                value = noteRepository.getById(noteId)
             }
         }
 

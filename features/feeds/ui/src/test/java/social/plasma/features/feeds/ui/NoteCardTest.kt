@@ -66,6 +66,7 @@ internal class NoteCardTest(
                         onProfileClick = {},
                         onNoteClick = {},
                         onRepostClick = {},
+                        getOpenGraphMetadata = { null }
                     )
                 }
             }

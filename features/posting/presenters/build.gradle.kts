@@ -49,11 +49,11 @@ android {
 }
 
 dependencies {
-    implementation(projects.data.daos)
     implementation(projects.data.models)
     implementation(projects.features.posting.screens)
     implementation(projects.common.utils.api)
     implementation(projects.domain)
+    implementation(projects.repositories.api)
 
     implementation(libs.circuit.core)
 
@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.timber)
 
     testImplementation(projects.common.utils.fakes)
+    testImplementation(projects.repositories.fakes)
     testImplementation(libs.junit)
     testImplementation(libs.circuit.test)
     testImplementation(libs.coroutines.test)

@@ -41,7 +41,7 @@ class HeadlessAuthenticatorPresenterTest {
         presenter.test {
             awaitItem()
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
         }
     }
 
@@ -52,7 +52,7 @@ class HeadlessAuthenticatorPresenterTest {
         presenter.test {
             awaitItem()
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
         }
     }
 
@@ -61,7 +61,7 @@ class HeadlessAuthenticatorPresenterTest {
         presenter.test {
             awaitItem()
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(LoginScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(LoginScreen)
         }
     }
 }
