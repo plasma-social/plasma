@@ -21,6 +21,7 @@ import social.plasma.domain.observers.ObserveFollowingCount
 import social.plasma.domain.observers.ObservePagedProfileFeed
 import social.plasma.domain.observers.ObserveUserIsInContacts
 import social.plasma.domain.observers.ObserveUserMetadata
+import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
@@ -119,9 +120,22 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 )
             }
         }
-
+        val feedState = feedsPresenter.present()
+        val profileFeedState = remember(feedState) {
+            val onFeedEvent = feedState.onEvent
+            feedState.copy(
+                onEvent = { event ->
+                    when (event) {
+                        is FeedUiEvent.OnProfileClick -> {
+                            if (event.pubKey != userData.publicKey) onFeedEvent(event)
+                        }
+                        else -> onFeedEvent(event)
+                    }
+                }
+            )
+        }
         return ProfileUiState.Loaded(
-            feedState = feedsPresenter.present(),
+            feedState = profileFeedState,
             statCards = listOf(
                 ProfileStat(
                     label = "Following",
