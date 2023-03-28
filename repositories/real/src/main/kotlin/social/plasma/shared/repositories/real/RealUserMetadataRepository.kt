@@ -9,12 +9,13 @@ import javax.inject.Inject
 
 internal class RealUserMetadataRepository @Inject constructor(
     private val userMetadataDao: UserMetadataDao,
-): UserMetadataRepository {
-    override fun search(query: String): Flow<List<String>> {
-        TODO("Not yet implemented")
-    }
-
+) : UserMetadataRepository {
     override fun observeUserMetaData(pubKey: PubKey): Flow<UserMetadataEntity?> {
         return userMetadataDao.observeUserMetadata(pubKey.hex)
+    }
+
+    override suspend fun searchUsers(query: String): List<UserMetadataEntity> {
+        val nameQuery = "$query%"
+        return userMetadataDao.search(nameQuery)
     }
 }

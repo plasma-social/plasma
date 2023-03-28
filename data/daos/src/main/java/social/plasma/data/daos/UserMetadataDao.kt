@@ -26,4 +26,7 @@ abstract class UserMetadataDao {
             insertInternal(metadata)
         }
     }
+
+    @Query("SELECT * FROM user_metadata WHERE name LIKE :nameQuery OR displayName LIKE :nameQuery ORDER BY displayName COLLATE NOCASE ASC ")
+    abstract suspend fun search(nameQuery: String): List<UserMetadataEntity>
 }
