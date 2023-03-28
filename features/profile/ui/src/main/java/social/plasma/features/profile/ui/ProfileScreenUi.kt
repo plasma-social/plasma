@@ -3,7 +3,6 @@ package social.plasma.features.profile.ui
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -69,6 +67,7 @@ import social.plasma.models.PubKey
 import social.plasma.ui.R
 import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
+import social.plasma.ui.components.OverlayIconButton
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
@@ -172,15 +171,12 @@ class ProfileScreenUi @Inject constructor(
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = Color.Transparent,
-                    navigationIconContentColor = Color.White, // TODO figure out best colors
-                    actionIconContentColor = Color.White
                 ),
                 navigationIcon = {
-                    IconButton(
+                    OverlayIconButton(
                         onClick = onNavigateBack,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
-                            .buttonOverlay()
                     ) {
                         Icon(
                             Icons.Default.ChevronLeft,
@@ -223,8 +219,7 @@ class ProfileScreenUi @Inject constructor(
     ) {
         val clipboardManager = LocalClipboardManager.current
 
-        IconButton(
-            modifier = Modifier.buttonOverlay(),
+        OverlayIconButton(
             onClick = {
                 clipboardManager.setText(AnnotatedString(pubKey.bech32))
             }
@@ -241,7 +236,7 @@ class ProfileScreenUi @Inject constructor(
         var walletRequiredDialogVisible by remember { mutableStateOf(false) }
         val currentContext = LocalContext.current
 
-        IconButton(modifier = Modifier.buttonOverlay(), onClick = {
+        OverlayIconButton(onClick = {
             try {
                 currentContext.startActivity(
                     Intent(
@@ -272,9 +267,6 @@ class ProfileScreenUi @Inject constructor(
             )
         }
     }
-
-    private fun Modifier.buttonOverlay() =
-        background(Color.Black.copy(alpha = 0.3f), shape = CircleShape)
 
     @Composable
     private fun ProfileBio(
@@ -381,7 +373,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
         username: String? = "@satoshi",
     ): ProfileUiState =
         Loaded(
-            feedState = FeedUiState(emptyFlow(), {null}, {}),
+            feedState = FeedUiState(emptyFlow(), { null }, {}),
             statCards = listOf(
                 Loaded.ProfileStat(
                     label = "Followers",

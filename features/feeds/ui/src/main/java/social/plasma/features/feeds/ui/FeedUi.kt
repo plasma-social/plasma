@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -49,15 +50,6 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
         Box(
             modifier = modifier.fillMaxSize()
         ) {
-
-            if (pagingLazyItems.itemCount == 0) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopStart)
-                )
-            }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = contentPadding,
@@ -94,6 +86,14 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
                         null -> {}
                     }
                 }
+            }
+            if (pagingLazyItems.itemCount == 0) {
+                LinearProgressIndicator(
+                    trackColor = Color.Transparent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopStart)
+                )
             }
         }
 
