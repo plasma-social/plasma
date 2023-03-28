@@ -4,14 +4,15 @@ import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import org.junit.Test
-
 import org.junit.Assert.*
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.features.posting.screens.ComposePostUiState
-import social.plasma.ui.testutils.TestFontScale
+import social.plasma.features.posting.screens.ComposePostUiState.TagSuggestion
+import social.plasma.models.PubKey
 import social.plasma.ui.testutils.TestDevice
+import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
 import social.plasma.ui.theme.PlasmaTheme
 
@@ -26,7 +27,8 @@ class ComposePostUiTest constructor(
         deviceConfig = testDevice.deviceConfig.copy(fontScale = fontScale.scale),
     )
 
-    @Test fun default() {
+    @Test
+    fun default() {
         snapshot(
             ComposePostUiState(
                 postButtonLabel = "Post",
@@ -38,13 +40,49 @@ class ComposePostUiTest constructor(
         )
     }
 
-    @Test fun `button enabled`() {
+    @Test
+    fun `button enabled`() {
         snapshot(
             ComposePostUiState(
                 postButtonLabel = "Post",
                 placeholder = "What's zappening?",
                 postButtonEnabled = true,
                 title = "Create Post",
+                onEvent = {}
+            )
+        )
+    }
+
+    @Test
+    fun `displaying tag suggestions`() {
+        snapshot(
+            ComposePostUiState(
+                postButtonLabel = "Post",
+                placeholder = "What's zappening?",
+                postButtonEnabled = true,
+                title = "Create Post",
+                showTagSuggestions = true,
+                tagSuggestions = listOf(
+                    TagSuggestion(
+                        pubKey = PubKey("1"),
+                        imageUrl = null,
+                        title = "KoalaSat",
+                        subtitle = "koalasat@nostros.net",
+                    ),
+                    TagSuggestion(
+                        pubKey = PubKey("1"),
+                        imageUrl = null,
+                        title = "KoalaSat",
+                        subtitle = "koalasat@nostros.net",
+                    ),
+                    TagSuggestion(
+                        pubKey = PubKey("1"),
+                        imageUrl = null,
+                        title = "KoalaSat",
+                        subtitle = "koalasat@nostros.net",
+                    ),
+
+                    ),
                 onEvent = {}
             )
         )
