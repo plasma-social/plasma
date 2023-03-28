@@ -1,5 +1,6 @@
 package social.plasma.features.posting.ui.composepost
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +24,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -32,10 +32,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.Ui
 import social.plasma.features.posting.screens.ComposePostUiEvent
+import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTapped
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
@@ -47,7 +47,7 @@ class ComposePostUi : Ui<ComposePostUiState> {
         state: ComposePostUiState, modifier: Modifier,
     ) {
         val onEvent = state.onEvent
-        val input = remember { mutableStateOf(TextFieldValue()) }
+
         val focusRequester = remember { FocusRequester() }
 
         LaunchedEffect(Unit) {
@@ -86,11 +86,10 @@ class ComposePostUi : Ui<ComposePostUiState> {
                         .focusRequester(focusRequester)
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    value = input.value,
+                    value = state.noteContent,
                     onValueChange = { newValue ->
-                        if (newValue != input.value) {
-                            input.value = newValue
-                            onEvent(ComposePostUiEvent.OnNoteChange(newValue.text))
+                        if (newValue != state.noteContent) {
+                            onEvent(ComposePostUiEvent.OnNoteChange(newValue))
                         }
                     },
                     colors = TextFieldDefaults.textFieldColors(
@@ -113,6 +112,13 @@ class ComposePostUi : Ui<ComposePostUiState> {
                     ) {
                         items(state.tagSuggestions) { suggestion ->
                             ListItem(
+                                modifier = Modifier.clickable {
+                                    onEvent(
+                                        OnSuggestionTapped(
+                                            suggestion
+                                        )
+                                    )
+                                },
                                 headlineContent = {
                                     Text(suggestion.title)
                                 },
@@ -128,7 +134,6 @@ class ComposePostUi : Ui<ComposePostUiState> {
                                     )
                                 }
                             )
-//                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                 }

@@ -1,7 +1,8 @@
 package social.plasma.features.posting.screens
 
+import androidx.compose.ui.text.input.TextFieldValue
 import com.slack.circuit.CircuitUiState
-import social.plasma.models.PubKey
+import social.plasma.models.TagSuggestion
 
 data class ComposePostUiState(
     val postButtonEnabled: Boolean = false,
@@ -10,13 +11,7 @@ data class ComposePostUiState(
     val postButtonLabel: String = "",
     val showTagSuggestions: Boolean = false,
     val tagSuggestions: List<TagSuggestion> = emptyList(),
+    val noteContent: TextFieldValue,
     val onEvent: (ComposePostUiEvent) -> Unit,
-) : CircuitUiState {
-    data class TagSuggestion(
-        val pubKey: PubKey,
-        val imageUrl: String?,
-        val title: String,
-        val subtitle: String?,
-    )
-}
+) : CircuitUiState
 

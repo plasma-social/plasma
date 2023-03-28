@@ -1,6 +1,7 @@
 package social.plasma.features.posting.ui.composepost
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -9,8 +10,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.features.posting.screens.ComposePostUiState
-import social.plasma.features.posting.screens.ComposePostUiState.TagSuggestion
 import social.plasma.models.PubKey
+import social.plasma.models.TagSuggestion
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
@@ -35,8 +36,8 @@ class ComposePostUiTest constructor(
                 placeholder = "What's zappening?",
                 postButtonEnabled = false,
                 title = "Create Post",
-                onEvent = {}
-            )
+                noteContent = TextFieldValue("")
+            ) {}
         )
     }
 
@@ -48,8 +49,8 @@ class ComposePostUiTest constructor(
                 placeholder = "What's zappening?",
                 postButtonEnabled = true,
                 title = "Create Post",
-                onEvent = {}
-            )
+                noteContent = TextFieldValue("Testing with content")
+            ) {}
         )
     }
 
@@ -62,6 +63,7 @@ class ComposePostUiTest constructor(
                 postButtonEnabled = true,
                 title = "Create Post",
                 showTagSuggestions = true,
+                noteContent = TextFieldValue("@ko"),
                 tagSuggestions = listOf(
                     TagSuggestion(
                         pubKey = PubKey("1"),
@@ -82,9 +84,8 @@ class ComposePostUiTest constructor(
                         subtitle = "koalasat@nostros.net",
                     ),
 
-                    ),
-                onEvent = {}
-            )
+                    )
+            ) {}
         )
     }
 

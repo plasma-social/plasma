@@ -6,7 +6,6 @@ import social.plasma.models.UserMetadataEntity
 
 
 interface UserMetadataRepository {
-    fun search(query: String): Flow<List<String>>
-
     fun observeUserMetaData(pubKey: PubKey): Flow<UserMetadataEntity?>
+    suspend fun searchUsers(query: String): List<UserMetadataEntity>
 }
