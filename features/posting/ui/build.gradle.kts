@@ -71,4 +71,5 @@ dependencies {
     testImplementation(projects.common.ui.testutils)
     testImplementation(libs.junit)
     testImplementation(libs.testparameterinjector)
+    testImplementation(libs.truth)
 }

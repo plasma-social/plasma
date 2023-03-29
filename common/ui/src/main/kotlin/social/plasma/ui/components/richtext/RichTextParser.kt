@@ -2,9 +2,11 @@ package social.plasma.ui.components.richtext
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.compose.ui.text.withAnnotation
+import androidx.compose.ui.text.withStyle
 import social.plasma.models.Mention
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
@@ -18,11 +20,11 @@ class RichTextParser constructor(
     /**
      * Builds an annotated string using the note's mentions.
      */
-    suspend fun parse(
+    fun parse(
         input: String,
         mentions: Map<Int, Mention>,
-    ): AnnotatedString = withContext(Dispatchers.Default) {
-        buildAnnotatedString {
+    ): AnnotatedString {
+        return buildAnnotatedString {
             val lines = input.split("\n")
 
             lines.forEachIndexed { lineIndex, line ->
@@ -91,5 +93,50 @@ class RichTextParser constructor(
         // Append text after the last match in a word
         val trailingText = word.substring(prevRange.last + 1, word.length)
         append(trailingText)
+    }
+}
+
+object RichTextTag {
+    const val URL = "URL"
+    const val PROFILE = "PROFILE"
+    const val NOTE = "NOTE"
+}
+
+@OptIn(ExperimentalTextApi::class)
+inline fun <R : Any> AnnotatedString.Builder.withProfileMention(
+    pubkey: String,
+    color: Color,
+    crossinline block: AnnotatedString.Builder.() -> R,
+): R {
+    return withAnnotation(RichTextTag.PROFILE, pubkey) {
+        withStyle(SpanStyle(color = color)) {
+            block(this)
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+inline fun <R : Any> AnnotatedString.Builder.withNoteMention(
+    id: String,
+    color: Color,
+    crossinline block: AnnotatedString.Builder.() -> R,
+): R {
+    return withAnnotation(RichTextTag.NOTE, id) {
+        withStyle(SpanStyle(color = color)) {
+            block(this)
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+inline fun <R : Any> AnnotatedString.Builder.withUrl(
+    url: String,
+    color: Color,
+    crossinline block: AnnotatedString.Builder.() -> R,
+): R {
+    return withAnnotation(RichTextTag.URL, url) {
+        withStyle(SpanStyle(color = color)) {
+            block(this)
+        }
     }
 }

@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -37,6 +36,10 @@ android {
 
 dependencies {
     api(projects.common.utils.api)
+    implementation(projects.data.models)
+
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui.ui)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

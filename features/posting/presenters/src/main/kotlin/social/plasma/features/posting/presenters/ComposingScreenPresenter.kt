@@ -3,6 +3,7 @@ package social.plasma.features.posting.presenters
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import social.plasma.features.posting.screens.ComposePostUiEvent
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.models.NoteWithUser
+import social.plasma.models.ProfileMention
 import social.plasma.models.TagSuggestion
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
@@ -42,6 +44,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
     override fun present(): ComposePostUiState {
         var submitting by remember { mutableStateOf(false) }
         var noteContent by remember { mutableStateOf(TextFieldValue()) }
+        val mentions = remember { mutableStateMapOf<String, ProfileMention>() }
 
         val rootNote by produceState<NoteWithUser?>(initialValue = null) {
             args.parentNote?.let { noteId ->
@@ -121,6 +124,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
             postButtonLabel = stringManager[R.string.post],
             postButtonEnabled = buttonEnabled,
             showTagSuggestions = tagSuggestions.isNotEmpty(),
+            mentions = mentions,
             noteContent = noteContent,
             tagSuggestions = tagSuggestions,
         ) { event ->
@@ -131,12 +135,43 @@ class ComposingScreenPresenter @AssistedInject constructor(
                     submitting = true
                 }
 
-                is ComposePostUiEvent.OnSuggestionTapped -> noteContent =
-                    noteContent.replaceMention("@${event.suggestion.pubKey.bech32} ")
+                is ComposePostUiEvent.OnSuggestionTapped -> {
+                    val profileMention = ProfileMention(
+                        text = "@${event.suggestion.title}",
+                        pubkey = event.suggestion.pubKey,
+                    )
+                    val replacement = "@${profileMention.pubkey.bech32}"
+
+                    mentions[replacement] = profileMention
+
+                    noteContent =
+                        noteContent.replaceTextForCurrentMention("$replacement ") // trailing space to force the cursor to start a new "word"
+                }
             }
         }
     }
 
+
+    private fun TextFieldValue.replaceTextForCurrentMention(replacement: String): TextFieldValue {
+        val cursorPosition = selection.end
+        val contentBeforeCursor = text.substring(0, cursorPosition)
+        val contentAfterCursor = text.substring(cursorPosition, text.length)
+
+        val contentBeforeCurrentMention = contentBeforeCursor.substringBeforeLast("@")
+
+        val updatedText = buildString {
+            append(contentBeforeCurrentMention)
+            append(replacement)
+            append(contentAfterCursor)
+        }
+
+        val newCursorPosition = contentBeforeCurrentMention.length + replacement.length
+
+        return copy(
+            text = updatedText,
+            selection = TextRange(newCursorPosition)
+        )
+    }
 
     @AssistedFactory
     interface Factory {
@@ -144,22 +179,5 @@ class ComposingScreenPresenter @AssistedInject constructor(
     }
 }
 
-private fun TextFieldValue.replaceMention(replacement: String): TextFieldValue {
-    val cursorPosition = selection.end
-    val contentBeforeCursor = text.substring(0, cursorPosition)
-    val contentAfterCursor = text.substring(cursorPosition, text.length)
 
-    val contentBeforeLastWord = contentBeforeCursor.substringBeforeLast("@")
-
-    val updatedText = buildString {
-        append(contentBeforeLastWord)
-        append(replacement)
-        append(contentAfterCursor)
-    }
-
-    return copy(
-        text = updatedText,
-        selection = TextRange(contentBeforeLastWord.length + replacement.length)
-    )
-}
 

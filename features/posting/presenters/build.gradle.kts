@@ -25,6 +25,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -70,4 +71,6 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.testparameterinjector)
     testImplementation(libs.truth)
+
+    coreLibraryDesugaring(libs.android.desugaring)
 }
