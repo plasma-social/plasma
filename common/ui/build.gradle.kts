@@ -47,6 +47,7 @@ android {
 dependencies {
     implementation(projects.data.models)
     implementation(projects.data.opengraph)
+    implementation(projects.common.utils.real)
 
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)

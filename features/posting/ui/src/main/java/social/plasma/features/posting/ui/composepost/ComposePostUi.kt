@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -39,14 +40,23 @@ import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTap
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
+import javax.inject.Inject
 
-class ComposePostUi : Ui<ComposePostUiState> {
+class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         state: ComposePostUiState, modifier: Modifier,
     ) {
         val onEvent = state.onEvent
+
+        val linkColor = MaterialTheme.colorScheme.primary
+
+        val visualTransformation = remember(state.mentions) {
+            MentionsVisualTransformation(
+                linkColor, state.mentions
+            )
+        }
 
         val focusRequester = remember { FocusRequester() }
 
@@ -60,26 +70,22 @@ class ComposePostUi : Ui<ComposePostUiState> {
                 .imePadding()
         ) {
             Column {
-                CenterAlignedTopAppBar(
-                    title = { Text(state.title) },
-                    navigationIcon = {
-                        IconButton(onClick = { onEvent(ComposePostUiEvent.OnBackClick) }) {
-                            Icon(
-                                painterResource(R.drawable.ic_chevron_back),
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    actions = {
-                        Button(
-                            modifier = Modifier.padding(end = 16.dp),
-                            onClick = { onEvent(ComposePostUiEvent.OnSubmitPost) },
-                            enabled = state.postButtonEnabled
-                        ) {
-                            Text(state.postButtonLabel)
-                        }
+                CenterAlignedTopAppBar(title = { Text(state.title) }, navigationIcon = {
+                    IconButton(onClick = { onEvent(ComposePostUiEvent.OnBackClick) }) {
+                        Icon(
+                            painterResource(R.drawable.ic_chevron_back),
+                            contentDescription = null,
+                        )
                     }
-                )
+                }, actions = {
+                    Button(
+                        modifier = Modifier.padding(end = 16.dp),
+                        onClick = { onEvent(ComposePostUiEvent.OnSubmitPost) },
+                        enabled = state.postButtonEnabled
+                    ) {
+                        Text(state.postButtonLabel)
+                    }
+                })
                 TextField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -92,6 +98,7 @@ class ComposePostUi : Ui<ComposePostUiState> {
                             onEvent(ComposePostUiEvent.OnNoteChange(newValue))
                         }
                     },
+                    visualTransformation = visualTransformation,
                     colors = TextFieldDefaults.textFieldColors(
                         containerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
@@ -111,29 +118,23 @@ class ComposePostUi : Ui<ComposePostUiState> {
                         contentPadding = PaddingValues(vertical = 16.dp)
                     ) {
                         items(state.tagSuggestions) { suggestion ->
-                            ListItem(
-                                modifier = Modifier.clickable {
-                                    onEvent(
-                                        OnSuggestionTapped(
-                                            suggestion
-                                        )
+                            ListItem(modifier = Modifier.clickable {
+                                onEvent(
+                                    OnSuggestionTapped(
+                                        suggestion
                                     )
-                                },
-                                headlineContent = {
-                                    Text(suggestion.title)
-                                },
-                                supportingContent = suggestion.subtitle?.let { subtitle ->
-                                    {
-                                        Text(subtitle)
-                                    }
-                                },
-                                leadingContent = {
-                                    Avatar(
-                                        imageUrl = suggestion.imageUrl,
-                                        contentDescription = null
-                                    )
+                                )
+                            }, headlineContent = {
+                                Text(suggestion.title)
+                            }, supportingContent = suggestion.subtitle?.let { subtitle ->
+                                {
+                                    Text(subtitle)
                                 }
-                            )
+                            }, leadingContent = {
+                                Avatar(
+                                    imageUrl = suggestion.imageUrl, contentDescription = null
+                                )
+                            })
                         }
                     }
                 }
@@ -141,4 +142,3 @@ class ComposePostUi : Ui<ComposePostUiState> {
         }
     }
 }
-

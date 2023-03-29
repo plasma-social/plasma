@@ -6,9 +6,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import social.plasma.models.NoteId
-import social.plasma.models.PubKey
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
+import social.plasma.models.PubKey
 import social.plasma.ui.components.richtext.RichTextParser
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -28,14 +28,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChangeConsumed
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withAnnotation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
@@ -47,11 +43,6 @@ import social.plasma.models.ProfileMention
 import social.plasma.models.PubKey
 import kotlin.math.ceil
 
-object RichTextTag {
-    const val URL = "URL"
-    const val PROFILE = "PROFILE"
-    const val NOTE = "NOTE"
-}
 
 @Composable
 fun RichText(
@@ -346,42 +337,3 @@ private fun Modifier.drawDebugBounds(
 
 private val MinLinkTouchTargetSize = DpSize(32.dp, 32.dp)
 private const val ShowDebugBounds = false
-
-@OptIn(ExperimentalTextApi::class)
-inline fun <R : Any> AnnotatedString.Builder.withUrl(
-    url: String,
-    color: Color,
-    crossinline block: AnnotatedString.Builder.() -> R,
-): R {
-    return withAnnotation(RichTextTag.URL, url) {
-        withStyle(SpanStyle(color = color)) {
-            block(this)
-        }
-    }
-}
-
-@OptIn(ExperimentalTextApi::class)
-inline fun <R : Any> AnnotatedString.Builder.withProfileMention(
-    pubkey: String,
-    color: Color,
-    crossinline block: AnnotatedString.Builder.() -> R,
-): R {
-    return withAnnotation(RichTextTag.PROFILE, pubkey) {
-        withStyle(SpanStyle(color = color)) {
-            block(this)
-        }
-    }
-}
-
-@OptIn(ExperimentalTextApi::class)
-inline fun <R : Any> AnnotatedString.Builder.withNoteMention(
-    id: String,
-    color: Color,
-    crossinline block: AnnotatedString.Builder.() -> R,
-): R {
-    return withAnnotation(RichTextTag.NOTE, id) {
-        withStyle(SpanStyle(color = color)) {
-            block(this)
-        }
-    }
-}

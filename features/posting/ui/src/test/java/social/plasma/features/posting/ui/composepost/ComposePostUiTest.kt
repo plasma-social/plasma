@@ -5,7 +5,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,7 +35,7 @@ class ComposePostUiTest constructor(
                 placeholder = "What's zappening?",
                 postButtonEnabled = false,
                 title = "Create Post",
-                noteContent = TextFieldValue("")
+                noteContent = TextFieldValue(""),
             ) {}
         )
     }
