@@ -32,7 +32,7 @@ class GetNoteTagSuggestionsTest {
                     pubKey = PubKey(""),
                     imageUrl = null,
                     title = "test",
-                    subtitle = null
+                    nip5Identifier = null
                 )
             )
             awaitComplete()
@@ -49,7 +49,7 @@ class GetNoteTagSuggestionsTest {
                     pubKey = PubKey(""),
                     imageUrl = null,
                     title = "test",
-                    subtitle = null
+                    nip5Identifier = null
                 )
             )
             awaitComplete()
@@ -72,7 +72,7 @@ class GetNoteTagSuggestionsTest {
                     pubKey = PubKey(""),
                     imageUrl = null,
                     title = "test",
-                    subtitle = null
+                    nip5Identifier = null
                 )
             )
             awaitComplete()

@@ -10,10 +10,14 @@ data class ComposePostUiState(
     val title: String = "",
     val placeholder: String = "",
     val postButtonLabel: String = "",
-    val showTagSuggestions: Boolean = false,
-    val tagSuggestions: List<TagSuggestion> = emptyList(),
+    val showAutoComplete: Boolean = false,
+    val autoCompleteSuggestions: List<AutoCompleteSuggestion> = emptyList(),
     val noteContent: TextFieldValue,
     val mentions: Map<String, ProfileMention> = emptyMap(),
     val onEvent: (ComposePostUiEvent) -> Unit,
 ) : CircuitUiState
 
+data class AutoCompleteSuggestion(
+    val tagSuggestion: TagSuggestion,
+    val nip5Valid: Boolean? = null,
+)
