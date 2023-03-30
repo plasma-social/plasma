@@ -27,7 +27,7 @@ class GetNoteTagSuggestions @Inject constructor(
                     pubKey = PubKey(it.pubkey),
                     imageUrl = it.picture,
                     title = it.userFacingName,
-                    subtitle = it.nip05,
+                    nip5Identifier = it.nip05,
                 )
             }
         }

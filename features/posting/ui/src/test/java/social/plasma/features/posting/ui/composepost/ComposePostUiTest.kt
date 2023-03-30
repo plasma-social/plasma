@@ -8,6 +8,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.models.PubKey
 import social.plasma.models.TagSuggestion
@@ -61,29 +62,34 @@ class ComposePostUiTest constructor(
                 placeholder = "What's zappening?",
                 postButtonEnabled = true,
                 title = "Create Post",
-                showTagSuggestions = true,
+                showAutoComplete = true,
                 noteContent = TextFieldValue("@ko"),
-                tagSuggestions = listOf(
-                    TagSuggestion(
-                        pubKey = PubKey("1"),
-                        imageUrl = null,
-                        title = "KoalaSat",
-                        subtitle = "koalasat@nostros.net",
+                autoCompleteSuggestions = listOf(
+                    AutoCompleteSuggestion(
+                        TagSuggestion(
+                            pubKey = PubKey("1"),
+                            imageUrl = null,
+                            title = "KoalaSat",
+                            nip5Identifier = "koalasat@nostros.net",
+                        ), true
                     ),
-                    TagSuggestion(
-                        pubKey = PubKey("1"),
-                        imageUrl = null,
-                        title = "KoalaSat",
-                        subtitle = "koalasat@nostros.net",
+                    AutoCompleteSuggestion(
+                        TagSuggestion(
+                            pubKey = PubKey("1"),
+                            imageUrl = null,
+                            title = "KoalaSat",
+                            nip5Identifier = "koalasat@nostros.net",
+                        ), true
                     ),
-                    TagSuggestion(
-                        pubKey = PubKey("1"),
-                        imageUrl = null,
-                        title = "KoalaSat",
-                        subtitle = "koalasat@nostros.net",
+                    AutoCompleteSuggestion(
+                        TagSuggestion(
+                            pubKey = PubKey("1"),
+                            imageUrl = null,
+                            title = "KoalaSat",
+                            nip5Identifier = "koalasat@nostros.net",
+                        ), true
                     ),
-
-                    )
+                )
             ) {}
         )
     }

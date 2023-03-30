@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetNoteTagSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
@@ -19,6 +20,7 @@ import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.models.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
+import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import social.plasma.shared.utils.fakes.FakeStringManager
@@ -45,7 +47,8 @@ class ComposingScreenPresenterTest {
                 ),
                 args = ComposingScreen(),
                 noteRepository = noteRepository,
-                getNoteTagSuggestions = GetNoteTagSuggestions(userMetadataRepository)
+                getNoteTagSuggestions = GetNoteTagSuggestions(userMetadataRepository),
+                getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext)
             )
         }
 
@@ -57,8 +60,8 @@ class ComposingScreenPresenterTest {
                 assertThat(postButtonEnabled).isFalse()
                 assertThat(postButtonLabel).isEqualTo(stringManager[R.string.post])
                 assertThat(placeholder).isEqualTo(stringManager[R.string.your_message])
-                assertThat(showTagSuggestions).isFalse()
-                assertThat(tagSuggestions).isEmpty()
+                assertThat(showAutoComplete).isFalse()
+                assertThat(autoCompleteSuggestions).isEmpty()
             }
         }
     }
@@ -120,10 +123,11 @@ class ComposingScreenPresenterTest {
             awaitItem().onEvent(OnNoteChange(TextFieldValue("@j", selection = TextRange(2))))
 
             awaitItem()
+            awaitItem()
 
             with(awaitItem()) {
-                assertThat(showTagSuggestions).isTrue()
-                assertThat(tagSuggestions).isNotEmpty()
+                assertThat(showAutoComplete).isTrue()
+                assertThat(autoCompleteSuggestions).isNotEmpty()
             }
         }
     }
@@ -140,8 +144,8 @@ class ComposingScreenPresenterTest {
             awaitItem()
 
             with(awaitItem()) {
-                assertThat(showTagSuggestions).isFalse()
-                assertThat(tagSuggestions).isEmpty()
+                assertThat(showAutoComplete).isFalse()
+                assertThat(autoCompleteSuggestions).isEmpty()
             }
         }
     }
@@ -160,12 +164,14 @@ class ComposingScreenPresenterTest {
                     TagSuggestion(
                         pubKey = pubKey,
                         title = "",
-                        subtitle = "",
+                        nip5Identifier = "",
                         imageUrl = null,
                     )
                 )
             )
 
+            awaitItem()
+            awaitItem()
             awaitItem()
             awaitItem()
 

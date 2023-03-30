@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.slack.circuit.Navigator
@@ -15,12 +16,15 @@ import com.slack.circuit.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
+import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetNoteTagSuggestions
 import social.plasma.domain.interactors.SendNote
+import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.ComposePostUiEvent
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
@@ -35,6 +39,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
     private val sendNote: SendNote,
     private val noteRepository: NoteRepository,
     private val getNoteTagSuggestions: GetNoteTagSuggestions,
+    private val getNip5Status: GetNip5Status,
     @Assisted private val args: ComposingScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ComposePostUiState> {
@@ -86,7 +91,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
             }
         }
 
-        val tagSuggestions by produceState<List<TagSuggestion>>(
+        val suggestedUsers by produceState<List<TagSuggestion>>(
             initialValue = emptyList(),
             noteContent
         ) {
@@ -100,6 +105,37 @@ class ComposingScreenPresenter @AssistedInject constructor(
                         cursorPosition
                     )
                 )
+        }
+
+        val autoCompleteSuggestions by produceState<List<AutoCompleteSuggestion>>(
+            emptyList(),
+            suggestedUsers
+        ) {
+
+            val list = suggestedUsers.map {
+                AutoCompleteSuggestion(
+                    tagSuggestion = it,
+                    nip5Valid = if (it.nip5Identifier == null) false else null
+                )
+            }.toMutableStateList()
+
+            suggestedUsers.forEachIndexed { index, suggestion ->
+                val nip5Identifier = suggestion.nip5Identifier ?: return@forEachIndexed
+                if (nip5Identifier.trim().isEmpty()) return@forEachIndexed
+
+                launch {
+                    val nip5Status = getNip5Status.executeSync(
+                        GetNip5Status.Params(
+                            suggestion.pubKey,
+                            nip5Identifier
+                        )
+                    ).isValid()
+
+                    list[index] = AutoCompleteSuggestion(suggestion, nip5Status)
+                }
+            }
+
+            value = list
         }
 
         LaunchedEffect(noteSubmitStatus) {
@@ -123,10 +159,10 @@ class ComposingScreenPresenter @AssistedInject constructor(
             placeholder = stringManager[R.string.your_message],
             postButtonLabel = stringManager[R.string.post],
             postButtonEnabled = buttonEnabled,
-            showTagSuggestions = tagSuggestions.isNotEmpty(),
+            showAutoComplete = autoCompleteSuggestions.isNotEmpty(),
             mentions = mentions,
             noteContent = noteContent,
-            tagSuggestions = tagSuggestions,
+            autoCompleteSuggestions = autoCompleteSuggestions,
         ) { event ->
             when (event) {
                 ComposePostUiEvent.OnBackClick -> navigator.pop()
@@ -150,7 +186,6 @@ class ComposingScreenPresenter @AssistedInject constructor(
             }
         }
     }
-
 
     private fun TextFieldValue.replaceTextForCurrentMention(replacement: String): TextFieldValue {
         val cursorPosition = selection.end

@@ -40,6 +40,7 @@ import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTap
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
+import social.plasma.ui.components.Nip5Badge
 import javax.inject.Inject
 
 class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
@@ -111,13 +112,13 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                         keyboardType = KeyboardType.Ascii,
                     ),
                 )
-                if (state.showTagSuggestions) {
+                if (state.showAutoComplete) {
                     Divider()
                     LazyColumn(
                         modifier = Modifier.height(300.dp),
                         contentPadding = PaddingValues(vertical = 16.dp)
                     ) {
-                        items(state.tagSuggestions) { suggestion ->
+                        items(state.autoCompleteSuggestions) { (suggestion, nip5Valid) ->
                             ListItem(modifier = Modifier.clickable {
                                 onEvent(
                                     OnSuggestionTapped(
@@ -126,10 +127,11 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                                 )
                             }, headlineContent = {
                                 Text(suggestion.title)
-                            }, supportingContent = suggestion.subtitle?.let { subtitle ->
-                                {
-                                    Text(subtitle)
-                                }
+                            }, supportingContent = {
+                                suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
+                                    ?.let {
+                                        Nip5Badge(identifier = it, nip5Valid = nip5Valid)
+                                    }
                             }, leadingContent = {
                                 Avatar(
                                     imageUrl = suggestion.imageUrl, contentDescription = null
