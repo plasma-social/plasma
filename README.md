@@ -17,7 +17,7 @@ An offline-first social media app for Android, built on the [nostr](https://gith
 - [x] [NIP-05: Mapping Nostr keys to DNS-based internet identifiers](https://github.com/nostr-protocol/nips/blob/master/05.md)<br>
 - [ ] [NIP-06: Basic key derivation from mnemonic seed phrase](https://github.com/nostr-protocol/nips/blob/master/06.md)<br>
 - [ ] [NIP-07: `window.nostr` capability for web browsers](https://github.com/nostr-protocol/nips/blob/master/07.md)<br>
-- [ ] [NIP-08: Handling Mentions](https://github.com/nostr-protocol/nips/blob/master/08.md)<br>
+- [x] [NIP-08: Handling Mentions](https://github.com/nostr-protocol/nips/blob/master/08.md)<br>
 - [ ] [NIP-09: Event Deletion](https://github.com/nostr-protocol/nips/blob/master/09.md)<br>
 - [ ] [NIP-10: Conventions for clients' use of `e` and `p` tags in text events](https://github.com/nostr-protocol/nips/blob/master/10.md)<br>
 - [ ] [NIP-19: bech32-encoded entities](https://github.com/nostr-protocol/nips/blob/master/19.md)<br>
