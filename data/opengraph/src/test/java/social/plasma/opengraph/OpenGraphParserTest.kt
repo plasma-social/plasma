@@ -4,12 +4,14 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import java.net.URL
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OpenGraphParserTest {
     @Test
+    @Ignore("Twitter scraping seems to be broken")
     fun `can parse from twitter without image`() = runTest {
         val metadata = ogParser().parse(URL("https://twitter.com/jack/status/20"))
 
