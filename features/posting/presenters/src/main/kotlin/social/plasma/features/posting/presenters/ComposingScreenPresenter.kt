@@ -2,6 +2,7 @@ package social.plasma.features.posting.presenters
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,19 +12,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.toByteString
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetNoteTagSuggestions
 import social.plasma.domain.interactors.SendNote
+import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.ComposePostUiEvent
 import social.plasma.features.posting.screens.ComposePostUiState
@@ -31,6 +36,7 @@ import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.models.NoteWithUser
 import social.plasma.models.ProfileMention
 import social.plasma.models.TagSuggestion
+import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
 
@@ -40,10 +46,19 @@ class ComposingScreenPresenter @AssistedInject constructor(
     private val noteRepository: NoteRepository,
     private val getNoteTagSuggestions: GetNoteTagSuggestions,
     private val getNip5Status: GetNip5Status,
+    accountStateRepository: AccountStateRepository,
+    observeMyMetadata: ObserveUserMetadata,
     @Assisted private val args: ComposingScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ComposePostUiState> {
+
+    private val myPubKey = PubKey(accountStateRepository.getPublicKey()!!.toByteString())
+    private val avatarUrlFlow = observeMyMetadata.flow.map { it?.picture }
     private val isReply = args.parentNote != null
+
+    init {
+        observeMyMetadata(ObserveUserMetadata.Params(myPubKey))
+    }
 
     @Composable
     override fun present(): ComposePostUiState {
@@ -64,6 +79,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
                 noteContent.text.isNotBlank() && !submitting && rootNote != null
             }
         }
+
+        val avatarUrl by avatarUrlFlow.collectAsState(initial = null)
 
         val noteSubmitStatus by produceState<InvokeStatus?>(
             null,
@@ -158,6 +175,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
             title = title,
             placeholder = stringManager[R.string.your_message],
             postButtonLabel = stringManager[R.string.post],
+            avatarUrl = avatarUrl,
             postButtonEnabled = buttonEnabled,
             showAutoComplete = autoCompleteSuggestions.isNotEmpty(),
             mentions = mentions,
