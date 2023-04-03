@@ -1,22 +1,18 @@
 package social.plasma.domain.observers
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onEach
-import social.plasma.data.daos.UserMetadataDao
 import social.plasma.domain.SubjectInteractor
 import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.UserMetadataEntity
+import social.plasma.shared.repositories.api.UserMetadataRepository
 import javax.inject.Inject
 
 class ObserveUserMetadata @Inject constructor(
-    private val userMetadataDao: UserMetadataDao,
+    private val userMetadataRepository: UserMetadataRepository,
 ) : SubjectInteractor<ObserveUserMetadata.Params, UserMetadataEntity?>() {
 
     override fun createObservable(params: Params): Flow<UserMetadataEntity?> {
-        return userMetadataDao.observeUserMetadata(params.pubKey.key.hex()).onEach {
-            Log.d("@@@", "$it")
-        }
+        return userMetadataRepository.observeUserMetaData(params.pubKey)
     }
 
     data class Params(val pubKey: PubKey)

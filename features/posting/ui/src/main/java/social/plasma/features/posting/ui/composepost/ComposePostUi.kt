@@ -3,6 +3,7 @@ package social.plasma.features.posting.ui.composepost
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -87,31 +88,43 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                         Text(state.postButtonLabel)
                     }
                 })
-                TextField(
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester)
                         .weight(1f)
                         .padding(horizontal = 16.dp),
-                    value = state.noteContent,
-                    onValueChange = { newValue ->
-                        if (newValue != state.noteContent) {
-                            onEvent(ComposePostUiEvent.OnNoteChange(newValue))
-                        }
-                    },
-                    visualTransformation = visualTransformation,
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                    placeholder = { Text(state.placeholder) },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        autoCorrect = true,
-                        keyboardType = KeyboardType.Ascii,
-                    ),
-                )
+                ) {
+                    Avatar(
+                        modifier = Modifier.padding(top = 8.dp),
+                        imageUrl = state.avatarUrl,
+                        contentDescription = null
+                    )
+                    TextField(
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        value = state.noteContent,
+                        onValueChange = { newValue ->
+                            if (newValue != state.noteContent) {
+                                onEvent(ComposePostUiEvent.OnNoteChange(newValue))
+                            }
+                        },
+                        visualTransformation = visualTransformation,
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                        ),
+                        placeholder = { Text(state.placeholder) },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            autoCorrect = true,
+                            keyboardType = KeyboardType.Ascii,
+                        ),
+                    )
+                }
+
                 if (state.showAutoComplete) {
                     Divider()
                     LazyColumn(

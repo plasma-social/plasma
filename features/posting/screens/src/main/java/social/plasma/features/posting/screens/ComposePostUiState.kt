@@ -8,6 +8,7 @@ import social.plasma.models.TagSuggestion
 data class ComposePostUiState(
     val postButtonEnabled: Boolean = false,
     val title: String = "",
+    val avatarUrl: String? = null,
     val placeholder: String = "",
     val postButtonLabel: String = "",
     val showAutoComplete: Boolean = false,

@@ -12,6 +12,7 @@ import org.junit.Test
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetNoteTagSuggestions
 import social.plasma.domain.interactors.SendNote
+import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnSubmitPost
@@ -21,6 +22,7 @@ import app.cash.nostrino.crypto.PubKey
 import okio.ByteString.Companion.decodeHex
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
+import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
@@ -49,13 +51,20 @@ class ComposingScreenPresenterTest {
                 args = ComposingScreen(),
                 noteRepository = noteRepository,
                 getNoteTagSuggestions = GetNoteTagSuggestions(userMetadataRepository),
-                getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext)
+                getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext),
+                accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
+                observeMyMetadata = ObserveUserMetadata(userMetadataRepository)
             )
         }
 
     @Test
     fun `emits default state`() = runTest {
+        userMetadataRepository.observeUserMetaDataResult.value = createUserMetadata(
+            picture = "avatar-url"
+        )
         presenter.test {
+            awaitItem()
+
             with(awaitItem()) {
                 assertThat(title).isEqualTo(stringManager[R.string.new_note])
                 assertThat(postButtonEnabled).isFalse()
@@ -63,7 +72,9 @@ class ComposingScreenPresenterTest {
                 assertThat(placeholder).isEqualTo(stringManager[R.string.your_message])
                 assertThat(showAutoComplete).isFalse()
                 assertThat(autoCompleteSuggestions).isEmpty()
+                assertThat(avatarUrl).isEqualTo("avatar-url")
             }
+
         }
     }
 
@@ -183,7 +194,9 @@ class ComposingScreenPresenterTest {
         }
     }
 
-    private fun createUserMetadata() = UserMetadataEntity(
+    private fun createUserMetadata(
+        picture: String? = null,
+    ) = UserMetadataEntity(
         name = "test",
         displayName = "",
         about = null,
@@ -193,7 +206,7 @@ class ComposingScreenPresenterTest {
         website = null,
         lud = null,
         nip05 = null,
-        picture = null,
+        picture = picture,
     )
 
     companion object {
