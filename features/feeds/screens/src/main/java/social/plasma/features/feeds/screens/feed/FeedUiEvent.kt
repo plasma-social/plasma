@@ -16,4 +16,8 @@ sealed interface FeedUiEvent : CircuitUiEvent {
     data class OnReplyClick(val noteId: NoteId) : FeedUiEvent
 
     data class OnNoteDisplayed(val noteId: NoteId, val pubKey: PubKey) : FeedUiEvent
+
+    data class OnFeedCountChange(val count: Int) : FeedUiEvent
+
+    object OnRefreshButtonClick : FeedUiEvent
 }

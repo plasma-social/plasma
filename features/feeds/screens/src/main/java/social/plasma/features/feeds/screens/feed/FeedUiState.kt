@@ -1,5 +1,6 @@
 package social.plasma.features.feeds.screens.feed
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.paging.PagingData
 import com.slack.circuit.CircuitUiState
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +11,9 @@ import app.cash.nostrino.crypto.PubKey
 data class FeedUiState(
     val pagingFlow: Flow<PagingData<FeedItem>>,
     val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata?,
+    val refreshText: String = "",
+    val listState: LazyListState,
+    val displayRefreshButton: Boolean = false,
     val onEvent: (FeedUiEvent) -> Unit,
 ) : CircuitUiState
 

@@ -1,11 +1,17 @@
 package social.plasma.feeds.presenters.feed
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.paging.PagingData
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
+import com.slack.circuit.retained.produceRetainedState
 import com.slack.circuit.retained.rememberRetained
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -15,6 +21,7 @@ import kotlinx.coroutines.launch
 import social.plasma.domain.interactors.RepostNote
 import social.plasma.domain.interactors.SendNoteReaction
 import social.plasma.domain.interactors.SyncMetadata
+import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.screens.threads.ThreadScreen
@@ -23,15 +30,18 @@ import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.models.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
+import social.plasma.shared.utils.api.StringManager
 import timber.log.Timber
 import java.net.MalformedURLException
 import java.net.URL
+import kotlin.math.min
 
 class FeedPresenter @AssistedInject constructor(
     private val notePagingFlowMapper: NotePagingFlowMapper,
     private val sendNoteReaction: SendNoteReaction,
     private val repostNote: RepostNote,
     private val syncMetadata: SyncMetadata,
+    private val stringManager: StringManager,
     private val openGraphParser: OpenGraphParser,
     @Assisted private val pagingFlow: Flow<PagingData<NoteWithUser>>,
     @Assisted private val navigator: Navigator,
@@ -49,11 +59,40 @@ class FeedPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): FeedUiState {
+        val listState = rememberLazyListState()
         val feedPagingFlow = rememberRetained { notePagingFlowMapper.map(pagingFlow) }
         val coroutineScope = rememberCoroutineScope()
+        val currentVisibleIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+
+        var currentFeedItemCount by rememberRetained { mutableStateOf(0) }
+        val initialFeedCount by produceRetainedState(
+            initialValue = 0,
+            currentFeedItemCount,
+            currentVisibleIndex
+        ) {
+            if (value == 0) {
+                value = currentFeedItemCount
+            }
+
+            if (currentVisibleIndex <= currentFeedItemCount - value) {
+                value = currentFeedItemCount - currentVisibleIndex
+            }
+        }
+
+        val unseenItemCount by produceRetainedState(
+            initialValue = 0,
+            currentVisibleIndex,
+            currentFeedItemCount,
+            initialFeedCount
+        ) {
+            value = min(currentVisibleIndex, currentFeedItemCount - initialFeedCount)
+        }
 
         return FeedUiState(
             pagingFlow = feedPagingFlow,
+            refreshText = stringManager[R.string.new_posts],
+            displayRefreshButton = unseenItemCount > 0,
+            listState = listState,
             getOpenGraphMetadata = getOpenGraphMetadata
         ) { event ->
             when (event) {
@@ -78,6 +117,16 @@ class FeedPresenter @AssistedInject constructor(
                 is FeedUiEvent.OnNoteDisplayed -> {
                     coroutineScope.launch {
                         syncMetadata.executeSync(SyncMetadata.Params(event.pubKey))
+                    }
+                }
+
+                is FeedUiEvent.OnFeedCountChange -> {
+                    currentFeedItemCount = event.count
+                }
+
+                FeedUiEvent.OnRefreshButtonClick -> {
+                    coroutineScope.launch {
+                        listState.animateScrollToItem(0)
                     }
                 }
             }

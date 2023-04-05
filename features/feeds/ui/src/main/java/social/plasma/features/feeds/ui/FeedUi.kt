@@ -8,7 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -19,11 +24,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.slack.circuit.Ui
 import social.plasma.features.feeds.screens.feed.FeedItem
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteReaction
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteRepost
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnProfileClick
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnRefreshButtonClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnReplyClick
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.notes.NoteElevatedCard
@@ -47,11 +54,16 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
         val getOpenGraphMetadata = state.getOpenGraphMetadata
         val pagingLazyItems = state.pagingFlow.collectAsLazyPagingItems()
 
+        LaunchedEffect(pagingLazyItems.itemCount) {
+            onEvent(OnFeedCountChange(pagingLazyItems.itemCount))
+        }
+
         Box(
             modifier = modifier.fillMaxSize()
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                state = state.listState,
                 contentPadding = contentPadding,
             ) {
 
@@ -95,7 +107,25 @@ class FeedUi @Inject constructor() : Ui<FeedUiState> {
                         .align(Alignment.TopStart)
                 )
             }
+
+
+            if (state.displayRefreshButton) {
+                RefreshButton(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter),
+                    text = state.refreshText,
+                    onClick = { onEvent(OnRefreshButtonClick) }
+                )
+            }
         }
 
+    }
+
+    @Composable
+    private fun RefreshButton(modifier: Modifier, text: String, onClick: () -> Unit) {
+        Button(modifier = modifier, onClick = onClick) {
+            Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
+            Text(text = text)
+        }
     }
 }
