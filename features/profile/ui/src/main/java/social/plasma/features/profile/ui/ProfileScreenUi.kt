@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -373,7 +374,14 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
         username: String? = "@satoshi",
     ): ProfileUiState =
         Loaded(
-            feedState = FeedUiState(emptyFlow(), { null }, {}),
+            feedState = FeedUiState(
+                pagingFlow = emptyFlow(),
+                getOpenGraphMetadata = { null },
+                refreshText = "Refresh",
+                listState = LazyListState(),
+                displayRefreshButton = false,
+                onEvent = {}
+            ),
             statCards = listOf(
                 Loaded.ProfileStat(
                     label = "Followers",
