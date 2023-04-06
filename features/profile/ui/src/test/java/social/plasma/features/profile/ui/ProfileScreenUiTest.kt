@@ -1,7 +1,9 @@
 package social.plasma.features.profile.ui
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.Modifier
 import androidx.paging.PagingData
+import app.cash.nostrino.crypto.PubKey
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -12,9 +14,7 @@ import org.junit.runner.RunWith
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiState
-import social.plasma.features.feeds.ui.FeedUi
 import social.plasma.features.profile.screens.ProfileUiState
-import app.cash.nostrino.crypto.PubKey
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
@@ -43,7 +43,7 @@ internal class ProfileScreenUiTest(
                 darkTheme = themeVariation.isDarkTheme,
                 dynamicStatusBar = false,
             ) {
-                ProfileScreenUi(FeedUi()).Content(
+                ProfileScreenUi().Content(
                     state = uiState,
                     modifier = Modifier,
                 )
@@ -111,6 +111,7 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
                 feedState = FeedUiState(
                     userNotesPagingFlow,
                     onEvent = {},
+                    listState = LazyListState(),
                     getOpenGraphMetadata = { null }),
                 onEvent = {},
             )
