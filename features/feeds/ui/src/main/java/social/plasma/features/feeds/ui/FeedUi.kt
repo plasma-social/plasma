@@ -40,92 +40,96 @@ import javax.inject.Inject
 class FeedUi @Inject constructor() : Ui<FeedUiState> {
     @Composable
     override fun Content(state: FeedUiState, modifier: Modifier) {
-        ListContent(state, modifier)
+        FeedUiContent(state, modifier)
+    }
+}
+
+@Composable
+fun FeedUiContent(
+    state: FeedUiState,
+    modifier: Modifier,
+    contentPadding: PaddingValues = PaddingValues(vertical = 8.dp),
+    headerContent: LazyListScope.() -> Unit = {},
+) {
+    val onEvent = state.onEvent
+    val getOpenGraphMetadata = state.getOpenGraphMetadata
+    val pagingLazyItems = state.pagingFlow.collectAsLazyPagingItems()
+
+    LaunchedEffect(pagingLazyItems.itemCount) {
+        onEvent(OnFeedCountChange(pagingLazyItems.itemCount))
     }
 
-    @Composable
-    fun ListContent(
-        state: FeedUiState,
-        modifier: Modifier,
-        contentPadding: PaddingValues = PaddingValues(vertical = 8.dp),
-        headerContent: LazyListScope.() -> Unit = {},
+    Box(
+        modifier = modifier.fillMaxSize()
     ) {
-        val onEvent = state.onEvent
-        val getOpenGraphMetadata = state.getOpenGraphMetadata
-        val pagingLazyItems = state.pagingFlow.collectAsLazyPagingItems()
-
-        LaunchedEffect(pagingLazyItems.itemCount) {
-            onEvent(OnFeedCountChange(pagingLazyItems.itemCount))
-        }
-
-        Box(
-            modifier = modifier.fillMaxSize()
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = state.listState,
+            contentPadding = contentPadding,
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = state.listState,
-                contentPadding = contentPadding,
-            ) {
 
-                headerContent()
+            headerContent()
 
-                items(pagingLazyItems, key = { it.key }) { item ->
-                    when (item) {
-                        is FeedItem.NoteCard -> {
-                            if (!item.hidden) {
-                                val noteId = NoteId(item.id)
-                                NoteElevatedCard(
-                                    uiModel = item,
-                                    modifier = Modifier
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                        .clickable {
-                                            onEvent(OnNoteClick(noteId))
-                                        },
-                                    onAvatarClick = { onEvent(OnProfileClick(item.userPubkey)) },
-                                    onLikeClick = { onEvent(OnNoteReaction(noteId)) },
-                                    onReplyClick = { onEvent(OnReplyClick(noteId)) },
-                                    onProfileClick = { onEvent(OnProfileClick(it)) },
-                                    onNoteClick = { onEvent(OnNoteClick(it)) },
-                                    onRepostClick = { onEvent(OnNoteRepost(noteId)) },
-                                    getOpenGraphMetadata = getOpenGraphMetadata,
-                                )
-                                LaunchedEffect(Unit) {
-                                    onEvent(OnNoteDisplayed(noteId, item.userPubkey))
-                                }
+            items(pagingLazyItems, key = { it.key }) { item ->
+                when (item) {
+                    is FeedItem.NoteCard -> {
+                        if (!item.hidden) {
+                            val noteId = NoteId(item.id)
+                            NoteElevatedCard(
+                                uiModel = item,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .clickable {
+                                        onEvent(OnNoteClick(noteId))
+                                    },
+                                onAvatarClick = { onEvent(OnProfileClick(item.userPubkey)) },
+                                onLikeClick = { onEvent(OnNoteReaction(noteId)) },
+                                onReplyClick = { onEvent(OnReplyClick(noteId)) },
+                                onProfileClick = { onEvent(OnProfileClick(it)) },
+                                onNoteClick = { onEvent(OnNoteClick(it)) },
+                                onRepostClick = { onEvent(OnNoteRepost(noteId)) },
+                                getOpenGraphMetadata = getOpenGraphMetadata,
+                            )
+                            LaunchedEffect(Unit) {
+                                onEvent(OnNoteDisplayed(noteId, item.userPubkey))
                             }
                         }
-
-                        null -> {}
                     }
+
+                    null -> {}
                 }
             }
-            if (pagingLazyItems.itemCount == 0) {
-                LinearProgressIndicator(
-                    trackColor = Color.Transparent,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopStart)
-                )
-            }
-
-
-            if (state.displayRefreshButton) {
-                RefreshButton(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter),
-                    text = state.refreshText,
-                    onClick = { onEvent(OnRefreshButtonClick) }
-                )
-            }
+        }
+        if (pagingLazyItems.itemCount == 0) {
+            LinearProgressIndicator(
+                trackColor = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopStart)
+            )
         }
 
+
+        if (state.displayRefreshButton) {
+            RefreshButton(
+                modifier = Modifier
+                    .align(Alignment.TopCenter),
+                text = state.refreshText,
+                onClick = { onEvent(OnRefreshButtonClick) }
+            )
+        }
     }
 
-    @Composable
-    private fun RefreshButton(modifier: Modifier, text: String, onClick: () -> Unit) {
-        Button(modifier = modifier, onClick = onClick) {
-            Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
-            Text(text = text)
-        }
+}
+
+@Composable
+private fun RefreshButton(modifier: Modifier, text: String, onClick: () -> Unit) {
+    Button(
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        onClick = onClick
+    ) {
+        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
+        Text(text = text)
     }
 }

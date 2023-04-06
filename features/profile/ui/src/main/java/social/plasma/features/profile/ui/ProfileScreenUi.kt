@@ -59,7 +59,7 @@ import com.slack.circuit.Ui
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedUiState
-import social.plasma.features.feeds.ui.FeedUi
+import social.plasma.features.feeds.ui.FeedUiContent
 import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
@@ -77,9 +77,7 @@ import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
-class ProfileScreenUi @Inject constructor(
-    private val feedUi: FeedUi,
-) : Ui<ProfileUiState> {
+class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
     @Composable
     override fun Content(state: ProfileUiState, modifier: Modifier) {
         when (state) {
@@ -102,8 +100,8 @@ class ProfileScreenUi @Inject constructor(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             modifier = modifier,
         ) { paddingValues ->
-            feedUi.ListContent(
-                state = uiState.feedState,
+            FeedUiContent(
+                state = uiState.feedState.copy(displayRefreshButton = false),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
@@ -356,7 +354,7 @@ private fun PreviewProfile(
     @PreviewParameter(ProfilePreviewProvider::class) uiState: ProfileUiState,
 ) {
     PlasmaTheme {
-        ProfileScreenUi(FeedUi()).Content(state = uiState, modifier = Modifier)
+        ProfileScreenUi().Content(state = uiState, modifier = Modifier)
     }
 }
 

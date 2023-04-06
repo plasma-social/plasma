@@ -26,21 +26,21 @@ fun Avatar(
     size: Dp = 44.dp,
     onClick: (() -> Unit)? = null,
 ) {
-    val background = modifier
+    val avatarModifier = modifier
         .size(size)
         .clip(CircleShape)
         .background(MaterialTheme.colorScheme.surface)
+        .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
 
     if (imageUrl == null) {
         Image(
-            modifier = background,
+            modifier = avatarModifier,
             painter = painterResource(id = R.drawable.avatar_fallback),
             contentDescription = null
         )
     } else {
         AsyncImage(
-            modifier = background
-                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            modifier = avatarModifier,
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
                 .crossfade(true)

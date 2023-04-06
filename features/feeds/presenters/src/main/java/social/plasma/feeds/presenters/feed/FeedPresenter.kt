@@ -88,9 +88,23 @@ class FeedPresenter @AssistedInject constructor(
             value = min(currentVisibleIndex, currentFeedItemCount - initialFeedCount)
         }
 
+        val refreshText = remember(unseenItemCount) {
+            if (unseenItemCount < NOTE_COUNT_MAX) {
+                stringManager.getFormattedString(
+                    R.string.new_notes_count,
+                    mapOf("count" to unseenItemCount)
+                )
+            } else {
+                stringManager.getFormattedString(
+                    R.string.many_new_notes,
+                    mapOf("count" to "$NOTE_COUNT_MAX+")
+                )
+            }
+        }
+
         return FeedUiState(
             pagingFlow = feedPagingFlow,
-            refreshText = stringManager[R.string.new_posts],
+            refreshText = refreshText,
             displayRefreshButton = unseenItemCount > 0,
             listState = listState,
             getOpenGraphMetadata = getOpenGraphMetadata
@@ -136,5 +150,9 @@ class FeedPresenter @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(navigator: Navigator, pagingFlow: Flow<PagingData<NoteWithUser>>): FeedPresenter
+    }
+
+    companion object {
+        private const val NOTE_COUNT_MAX = 50
     }
 }
