@@ -14,6 +14,7 @@ import social.plasma.nostr.relay.Relay
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
+import app.cash.nostrino.crypto.SecKey
 
 internal class RealNoteRepository @Inject constructor(
     private val relay: Relay,
@@ -32,13 +33,13 @@ internal class RealNoteRepository @Inject constructor(
             }
         }.toSet()
 
-        val pubkey = accountStateRepository.getPublicKey() ?: throw IllegalStateException("Public key required to send notes")
-        val secretKey = accountStateRepository.getSecretKey() ?: throw IllegalStateException("Secret key required to send notes")
+        val secKey = SecKey(accountStateRepository.getSecretKey()?.toByteString()
+            ?: throw IllegalStateException("Secret key required to send notes"))
 
         relay.sendNote(
             content,
             tags = nostrTags,
-            keyPair = KeyPair(pubkey.toByteString(), secretKey.toByteString())
+            keyPair = KeyPair(secKey.pubKey.key, secKey.key)
         )
     }
 

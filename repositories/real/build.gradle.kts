@@ -44,6 +44,7 @@ dependencies {
     implementation(projects.data.daos)
     implementation(projects.data.nostr)
     implementation(projects.data.models)
+    implementation(libs.nostrino)
     implementation(libs.okhttp.core)
 
     implementation(libs.hilt.android)
