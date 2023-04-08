@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.hilt.android)
+    implementation(libs.nostrino)
     kapt(libs.hilt.compiler)
     implementation(libs.moshi.core)
 

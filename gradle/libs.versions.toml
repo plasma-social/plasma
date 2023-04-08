@@ -20,6 +20,7 @@ kotlin = "1.8.0"
 lifecycle = "2.5.1"
 molecule = "0.7.1"
 moshi = "1.14.0"
+nostrino = "0.0.2"
 okhttp = "5.0.0-alpha.11"
 paging = "3.1.1"
 room = "2.5.0"
@@ -109,6 +110,8 @@ lifecycle-viewmodelcompose = { module = "androidx.lifecycle:lifecycle-viewmodel-
 
 moshi-core = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
+
+nostrino = { module = "app.cash.nostrino:lib", version.ref = "nostrino" }
 
 okhttp-core = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-interceptor-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
