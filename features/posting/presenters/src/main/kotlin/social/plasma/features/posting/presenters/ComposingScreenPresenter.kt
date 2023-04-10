@@ -176,7 +176,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
                         text = "@${event.suggestion.title}",
                         pubkey = event.suggestion.pubKey,
                     )
-                    val replacement = "@${profileMention.pubkey.bech32}"
+                    val replacement = "@${profileMention.pubkey.npub}"
 
                     mentions[replacement] = profileMention
 

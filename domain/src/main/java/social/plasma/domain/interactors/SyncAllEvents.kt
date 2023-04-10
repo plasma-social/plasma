@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import social.plasma.domain.Interactor
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.Filter
@@ -24,8 +24,8 @@ class SyncAllEvents @Inject constructor(
         val pubkey = params.pubKey
 
         val subscribeMessage = ClientMessage.SubscribeMessage(
-            Filter(authors = setOf(pubkey.hex), since = Instant.EPOCH, limit = 2000),
-            Filter(pTags = setOf(pubkey.hex), limit = 2000)
+            Filter(authors = setOf(pubkey.key.hex()), since = Instant.EPOCH, limit = 2000),
+            Filter(pTags = setOf(pubkey.key.hex()), limit = 2000)
         )
 
         val subscription = relay.subscribe(subscribeMessage).distinctUntilChanged().map { it.event }

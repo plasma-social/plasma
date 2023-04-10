@@ -1,9 +1,9 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import social.plasma.domain.ResultInteractor
-import social.plasma.models.PubKey
 import social.plasma.shared.repositories.api.Nip5Validator
 import javax.inject.Inject
 import javax.inject.Named
@@ -27,7 +27,7 @@ class GetNip5Status @Inject constructor(
         val name = parts[0]
         val domain = parts[1]
 
-        val pubKeyHex = params.pubKey.hex
+        val pubKeyHex = params.pubKey.key.hex()
         val httpUrl = try {
             HttpUrl.Builder()
                 .scheme("https")

@@ -10,7 +10,8 @@ import org.junit.runner.RunWith
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.ui.notes.NoteElevatedCard
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
@@ -29,7 +30,7 @@ enum class NoteCardTestCase(val uiModel: FeedItem.NoteCard) {
             displayName = "Jane",
             id = "",
             content = listOf(ContentBlock.Text("PV", emptyMap())),
-            userPubkey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab")
+            userPubkey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex())
         )
     )
 }

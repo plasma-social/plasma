@@ -1,12 +1,12 @@
 package social.plasma.shared.repositories.fakes
 
 import androidx.paging.PagingSource
+import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
-import social.plasma.models.PubKey
 import social.plasma.models.Tag
 import social.plasma.shared.repositories.api.NoteRepository
 

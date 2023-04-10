@@ -17,7 +17,8 @@ import social.plasma.features.posting.screens.ComposePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnSubmitPost
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTapped
 import social.plasma.features.posting.screens.ComposingScreen
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
@@ -176,7 +177,7 @@ class ComposingScreenPresenterTest {
             awaitItem()
 
             with(awaitItem()) {
-                assertThat(noteContent.text).isEqualTo("@${pubKey.bech32} ")
+                assertThat(noteContent.text).isEqualTo("@${pubKey.encoded()} ")
             }
 
         }
@@ -196,7 +197,7 @@ class ComposingScreenPresenterTest {
     )
 
     companion object {
-        val pubKey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab")
+        val pubKey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex())
     }
 }
 

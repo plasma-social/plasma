@@ -1,5 +1,6 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.SubjectInteractor
 import social.plasma.domain.observers.ObserveContacts
-import social.plasma.models.PubKey
+import okio.ByteString.Companion.toByteString
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
@@ -32,7 +33,7 @@ class SyncContactsEvents @Inject constructor(
 ) : SubjectInteractor<Unit, Any>() {
 
     override fun createObservable(params: Unit): Flow<Any> {
-        val pubKey = PubKey.of(accountStateRepository.getPublicKey()!!)
+        val pubKey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
         return observeContacts.flow.onStart {
             observeContacts(ObserveContacts.Params(pubKey))

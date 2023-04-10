@@ -50,19 +50,19 @@ android {
 }
 
 dependencies {
-    implementation(projects.domain)
-    implementation(projects.data.daos)
-    implementation(projects.features.feeds.screens)
-    implementation(projects.features.profile.screens)
-    implementation(projects.features.posting.screens)
-    implementation(projects.repositories.api)
     implementation(projects.common.utils.api)
-    implementation(projects.domain)
+    implementation(projects.data.daos)
     implementation(projects.data.models)
+    implementation(projects.domain)
+    implementation(projects.features.feeds.screens)
+    implementation(projects.features.posting.screens)
+    implementation(projects.features.profile.screens)
+    implementation(projects.repositories.api)
 
     implementation(libs.androidx.paging.common)
     implementation(libs.circuit.core)
     implementation(libs.circuit.retained)
+    implementation(libs.nostrino)
     implementation(libs.timber)
 
     implementation(libs.hilt.android)

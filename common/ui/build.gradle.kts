@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.exoplayer.core)
     implementation(libs.exoplayer.ui)
 
+    implementation(libs.nostrino)
+
     implementation(libs.okhttp.core)
     implementation(libs.timber)
     implementation(libs.touchimageview)

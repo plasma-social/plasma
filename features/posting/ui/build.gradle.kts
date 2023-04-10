@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
+    implementation(libs.nostrino)
     implementation(libs.timber)
 
     debugImplementation(libs.compose.ui.test.manifest)

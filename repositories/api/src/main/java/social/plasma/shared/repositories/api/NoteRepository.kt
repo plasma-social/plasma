@@ -1,9 +1,9 @@
 package social.plasma.shared.repositories.api
 
 import androidx.paging.PagingSource
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
-import social.plasma.models.PubKey
 import social.plasma.models.Tag
 
 interface NoteRepository {

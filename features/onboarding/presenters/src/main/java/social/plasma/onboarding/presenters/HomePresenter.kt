@@ -1,5 +1,6 @@
 package social.plasma.onboarding.presenters
 
+import app.cash.nostrino.crypto.PubKey
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +12,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.toByteString
 import social.plasma.domain.interactors.SyncAllEvents
 import social.plasma.domain.interactors.SyncProfileData
 import social.plasma.domain.observers.ObserveUserMetadata
@@ -19,7 +21,6 @@ import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.features.profile.screens.ProfileScreen
-import social.plasma.models.PubKey
 import social.plasma.shared.repositories.api.AccountStateRepository
 
 class HomePresenter @AssistedInject constructor(
@@ -29,7 +30,7 @@ class HomePresenter @AssistedInject constructor(
     accountStateRepository: AccountStateRepository,
     @Assisted private val navigator: Navigator,
 ) : Presenter<HomeUiState> {
-    private val pubKey = PubKey.of(accountStateRepository.getPublicKey()!!)
+    private val pubKey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
     private val metadataFlow = observeMyMetadata.flow
 
     @Composable
@@ -45,7 +46,7 @@ class HomePresenter @AssistedInject constructor(
         return HomeUiState(avatarUrl = metadata?.picture) { event ->
             when (event) {
                 OnFabClick -> navigator.goTo(ComposingScreen())
-                HomeUiEvent.OnAvatarClick -> navigator.goTo(ProfileScreen(pubKeyHex = pubKey.hex))
+                HomeUiEvent.OnAvatarClick -> navigator.goTo(ProfileScreen(pubKeyHex = pubKey.key.hex()))
                 is HomeUiEvent.OnChildNav -> navigator.onNavEvent(event.navEvent)
             }
         }

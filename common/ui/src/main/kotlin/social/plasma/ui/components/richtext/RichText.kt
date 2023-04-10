@@ -36,11 +36,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
 import social.plasma.models.Mention
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
-import social.plasma.models.PubKey
 import kotlin.math.ceil
 
 
@@ -73,7 +74,7 @@ fun RichText(
     fun handleClick(tag: String, item: String) {
         when (tag) {
             RichTextTag.URL -> uriHandler.openUri(item)
-            RichTextTag.PROFILE -> onMentionClick(ProfileMention(pubkey = PubKey(item), text = ""))
+            RichTextTag.PROFILE -> onMentionClick(ProfileMention(pubkey = PubKey(item.decodeHex()), text = ""))
             RichTextTag.NOTE -> onMentionClick(NoteMention(noteId = NoteId(item), text = ""))
             else -> error("Unsupported tag: $tag")
         }

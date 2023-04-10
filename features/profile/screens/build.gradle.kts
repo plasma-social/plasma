@@ -44,6 +44,7 @@ dependencies {
     implementation(projects.data.models)
     implementation(libs.circuit.core)
     implementation(libs.compose.runtime)
+    implementation(libs.nostrino)
 
     implementation(libs.androidx.paging.runtime)
 }

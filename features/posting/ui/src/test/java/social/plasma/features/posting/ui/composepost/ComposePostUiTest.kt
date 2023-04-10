@@ -10,7 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.ComposePostUiState
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
@@ -67,7 +67,7 @@ class ComposePostUiTest constructor(
                 autoCompleteSuggestions = listOf(
                     AutoCompleteSuggestion(
                         TagSuggestion(
-                            pubKey = PubKey("1"),
+                            pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",
@@ -75,7 +75,7 @@ class ComposePostUiTest constructor(
                     ),
                     AutoCompleteSuggestion(
                         TagSuggestion(
-                            pubKey = PubKey("1"),
+                            pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",
@@ -83,7 +83,7 @@ class ComposePostUiTest constructor(
                     ),
                     AutoCompleteSuggestion(
                         TagSuggestion(
-                            pubKey = PubKey("1"),
+                            pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",

@@ -13,7 +13,7 @@ class MentionsVisualTransformation constructor(
     private val highlightColor: Color,
     private val mentions: Map<String, ProfileMention>,
 ) : VisualTransformation {
-    private val bech32Regex = Regex("(@npub)[0-9a-z]{1,83}")
+    private val bech32Regex = Regex("(@npub)[\\da-z]{1,83}")
 
     override fun filter(text: AnnotatedString): TransformedText {
         val (transformedText, offsetMapping) = replaceMentions(text)
@@ -49,7 +49,8 @@ class MentionsVisualTransformation constructor(
                             transformedWord += textBefore
                         }
 
-                        withProfileMention(mention.pubkey.hex, highlightColor) {
+                        // TODO replace .key.hex() with .hex() everywhere when nostrino is updated
+                        withProfileMention(mention.pubkey.key.hex(), highlightColor) {
                             append(mention.text)
                             transformedWord += mention.text
                         }

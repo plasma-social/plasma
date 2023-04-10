@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.models.NoteId
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ConfirmationDialog
@@ -479,7 +479,7 @@ object NoteCardFakes {
         replyCount = "352k",
         shareCount = "509k",
         likeCount = 290,
-        userPubkey = PubKey("fdsf")
+        userPubkey = PubKey.parse("npub1jem3jmdve9h94snjkuf5egagk7uupgxtu0eru33mzyms8ctzlk9sjhk73a")
     )
 }
 

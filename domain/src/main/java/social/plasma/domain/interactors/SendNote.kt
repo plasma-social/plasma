@@ -1,13 +1,15 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.toByteString
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.domain.ResultInteractor
 import social.plasma.models.EventTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
-import social.plasma.models.PubKey
 import social.plasma.models.PubKeyTag
 import social.plasma.models.Tag
 import social.plasma.models.crypto.Bech32
@@ -20,7 +22,7 @@ class SendNote @Inject constructor(
     private val noteRepository: NoteRepository,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : ResultInteractor<SendNote.Params, InvokeStatus>() {
-    private val bech32Regex = Regex("(@npub|@note|npub|note)[0-9a-z]{1,83}")
+    private val bech32Regex = Regex("(@npub|@note|npub|note)[\\da-z]{1,83}")
 
     data class Params(
         val content: String,
@@ -35,7 +37,7 @@ class SendNote @Inject constructor(
 
                 noteEntity.tags.forEachIndexed { index, tag ->
                     if (tag.firstOrNull() == "p" && tag.size >= 2) {
-                        add(PubKeyTag(PubKey(tag[1])))
+                        add(PubKeyTag(PubKey(tag[1].decodeHex())))
                     }
                     if (tag.firstOrNull() == "e" && tag.size >= 2 && index == 0) {
                         add(EventTag(NoteId(tag[1])))
@@ -43,7 +45,7 @@ class SendNote @Inject constructor(
                 }
 
                 add(EventTag(NoteId(noteEntity.id)))
-                add(PubKeyTag(PubKey(noteEntity.pubkey)))
+                add(PubKeyTag(PubKey(noteEntity.pubkey.decodeHex())))
             }
         } else {
             emptySet()
@@ -67,13 +69,13 @@ class SendNote @Inject constructor(
         val npubMentions = extractBech32Mentions(content, type = "npub")
         val noteMentions = extractBech32Mentions(content, type = "note")
 
-        val allPTags = additionalPTags + npubMentions.map { PubKeyTag(PubKey.of(it.second)) }
+        val allPTags = additionalPTags + npubMentions.map { PubKeyTag(PubKey(it.second.toByteString())) }
         val allETags = additionalETags + noteMentions.map { EventTag(NoteId.of(it.second)) }
 
         var contentWithPlaceholders =
             npubMentions.fold(content) { acc, (originalContent, hex) ->
                 val placeholderIndex =
-                    allETags.count() + allPTags.indexOfFirst { it.pubKey == PubKey.of(hex) }
+                    allETags.count() + allPTags.indexOfFirst { it.pubKey == PubKey(hex.toByteString()) }
                 acc.replace(originalContent, "#[$placeholderIndex]")
             }
 

@@ -41,5 +41,6 @@ dependencies {
     api(projects.repositories.api)
 
     implementation(projects.data.models)
+    implementation(libs.nostrino)
     implementation(libs.turbine)
 }

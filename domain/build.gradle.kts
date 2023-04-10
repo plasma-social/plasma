@@ -51,6 +51,7 @@ dependencies {
 
     implementation(libs.androidx.paging.common)
     implementation(libs.moshi.core)
+    implementation(libs.nostrino)
     testImplementation(projects.repositories.fakes)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)

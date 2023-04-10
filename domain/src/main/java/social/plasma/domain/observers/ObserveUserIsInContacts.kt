@@ -3,7 +3,7 @@ package social.plasma.domain.observers
 import kotlinx.coroutines.flow.Flow
 import social.plasma.data.daos.ContactsDao
 import social.plasma.domain.SubjectInteractor
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import javax.inject.Inject
 
 class ObserveUserIsInContacts @Inject constructor(
@@ -13,8 +13,8 @@ class ObserveUserIsInContacts @Inject constructor(
 
     override fun createObservable(params: Params): Flow<Boolean> {
         return contactListDao.observeOwnerFollowsContact(
-            ownerPubKey = params.ownerPubKey.hex,
-            contactPubKey = params.contactPubKey.hex
+            ownerPubKey = params.ownerPubKey.key.hex(),
+            contactPubKey = params.contactPubKey.key.hex()
         )
     }
 }
