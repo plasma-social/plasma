@@ -22,7 +22,6 @@ import app.cash.nostrino.crypto.SecKeyGenerator
 import okio.ByteString.Companion.decodeHex
 import shortBech32
 import social.plasma.models.UserMetadataEntity
-import social.plasma.models.crypto.KeyGenerator
 import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
@@ -52,7 +51,7 @@ class NoteCardMapperTest {
         get() {
             return NoteCardMapper(
                 userMetaDataRepository = FakeUserMetadataRepository(),
-                accountStateRepository = FakeAccountStateRepository(publicKey = KeyGenerator().generateKeyPair().pub.toByteArray()),
+                accountStateRepository = FakeAccountStateRepository(publicKey = SecKeyGenerator().generate().pubKey.key.toByteArray()),
                 noteRepository = FakeNoteRepository(),
                 noteContentParser = NoteContentParser(),
                 moshi = moshi,

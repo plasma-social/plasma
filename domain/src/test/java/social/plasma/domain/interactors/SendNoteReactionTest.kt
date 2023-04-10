@@ -19,8 +19,8 @@ import social.plasma.models.NoteId
 import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
 import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKeyGenerator
 import okio.ByteString.Companion.decodeHex
-import social.plasma.models.crypto.KeyGenerator
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
@@ -28,9 +28,9 @@ import java.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SendNoteReactionTest {
-    private val keys = KeyGenerator().generateKeyPair()
-    private val mySecretKey = keys.sec.toByteArray()
-    private val myPubKey = keys.pub.toByteArray()
+    private val sec = SecKeyGenerator().generate()
+    private val mySecretKey = sec.key.toByteArray()
+    private val myPubKey = sec.pubKey.key.toByteArray()
 
     private val noteRepository = FakeNoteRepository()
     private val accountStateRepository = FakeAccountStateRepository(
