@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import social.plasma.domain.PagingInteractor
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
 

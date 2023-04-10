@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import social.plasma.domain.Interactor
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.Filter
@@ -27,9 +27,9 @@ class SyncProfileData @Inject constructor(
         val pubkey = params.pubKey
 
         val subscribeMessage = ClientMessage.SubscribeMessage(
-            Filter.contactList(pubkey.hex),
-            Filter.userMetaData(pubkey.hex),
-            Filter.userNotes(pubkey.hex),
+            Filter.contactList(pubkey.key.hex()),
+            Filter.userMetaData(pubkey.key.hex()),
+            Filter.userNotes(pubkey.key.hex()),
         )
 
         val subscription = relay.subscribe(subscribeMessage)

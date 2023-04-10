@@ -58,6 +58,7 @@ dependencies {
     implementation(projects.data.models)
 
     implementation(libs.circuit.core)
+    implementation(libs.nostrino)
     implementation(libs.timber)
 
     implementation(libs.hilt.android)
@@ -66,9 +67,9 @@ dependencies {
     testImplementation(projects.repositories.fakes)
     testImplementation(projects.common.utils.fakes)
     testImplementation(libs.circuit.test)
-    testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
-    testImplementation(libs.turbine)
+    testImplementation(libs.junit)
     testImplementation(libs.testparameterinjector)
     testImplementation(libs.truth)
+    testImplementation(libs.turbine)
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.domain.Interactor
 import social.plasma.models.LastRequestEntity
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.Request
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
@@ -30,21 +30,21 @@ class SyncMetadata @Inject constructor(
 
     override suspend fun doWork(params: Params) {
         withContext(ioDispatcher) {
-            val lastRequest = lastRequestDao.lastRequest(Request.SYNC_METADATA, params.pubKey.hex)
+            val lastRequest = lastRequestDao.lastRequest(Request.SYNC_METADATA, params.pubKey.key.hex())
 
             if (lastRequest?.isStillValid(ttl) == true) {
                 return@withContext
             }
 
             storeMetadataEvents(
-                relay.subscribe(SubscribeMessage(userMetaData(params.pubKey.hex)))
+                relay.subscribe(SubscribeMessage(userMetaData(params.pubKey.key.hex())))
                     .take(params.limit)
                     .map { it.event }
                     .onEach {
                         lastRequestDao.upsert(
                             LastRequestEntity(
                                 request = Request.SYNC_METADATA,
-                                resourceId = params.pubKey.hex,
+                                resourceId = params.pubKey.key.hex(),
                             )
                         )
                     }

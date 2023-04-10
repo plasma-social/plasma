@@ -27,8 +27,11 @@ import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
 import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.models.PubKey
 import social.plasma.shared.repositories.api.AccountStateRepository
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.toByteString
+import shortBech32
 
 class ProfileScreenPresenter @AssistedInject constructor(
     private val observeFollowingCount: ObserveFollowingCount,
@@ -42,8 +45,8 @@ class ProfileScreenPresenter @AssistedInject constructor(
     @Assisted private val args: ProfileScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ProfileUiState> {
-    private val myPubKey = PubKey.of(accountStateRepository.getPublicKey()!!)
-    private val pubKey = PubKey(args.pubKeyHex)
+    private val myPubKey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
+    private val pubKey = PubKey(args.pubKeyHex.decodeHex())
 
     private val metadataInitialState =
         ProfileUiState.Loaded.UserData(
@@ -106,7 +109,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
         val userData by produceState(initialValue = metadataInitialState, metadata) {
             metadata?.let {
                 value = ProfileUiState.Loaded.UserData(
-                    petName = metadata!!.displayName ?: pubKey.shortBech32,
+                    petName = metadata!!.displayName ?: pubKey.shortBech32(),
                     banner = metadata!!.banner
                         ?: "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
                     website = metadata!!.website,

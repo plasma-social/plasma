@@ -44,6 +44,7 @@ dependencies {
     api(projects.data.opengraph)
     implementation(libs.circuit.core)
     implementation(libs.compose.runtime)
+    implementation(libs.nostrino)
 
     implementation(libs.androidx.paging.runtime)
 }

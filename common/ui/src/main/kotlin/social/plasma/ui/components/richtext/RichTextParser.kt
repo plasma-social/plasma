@@ -15,7 +15,7 @@ class RichTextParser constructor(
     private val linkColor: Color,
 ) {
     private val urlRegex = Regex("(https?://\\S+)")
-    private val mentionRegex = Regex("#\\[[0-9]+]")
+    private val mentionRegex = Regex("#\\[\\d+]")
 
     /**
      * Builds an annotated string using the note's mentions.
@@ -72,7 +72,7 @@ class RichTextParser constructor(
             mentions[key]?.let { mention ->
                 when (mention) {
                     is ProfileMention -> withProfileMention(
-                        pubkey = mention.pubkey.hex,
+                        pubkey = mention.pubkey.key.hex(),
                         color = linkColor,
                     ) {
                         append(mention.text)

@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.paging.common)
     implementation(libs.circuit.core)
     implementation(libs.circuit.retained)
+    implementation(libs.nostrino)
     implementation(libs.timber)
 
     implementation(libs.hilt.android)

@@ -3,6 +3,9 @@ package social.plasma.models
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
+import shortBech32
 
 @Entity(tableName = "user_metadata")
 data class UserMetadataEntity(
@@ -21,6 +24,6 @@ data class UserMetadataEntity(
     @delegate:Ignore
     val userFacingName: String by lazy {
         displayName?.takeIf { it.isNotBlank() } ?: name?.takeIf { it.isNotBlank() }
-        ?: PubKey(pubkey).shortBech32
+        ?: PubKey(pubkey.decodeHex()).shortBech32()
     }
 }

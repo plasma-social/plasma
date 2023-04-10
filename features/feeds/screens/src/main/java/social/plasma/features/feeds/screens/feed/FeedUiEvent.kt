@@ -2,7 +2,7 @@ package social.plasma.features.feeds.screens.feed
 
 import com.slack.circuit.CircuitUiEvent
 import social.plasma.models.NoteId
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 
 sealed interface FeedUiEvent : CircuitUiEvent {
     data class OnNoteClick(val noteId: NoteId) : FeedUiEvent

@@ -5,8 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import social.plasma.models.ProfileMention
-import social.plasma.models.PubKey
-import social.plasma.models.crypto.Bech32.bechToBytes
+import app.cash.nostrino.crypto.PubKey
 
 
 class MentionsVisualTransformationTest {
@@ -72,7 +71,7 @@ class MentionsVisualTransformationTest {
 
     companion object {
         val pubKey =
-            PubKey.of("npub1z2aauyjavy9kfau3jn4cq3u0uvadjhkngxzv0uzh0e3pfuexdjcql0pyy7".bechToBytes())
+            PubKey.parse("npub1z2aauyjavy9kfau3jn4cq3u0uvadjhkngxzv0uzh0e3pfuexdjcql0pyy7")
         const val npubString = "@npub1z2aauyjavy9kfau3jn4cq3u0uvadjhkngxzv0uzh0e3pfuexdjcql0pyy7"
     }
 }

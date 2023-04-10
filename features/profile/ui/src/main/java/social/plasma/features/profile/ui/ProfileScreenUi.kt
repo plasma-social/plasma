@@ -63,7 +63,7 @@ import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
 import social.plasma.features.profile.screens.ProfileUiState.Loading
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.ui.R
 import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
@@ -221,7 +221,7 @@ class ProfileScreenUi @Inject constructor(
 
         OverlayIconButton(
             onClick = {
-                clipboardManager.setText(AnnotatedString(pubKey.bech32))
+                clipboardManager.setText(AnnotatedString(pubKey.encoded()))
             }
         ) {
             Icon(
@@ -392,7 +392,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
                 nip5Identifier = nip5,
                 petName = "Satoshi",
                 username = username,
-                publicKey = PubKey(UUID.randomUUID().toString()),
+                publicKey = PubKey.parse("npub1jem3jmdve9h94snjkuf5egagk7uupgxtu0eru33mzyms8ctzlk9sjhk73a"),
                 about = "Developer @ a peer-to-peer electronic cash system",
                 avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
                 website = "https://cash.app",

@@ -1,7 +1,8 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
+import okio.ByteString.Companion.decodeHex
 import social.plasma.domain.ResultInteractor
-import social.plasma.models.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.shared.repositories.api.UserMetadataRepository
 import javax.inject.Inject
@@ -24,7 +25,7 @@ class GetNoteTagSuggestions @Inject constructor(
 
             return userEntities.map {
                 TagSuggestion(
-                    pubKey = PubKey(it.pubkey),
+                    pubKey = PubKey(it.pubkey.decodeHex()),
                     imageUrl = it.picture,
                     title = it.userFacingName,
                     nip5Identifier = it.nip05,

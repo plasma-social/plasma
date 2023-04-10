@@ -1,20 +1,16 @@
 package social.plasma.shared.repositories.real
 
 import androidx.paging.PagingSource
+import app.cash.nostrino.crypto.PubKey
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.NotesDao
-import social.plasma.models.EventTag
-import social.plasma.models.NoteId
-import social.plasma.models.NoteWithUser
-import social.plasma.models.PubKey
-import social.plasma.models.PubKeyTag
-import social.plasma.models.Tag
 import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.Relay
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
 import app.cash.nostrino.crypto.SecKey
+import social.plasma.models.*
 
 internal class RealNoteRepository @Inject constructor(
     private val relay: Relay,
@@ -29,7 +25,7 @@ internal class RealNoteRepository @Inject constructor(
         val nostrTags = tags.map { tag ->
             when (tag) {
                 is EventTag -> listOf("e", tag.noteId.hex)
-                is PubKeyTag -> listOf("p", tag.pubKey.hex)
+                is PubKeyTag -> listOf("p", tag.pubKey.key.hex())
             }
         }.toSet()
 
@@ -44,25 +40,25 @@ internal class RealNoteRepository @Inject constructor(
     }
 
     override fun observePagedContactsNotes(): PagingSource<Int, NoteWithUser> {
-        val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
+        val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
-        return notesDao.observePagedContactsNotes(pubkey.hex)
+        return notesDao.observePagedContactsNotes(pubkey.key.hex())
     }
 
     override fun observePagedNotifications(): PagingSource<Int, NoteWithUser> {
-        val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
+        val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
-        return notesDao.observePagedNotifications(pubkey.hex)
+        return notesDao.observePagedNotifications(pubkey.key.hex())
     }
 
     override fun observePagedContactsReplies(): PagingSource<Int, NoteWithUser> {
-        val pubkey = PubKey.of(accountStateRepository.getPublicKey()!!)
+        val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
-       return notesDao.observePagedContactsReplies(pubkey.hex)
+       return notesDao.observePagedContactsReplies(pubkey.key.hex())
     }
 
     override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, NoteWithUser> {
-        return notesDao.observePagedUserNotes(pubKey.hex)
+        return notesDao.observePagedUserNotes(pubKey.key.hex())
     }
 
     override fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, NoteWithUser> {
@@ -75,6 +71,6 @@ internal class RealNoteRepository @Inject constructor(
     }
 
     override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
-        return notesDao.isNoteLiked(byPubKey.hex, noteId.hex)
+        return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
     }
 }

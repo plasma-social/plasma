@@ -57,6 +57,7 @@ dependencies {
     implementation(projects.repositories.api)
 
     implementation(libs.circuit.core)
+    implementation(libs.nostrino)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

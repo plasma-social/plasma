@@ -4,8 +4,8 @@ import androidx.paging.PagingData
 import com.slack.circuit.CircuitUiState
 import kotlinx.coroutines.flow.Flow
 import social.plasma.models.Mention
-import social.plasma.models.PubKey
 import social.plasma.opengraph.OpenGraphMetadata
+import app.cash.nostrino.crypto.PubKey
 
 data class FeedUiState(
     val pagingFlow: Flow<PagingData<FeedItem>>,

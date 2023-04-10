@@ -72,7 +72,7 @@ class FeedPresenter @AssistedInject constructor(
                 }
 
                 is FeedUiEvent.OnProfileClick -> {
-                    navigator.goTo(ProfileScreen(pubKeyHex = event.pubKey.hex))
+                    navigator.goTo(ProfileScreen(pubKeyHex = event.pubKey.key.hex()))
                 }
 
                 is FeedUiEvent.OnNoteDisplayed -> {

@@ -17,7 +17,10 @@ import social.plasma.models.Event
 import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
 import social.plasma.models.ProfileMention
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKeyGenerator
+import okio.ByteString.Companion.decodeHex
+import shortBech32
 import social.plasma.models.UserMetadataEntity
 import social.plasma.models.crypto.KeyGenerator
 import social.plasma.nostr.relay.message.NostrMessageAdapter
@@ -101,7 +104,7 @@ class NoteCardMapperTest {
             assertThat(displayName).isEqualTo("Test")
             assertThat(avatarUrl).isEqualTo("testpicture")
             assertThat(nip5Identifier).isNull()
-            assertThat(cardLabel).isEqualTo("Replying to ${PubKey(pubkeyHex).shortBech32}")
+            assertThat(cardLabel).isEqualTo("Replying to ${pubkey.shortBech32()}")
             assertThat(replyCount).isEmpty()
             assertThat(timePosted).isEqualTo(instantFormatter.formatResponse)
             assertThat(shareCount).isEmpty()
@@ -113,73 +116,73 @@ class NoteCardMapperTest {
 
     @Test
     fun `Reply with a single p tag uses correct string`() = runTest {
-        val referencedPubkey = PubKey(keyGenerator.generateKeyPair().pub.hex())
+        val referencedPubkey = secKeyGenerator.generate().pubKey
 
         val noteWithUser = NoteWithUser(
             noteEntity = createNoteView(
                 tags = listOf(
-                    listOf("p", referencedPubkey.hex)
+                    listOf("p", referencedPubkey.key.hex())
                 ),
                 isReply = true,
             ), userMetadataEntity = createUserMetadata()
         )
 
         with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
-            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkey.shortBech32}")
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkey.shortBech32()}")
         }
     }
 
     @Test
     fun `Reply note with many tags only shows the first two`() = runTest {
-        val referencedPubkeys = (1..50).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+        val referencedPubkeys = (1..50).map { secKeyGenerator.generate().pubKey }
 
         val noteWithUser = NoteWithUser(
             noteEntity = createNoteView(
                 tags = referencedPubkeys.map {
-                    listOf("p", it.hex)
+                    listOf("p", it.key.hex())
                 },
                 isReply = true,
             ), userMetadataEntity = createUserMetadata()
         )
 
         with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
-            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32}, ${referencedPubkeys[1].shortBech32}, and 48 others")
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32()}, ${referencedPubkeys[1].shortBech32()}, and 48 others")
         }
     }
 
     @Test
     fun `Reply note with two tags shows correct text`() = runTest {
-        val referencedPubkeys = (1..2).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+        val referencedPubkeys = (1..2).map { secKeyGenerator.generate().pubKey }
 
         val noteWithUser = NoteWithUser(
             noteEntity = createNoteView(
                 tags = referencedPubkeys.map {
-                    listOf("p", it.hex)
+                    listOf("p", it.key.hex())
                 },
                 isReply = true,
             ), userMetadataEntity = createUserMetadata()
         )
 
         with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
-            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32} and ${referencedPubkeys[1].shortBech32}")
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32()} and ${referencedPubkeys[1].shortBech32()}")
         }
     }
 
     @Test
     fun `Reply note with 1 "other" tag shows singular text`() = runTest {
-        val referencedPubkeys = (1..3).map { PubKey(keyGenerator.generateKeyPair().pub.hex()) }
+        val referencedPubkeys = (1..3).map { secKeyGenerator.generate().pubKey }
 
         val noteWithUser = NoteWithUser(
             noteEntity = createNoteView(
                 tags = referencedPubkeys.map {
-                    listOf("p", it.hex)
+                    listOf("p", it.key.hex())
                 },
                 isReply = true,
             ), userMetadataEntity = createUserMetadata()
         )
 
         with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
-            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32}, ${referencedPubkeys[1].shortBech32}, and 1 other")
+            assertThat(cardLabel).isEqualTo("Replying to ${referencedPubkeys[0].shortBech32()}, ${referencedPubkeys[1].shortBech32()}, and 1 other")
         }
     }
 
@@ -209,7 +212,7 @@ class NoteCardMapperTest {
             assertThat(timePosted).isEqualTo(instantFormatter.formatResponse)
             assertThat(shareCount).isEmpty()
             assertThat(likeCount).isEqualTo(0)
-            assertThat(userPubkey).isEqualTo(PubKey("978c8f26ea9b3c58bfd4c8ddfde83741a6c2496fab72774109fe46819ca49708"))
+            assertThat(userPubkey).isEqualTo(PubKey("978c8f26ea9b3c58bfd4c8ddfde83741a6c2496fab72774109fe46819ca49708".decodeHex()))
             assertThat(nip5Domain).isNull()
             assertThat(cardLabel).isEqualTo("Replying to 48ut8u4v:rs59ty0w")
         }
@@ -229,7 +232,7 @@ class NoteCardMapperTest {
             assertThat(headerContent).isEqualTo(
                 ContentBlock.Text(
                     "Boosted by #[0]",
-                    mapOf(0 to ProfileMention(pubkey.shortBech32, pubkey))
+                    mapOf(0 to ProfileMention(pubkey.shortBech32(), pubkey))
                 )
             )
         }
@@ -280,9 +283,9 @@ class NoteCardMapperTest {
     )
 
     companion object {
-        private val keyGenerator = KeyGenerator()
-        val pubkey = PubKey.of(keyGenerator.generateKeyPair().pub.toByteArray())
+        private val secKeyGenerator = SecKeyGenerator()
+        private val pubkey = secKeyGenerator.generate().pubKey
         const val rootNoteIdHex = "fe64ae6fdd89581938b4644958ffcefba5871bd9ad9f4b5d3dbe59e7274faaf6"
-        val pubkeyHex = pubkey.hex
+        private val pubkeyHex = pubkey.key.hex()
     }
 }

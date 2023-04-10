@@ -1,5 +1,6 @@
 package social.plasma.models
 
+import app.cash.nostrino.crypto.PubKey
 sealed class Mention {
     abstract val text: String
 }

@@ -14,7 +14,7 @@ import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.FeedUi
 import social.plasma.features.profile.screens.ProfileUiState
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
@@ -60,7 +60,7 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
             website = "https://plasma.social",
             petName = "Plasma",
             username = "@plasma",
-            publicKey = PubKey(""),
+            publicKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
             about = "A native nostr client for Android",
             avatarUrl = "https://api.dicebear.com/5.x/big-smile/png?seed=plasma",
             nip5Identifier = "_@plasma.social",
@@ -97,7 +97,7 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
                 replyCount = "55",
                 shareCount = "500",
                 likeCount = 400,
-                userPubkey = PubKey(""),
+                userPubkey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                 isLiked = true,
                 isNip5Valid = { _, _ -> true },
                 nip5Domain = userData.nip5Domain,

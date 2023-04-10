@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
@@ -29,7 +29,7 @@ class GetNoteTagSuggestionsTest {
         ).test {
             assertThat(awaitItem()).containsExactly(
                 TagSuggestion(
-                    pubKey = PubKey(""),
+                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                     imageUrl = null,
                     title = "test",
                     nip5Identifier = null
@@ -46,7 +46,7 @@ class GetNoteTagSuggestionsTest {
         getNoteTagSuggestions(GetNoteTagSuggestions.Params("@j", cursorPosition = 2)).test {
             assertThat(awaitItem()).containsExactly(
                 TagSuggestion(
-                    pubKey = PubKey(""),
+                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                     imageUrl = null,
                     title = "test",
                     nip5Identifier = null
@@ -69,7 +69,7 @@ class GetNoteTagSuggestionsTest {
         ).test {
             assertThat(awaitItem()).containsExactly(
                 TagSuggestion(
-                    pubKey = PubKey(""),
+                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                     imageUrl = null,
                     title = "test",
                     nip5Identifier = null
@@ -120,7 +120,7 @@ class GetNoteTagSuggestionsTest {
         about = null,
         createdAt = null,
         banner = null,
-        pubkey = "",
+        pubkey = "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
         website = null,
         lud = null,
         nip05 = null,

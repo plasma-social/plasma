@@ -1,11 +1,8 @@
 package social.plasma.features.profile.screens
 
-import androidx.paging.PagingData
 import com.slack.circuit.CircuitUiState
-import kotlinx.coroutines.flow.Flow
-import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiState
-import social.plasma.models.PubKey
+import app.cash.nostrino.crypto.PubKey
 
 sealed interface ProfileUiState : CircuitUiState {
     object Loading : ProfileUiState
