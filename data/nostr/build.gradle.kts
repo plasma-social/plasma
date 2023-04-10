@@ -72,6 +72,7 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.nostrino)
     testImplementation(libs.turbine)
 
     androidTestImplementation(libs.androidx.test.junit)
