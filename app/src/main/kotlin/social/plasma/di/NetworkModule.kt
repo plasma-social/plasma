@@ -7,6 +7,7 @@ import com.tinder.scarlet.Lifecycle
 import com.tinder.scarlet.Scarlet
 import com.tinder.scarlet.lifecycle.LifecycleRegistry
 import com.tinder.scarlet.messageadapter.moshi.MoshiMessageAdapter
+import com.tinder.scarlet.retry.ExponentialBackoffStrategy
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
 import com.tinder.streamadapter.coroutines.CoroutinesStreamAdapterFactory
 import dagger.Module
@@ -23,6 +24,8 @@ import social.plasma.utils.ApplicationResumedLifecycle
 import social.plasma.utils.ConnectivityOnLifecycle
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -33,15 +36,14 @@ object NetworkModule {
     @Named("default-relay-list")
     fun provideDefaultRelayList(): List<String> = listOf(
         "wss://relay.damus.io",
-        "wss://brb.io",
         "wss://nos.lol",
         "wss://eden.nostr.land",
         "wss://nostr.oxtr.dev",
-        "wss://relay.kronkltd.net",
-        "wss://nostr.zebedee.cloud",
         "wss://no.str.cr",
-        "wss://relay.nostr.info",
-        "wss://relay.snort.social"
+        "wss://relay.nostr.band",
+        "wss://relay.snort.social",
+        "wss://puravida.nostr.land",
+        "wss://atlas.nostr.land",
     )
 
     @Provides
@@ -71,6 +73,12 @@ object NetworkModule {
             .addMessageAdapterFactory(MoshiMessageAdapter.Factory(moshi))
             .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
             .addStreamAdapterFactory(CoroutinesStreamAdapterFactory())
+            .backoffStrategy(
+                ExponentialBackoffStrategy(
+                    5.seconds.inWholeMilliseconds,
+                    30.minutes.inWholeMilliseconds
+                )
+            )
             .lifecycle(lifecycle)
 }
 
