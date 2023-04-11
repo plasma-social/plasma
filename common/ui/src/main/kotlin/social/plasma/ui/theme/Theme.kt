@@ -17,7 +17,7 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = with(DarkThemeColors) {
     darkColorScheme(
         background = fillPage,
-        surface = fillPage,
+        surface = fillElevation,
         surfaceVariant = fillElevation,
         onSurface = textPrimary,
         onSurfaceVariant = textHint,
@@ -31,7 +31,7 @@ private val DarkColorScheme = with(DarkThemeColors) {
 private val LightColorScheme = with(LightThemeColors) {
     lightColorScheme(
         background = fillPage,
-        surface = fillPage,
+        surface = fillElevation,
         surfaceVariant = fillElevation,
         onSurface = textPrimary,
         onSurfaceVariant = textHint,

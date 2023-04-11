@@ -6,8 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,10 +43,13 @@ fun OpenGraphPreviewCard(
     }
 
     openGraphMetadata?.let { metadata ->
-        OutlinedCard(
+        Card(
             modifier = modifier.clickable {
                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-            }
+            },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            ),
         ) {
             Column {
                 metadata.image?.let {
@@ -56,6 +64,9 @@ fun OpenGraphPreviewCard(
                     Divider()
                 }
                 ListItem(
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                    ),
                     headlineContent = {
                         metadata.title?.let {
                             Text(it)

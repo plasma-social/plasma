@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.slack.circuit.CircuitContent
 import com.slack.circuit.Ui
 import social.plasma.features.feeds.screens.feed.FeedScreen
@@ -31,10 +32,9 @@ import social.plasma.features.onboarding.screens.home.HomeUiEvent
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnChildNav
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
-import social.plasma.features.onboarding.screens.login.LoginScreen
 import social.plasma.features.onboarding.ui.R
-import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.components.AvatarToolBar
+import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.R as ComponentsR
 
 class HomeScreenUi : Ui<HomeUiState> {
@@ -65,6 +65,7 @@ class HomeScreenUi : Ui<HomeUiState> {
             modifier = modifier,
             floatingActionButton = {
                 FloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.primary,
                     onClick = { onEvent(OnFabClick) },
                     shape = CircleShape,
                 ) {
@@ -110,12 +111,12 @@ private fun BottomNavigationBar(
     Column {
         HorizontalSeparator()
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = 0.dp,
         ) {
             barNavItems.forEach { item ->
                 NavigationBarItem(
                     colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = MaterialTheme.colorScheme.surface,
+                        indicatorColor = MaterialTheme.colorScheme.background,
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                     ),

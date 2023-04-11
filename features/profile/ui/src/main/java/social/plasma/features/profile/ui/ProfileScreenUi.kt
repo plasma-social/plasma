@@ -197,7 +197,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
             Box(
                 modifier = Modifier
                     .size(92.dp)
-                    .border(4.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                    .border(4.dp, MaterialTheme.colorScheme.background, CircleShape)
                     .constrainAs(avatar) {
                         top.linkTo(coverImage.bottom)
                         bottom.linkTo(coverImage.bottom)

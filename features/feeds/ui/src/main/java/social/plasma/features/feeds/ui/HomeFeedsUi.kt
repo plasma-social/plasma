@@ -18,6 +18,7 @@ import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent.ChildNav
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiState
+import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.components.PlasmaTab
 import social.plasma.ui.components.PlasmaTabRow
 
@@ -60,6 +61,8 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } })
                 }
             }
+            HorizontalSeparator()
+            
             HorizontalPager(pageCount = tabs.size, state = pagerState) {
                 CircuitContent(
                     screen = tabs[it].screen,
