@@ -58,6 +58,7 @@ fun RichText(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = LocalTextStyle.current,
     onMentionClick: (Mention) -> Unit = {},
+    onHashTagClick: (String) -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     val linkColor = MaterialTheme.colorScheme.primary
@@ -76,6 +77,7 @@ fun RichText(
             RichTextTag.URL -> uriHandler.openUri(item)
             RichTextTag.PROFILE -> onMentionClick(ProfileMention(pubkey = PubKey(item.decodeHex()), text = ""))
             RichTextTag.NOTE -> onMentionClick(NoteMention(noteId = NoteId(item), text = ""))
+            RichTextTag.HASHTAG -> onHashTagClick(item)
             else -> error("Unsupported tag: $tag")
         }
     }

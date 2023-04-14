@@ -37,21 +37,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.cash.nostrino.crypto.PubKey
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.models.NoteId
-import app.cash.nostrino.crypto.PubKey
+import social.plasma.models.NoteMention
+import social.plasma.models.ProfileMention
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.ConfirmationDialog
+import social.plasma.ui.components.GetOpenGraphMetadata
 import social.plasma.ui.components.ImageCarousel
 import social.plasma.ui.components.InlineMediaPlayer
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.OpenGraphPreviewCard
 import social.plasma.ui.components.ZoomableImage
-import social.plasma.models.NoteMention
-import social.plasma.models.ProfileMention
-import social.plasma.ui.components.GetOpenGraphMetadata
 import social.plasma.ui.components.richtext.RichText
 import social.plasma.ui.theme.PlasmaTheme
 
@@ -67,6 +67,7 @@ fun NoteElevatedCard(
     onNoteClick: (NoteId) -> Unit,
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onHashTagClick: (String) -> Unit,
 ) {
     Card(
         modifier = modifier,
@@ -77,9 +78,10 @@ fun NoteElevatedCard(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            onNoteClick = onNoteClick,
             onProfileClick = onProfileClick,
+            onNoteClick = onNoteClick,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            onHashTagClick = onHashTagClick,
         )
         NoteContent(
             uiModel,
@@ -89,6 +91,7 @@ fun NoteElevatedCard(
             onNoteClick = onNoteClick,
             onRepostClick = onRepostClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
+            onHashTagClick = onHashTagClick
         )
     }
 }
@@ -104,6 +107,7 @@ fun NoteFlatCard(
     onNoteClick: (NoteId) -> Unit,
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onHashTagClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -111,9 +115,10 @@ fun NoteFlatCard(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(horizontal = 16.dp),
             onProfileClick = onProfileClick,
             onNoteClick = onNoteClick,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onHashTagClick = onHashTagClick,
         )
         NoteContent(
             uiModel,
@@ -123,6 +128,7 @@ fun NoteFlatCard(
             onNoteClick = onNoteClick,
             onRepostClick = onRepostClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
+            onHashTagClick = onHashTagClick
         )
     }
 }
@@ -139,6 +145,7 @@ fun ThreadNote(
     onNoteClick: (NoteId) -> Unit,
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onHashTagClick: (String) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -146,9 +153,10 @@ fun ThreadNote(
         NoteCardHeader(
             uiModel,
             onAvatarClick,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-            onNoteClick = onNoteClick,
             onProfileClick = onProfileClick,
+            onNoteClick = onNoteClick,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+            onHashTagClick = onHashTagClick,
         )
         val borderColor = DividerDefaults.color
         val borderThickness = DividerDefaults.Thickness
@@ -178,6 +186,7 @@ fun ThreadNote(
                 onNoteClick = onNoteClick,
                 onRepostClick = onRepostClick,
                 getOpenGraphMetadata = getOpenGraphMetadata,
+                onHashTagClick = onHashTagClick,
             )
         }
     }
@@ -193,6 +202,7 @@ private fun NoteContent(
     onNoteClick: (NoteId) -> Unit,
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
+    onHashTagClick: (String) -> Unit,
 ) {
     uiModel.cardLabel?.let {
         Text(
@@ -211,6 +221,7 @@ private fun NoteContent(
                 is ContentBlock.Text -> {
                     RichText(
                         plainText = it.content,
+                        onHashTagClick = onHashTagClick,
                         onMentionClick = { mention ->
                             when (mention) {
                                 is NoteMention -> onNoteClick(mention.noteId)
@@ -361,6 +372,7 @@ private fun NoteCardHeader(
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
     modifier: Modifier = Modifier,
+    onHashTagClick: (String) -> Unit,
 ) {
     val isNip5Valid by produceState(initialValue = false, uiModel.nip5Identifier) {
         value = uiModel.isNip5Valid(uiModel.userPubkey, uiModel.nip5Identifier)
@@ -377,7 +389,8 @@ private fun NoteCardHeader(
                         is ProfileMention -> onProfileClick(it.pubkey)
                         is NoteMention -> onNoteClick(it.noteId)
                     }
-                }
+                },
+                onHashTagClick = onHashTagClick,
             )
         }
     }
@@ -439,6 +452,7 @@ private fun PreviewFeedCard() {
             onNoteClick = {},
             onRepostClick = {},
             getOpenGraphMetadata = { null },
+            onHashTagClick = {},
         )
     }
 }
@@ -457,6 +471,7 @@ private fun PreviewThreadCard() {
             onNoteClick = {},
             onRepostClick = {},
             getOpenGraphMetadata = { null },
+            onHashTagClick = {},
         )
     }
 }

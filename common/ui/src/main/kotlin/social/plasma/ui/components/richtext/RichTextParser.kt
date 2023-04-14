@@ -15,6 +15,7 @@ class RichTextParser constructor(
     private val linkColor: Color,
 ) {
     private val urlRegex = Regex("(https?://\\S+)")
+    private val hashtagRegex = Regex("#[a-zA-Z]\\S+")
     private val mentionRegex = Regex("#\\[\\d+]")
 
     /**
@@ -34,6 +35,7 @@ class RichTextParser constructor(
 
                     when {
                         urlRegex.matches(word) -> appendUrl(word)
+                        hashtagRegex.matches(word) -> appendHashtag(word)
                         mentionRegex.containsMatchIn(word) -> appendMention(word, mentions)
                         else -> append(word)
                     }
@@ -49,6 +51,13 @@ class RichTextParser constructor(
             }
         }
     }
+
+    private fun AnnotatedString.Builder.appendHashtag(word: String) {
+        withHashTag(word, linkColor) {
+            append(word)
+        }
+    }
+
 
     private fun AnnotatedString.Builder.appendUrl(word: String) {
         withUrl(word, linkColor) {
@@ -100,6 +109,7 @@ object RichTextTag {
     const val URL = "URL"
     const val PROFILE = "PROFILE"
     const val NOTE = "NOTE"
+    const val HASHTAG = "HASHTAG"
 }
 
 @OptIn(ExperimentalTextApi::class)
@@ -109,6 +119,19 @@ inline fun <R : Any> AnnotatedString.Builder.withProfileMention(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.PROFILE, pubkey) {
+        withStyle(SpanStyle(color = color)) {
+            block(this)
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
+inline fun <R : Any> AnnotatedString.Builder.withHashTag(
+    tag: String,
+    color: Color,
+    crossinline block: AnnotatedString.Builder.() -> R,
+): R {
+    return withAnnotation(RichTextTag.HASHTAG, tag) {
         withStyle(SpanStyle(color = color)) {
             block(this)
         }
