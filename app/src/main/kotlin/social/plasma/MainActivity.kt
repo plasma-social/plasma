@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.slack.circuit.CircuitCompositionLocals
@@ -17,6 +18,7 @@ import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.push
 import com.slack.circuit.rememberCircuitNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import social.plasma.domain.interactors.SyncMyEvents
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.ui.theme.PlasmaTheme
 import javax.inject.Inject
@@ -26,6 +28,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var circuitConfig: CircuitConfig
 
+    @Inject
+    lateinit var syncMyEvents: SyncMyEvents
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -33,6 +38,8 @@ class MainActivity : ComponentActivity() {
         val startScreens: List<Screen> = listOf(HeadlessAuthenticator)
 
         setContent {
+            LaunchedEffect(Unit) { syncMyEvents.executeSync(Unit) }
+
             PlasmaTheme(dynamicStatusBar = true) {
                 val backstack =
                     rememberSaveableBackStack { startScreens.forEach { screen -> push(screen) } }
