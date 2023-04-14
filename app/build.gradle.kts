@@ -61,6 +61,7 @@ android {
 
 dependencies {
     implementation(projects.data.daos)
+    implementation(projects.domain)
     implementation(projects.repositories.real)
     implementation(projects.common.utils.real)
     implementation(projects.features.feeds.screens)
