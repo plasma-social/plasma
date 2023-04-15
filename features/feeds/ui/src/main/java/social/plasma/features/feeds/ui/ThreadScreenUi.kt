@@ -34,6 +34,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.slack.circuit.Ui
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteReaction
@@ -112,6 +113,7 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onNoteClick = { onFeedItemEvent(OnNoteClick(it)) },
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
+                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) }
                                 )
                                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                                 Spacer(Modifier.height(32.dp))
@@ -155,6 +157,7 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onNoteClick = { onFeedItemEvent(OnNoteClick(it)) },
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
+                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) }
                                 )
                                 LaunchedEffect(Unit) {
                                     onFeedItemEvent(

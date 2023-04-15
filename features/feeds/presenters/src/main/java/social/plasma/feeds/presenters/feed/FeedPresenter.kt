@@ -143,6 +143,10 @@ class FeedPresenter @AssistedInject constructor(
                         listState.animateScrollToItem(0)
                     }
                 }
+
+                is FeedUiEvent.OnHashTagClick -> {
+                    Timber.d("Hashtag clicked: ${event.hashTag}")
+                }
             }
         }
     }

@@ -1,6 +1,8 @@
 package social.plasma.ui.components
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import app.cash.nostrino.crypto.PubKey
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -8,9 +10,8 @@ import org.junit.Test
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
-import app.cash.nostrino.crypto.PubKey
-import app.cash.nostrino.crypto.SecKeyGenerator
 import social.plasma.ui.components.richtext.RichTextParser
+import social.plasma.ui.components.richtext.RichTextTag
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RichTextParserTest {
@@ -60,8 +61,14 @@ class RichTextParserTest {
             "Hey #[0], have you considered collaborating with #[1]?"
 
         val mentions = mapOf(
-            0 to ProfileMention("@joe", PubKey.parse("npub1mm90r3fkz436p4jgtkcqdy4uvelgx3xru6ej242ktx096flmmhjsfqrwg0")),
-            1 to ProfileMention("@will", PubKey.parse("npub1jcgyf7tcshfkc48w40g2s3769h0uw79mnx73hspwcpdgy049rm5spf50ps"))
+            0 to ProfileMention(
+                "@joe",
+                PubKey.parse("npub1mm90r3fkz436p4jgtkcqdy4uvelgx3xru6ej242ktx096flmmhjsfqrwg0")
+            ),
+            1 to ProfileMention(
+                "@will",
+                PubKey.parse("npub1jcgyf7tcshfkc48w40g2s3769h0uw79mnx73hspwcpdgy049rm5spf50ps")
+            )
         )
 
         val result = parser.parse(plainText, mentions)
@@ -74,17 +81,38 @@ class RichTextParserTest {
     @Test
     fun `note with characters before mention`() = runTest {
         val plainText =
-            "Best people to follow:#[0] and #[1]."
+            "Best people to follow:#[0] and #[1]. #followme3000"
 
         val mentions = mapOf(
-            0 to ProfileMention("@joe", PubKey.parse("npub1felyu03mh8xdszx927cyvgyf9yp83feyyug4505aa8cma5t6g9vql86w95")),
-            1 to ProfileMention("@will", PubKey.parse("npub1tjkc9jycaenqzdc3j3wkslmaj4ylv3dqzxzx0khz7h38f3vc6mls4ys9w3"))
+            0 to ProfileMention(
+                "@joe",
+                PubKey.parse("npub1felyu03mh8xdszx927cyvgyf9yp83feyyug4505aa8cma5t6g9vql86w95")
+            ),
+            1 to ProfileMention(
+                "@will",
+                PubKey.parse("npub1tjkc9jycaenqzdc3j3wkslmaj4ylv3dqzxzx0khz7h38f3vc6mls4ys9w3")
+            )
         )
 
         val result = parser.parse(plainText, mentions)
 
         assertThat(result.text).isEqualTo(
-            "Best people to follow:@joe and @will."
+            "Best people to follow:@joe and @will. #followme3000"
+        )
+
+        assertThat(
+            result.getStringAnnotations(
+                RichTextTag.HASHTAG,
+                0,
+                result.length
+            )
+        ).containsExactly(
+            AnnotatedString.Range(
+                item = "#followme3000",
+                start = 38,
+                end = 51,
+                tag = RichTextTag.HASHTAG
+            )
         )
     }
 }

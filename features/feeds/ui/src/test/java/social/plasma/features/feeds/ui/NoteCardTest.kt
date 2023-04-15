@@ -1,17 +1,17 @@
 package social.plasma.features.feeds.ui
 
 import androidx.compose.foundation.layout.Box
+import app.cash.nostrino.crypto.PubKey
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import okio.ByteString.Companion.decodeHex
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.ui.notes.NoteElevatedCard
-import app.cash.nostrino.crypto.PubKey
-import okio.ByteString.Companion.decodeHex
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
 import social.plasma.ui.testutils.TestThemeConfig
@@ -67,7 +67,8 @@ internal class NoteCardTest(
                         onProfileClick = {},
                         onNoteClick = {},
                         onRepostClick = {},
-                        getOpenGraphMetadata = { null }
+                        getOpenGraphMetadata = { null },
+                        onHashTagClick = {}
                     )
                 }
             }
