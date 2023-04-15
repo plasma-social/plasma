@@ -14,6 +14,8 @@ data class Filter(
     val eTags: Set<String>? = null,
     @Json(name = "#p")
     val pTags: Set<String>? = null,
+    @Json(name = "#t")
+    val hashTags: Set<String>? = null,
     val limit: Int? = null,
 ) {
     companion object {

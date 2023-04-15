@@ -60,4 +60,11 @@ interface NotesDao {
                 ") ORDER BY created_at"
     )
     fun observePagedThreadNotes(noteId: String): PagingSource<Int, NoteWithUser>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "SELECT n.* FROM noteview n WHERE content LIKE :query AND kind = ${Event.Kind.Note} AND NOT is_reply"
+    )
+    fun observePagedNotesWithContent(query: String): PagingSource<Int, NoteWithUser>
 }

@@ -24,6 +24,7 @@ import social.plasma.domain.interactors.SyncMetadata
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiState
+import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.features.profile.screens.ProfileScreen
@@ -145,7 +146,7 @@ class FeedPresenter @AssistedInject constructor(
                 }
 
                 is FeedUiEvent.OnHashTagClick -> {
-                    Timber.d("Hashtag clicked: ${event.hashTag}")
+                    navigator.goTo(HashTagFeedScreen(event.hashTag))
                 }
             }
         }
