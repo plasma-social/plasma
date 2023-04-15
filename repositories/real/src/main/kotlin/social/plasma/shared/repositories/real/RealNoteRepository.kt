@@ -2,15 +2,19 @@ package social.plasma.shared.repositories.real
 
 import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKey
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.NotesDao
+import social.plasma.models.EventTag
+import social.plasma.models.NoteId
+import social.plasma.models.NoteWithUser
+import social.plasma.models.PubKeyTag
+import social.plasma.models.Tag
 import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.Relay
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
-import app.cash.nostrino.crypto.SecKey
-import social.plasma.models.*
 
 internal class RealNoteRepository @Inject constructor(
     private val relay: Relay,
@@ -29,8 +33,10 @@ internal class RealNoteRepository @Inject constructor(
             }
         }.toSet()
 
-        val secKey = SecKey(accountStateRepository.getSecretKey()?.toByteString()
-            ?: throw IllegalStateException("Secret key required to send notes"))
+        val secKey = SecKey(
+            accountStateRepository.getSecretKey()?.toByteString()
+                ?: throw IllegalStateException("Secret key required to send notes")
+        )
 
         relay.sendNote(
             content,
@@ -54,7 +60,7 @@ internal class RealNoteRepository @Inject constructor(
     override fun observePagedContactsReplies(): PagingSource<Int, NoteWithUser> {
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
-       return notesDao.observePagedContactsReplies(pubkey.key.hex())
+        return notesDao.observePagedContactsReplies(pubkey.key.hex())
     }
 
     override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, NoteWithUser> {
@@ -72,5 +78,10 @@ internal class RealNoteRepository @Inject constructor(
 
     override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
         return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
+    }
+
+    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
+        // TODO use hashtags from tag list.
+        return notesDao.observePagedNotesWithContent("%$hashtag%")
     }
 }
