@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.text.withStyle
 import social.plasma.models.Mention
@@ -119,7 +120,7 @@ inline fun <R : Any> AnnotatedString.Builder.withProfileMention(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.PROFILE, pubkey) {
-        withStyle(SpanStyle(color = color)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
             block(this)
         }
     }
@@ -132,7 +133,7 @@ inline fun <R : Any> AnnotatedString.Builder.withHashTag(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.HASHTAG, tag) {
-        withStyle(SpanStyle(color = color)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
             block(this)
         }
     }
@@ -145,7 +146,7 @@ inline fun <R : Any> AnnotatedString.Builder.withNoteMention(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.NOTE, id) {
-        withStyle(SpanStyle(color = color)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
             block(this)
         }
     }
@@ -158,7 +159,7 @@ inline fun <R : Any> AnnotatedString.Builder.withUrl(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.URL, url) {
-        withStyle(SpanStyle(color = color)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
             block(this)
         }
     }
