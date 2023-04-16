@@ -48,6 +48,10 @@ class FakeNoteRepository : NoteRepository {
     override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
         return false
     }
+
+    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
 }
 
 data class SendNoteEvent(
