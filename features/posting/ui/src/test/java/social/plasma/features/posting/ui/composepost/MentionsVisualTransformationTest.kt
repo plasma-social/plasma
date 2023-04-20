@@ -2,10 +2,11 @@ package social.plasma.features.posting.ui.composepost
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import app.cash.nostrino.crypto.PubKey
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import social.plasma.models.ProfileMention
-import app.cash.nostrino.crypto.PubKey
+import social.plasma.ui.components.richtext.RichTextTag
 
 
 class MentionsVisualTransformationTest {
@@ -66,6 +67,45 @@ class MentionsVisualTransformationTest {
             assertThat(offsetMapping.originalToTransformed(input.lastIndexOf(npubString))).isEqualTo(
                 transformedText.lastIndexOf("@mark")
             )
+        }
+    }
+
+    @Test
+    fun `when text contains hashtag, add hashtag annotated string tags`() {
+        val input = AnnotatedString("#1team Hey $npubString, $npubString is finally here #foodstr!")
+        val transformedText = "#1team Hey @mark, @mark is finally here #foodstr!"
+
+        val result = transformation(
+            mentions = mapOf(
+                npubString to ProfileMention(
+                    text = "@mark",
+                    pubkey = pubKey,
+                )
+            )
+        )
+
+        with(result.filter(input)) {
+            assertThat(text.text).isEqualTo(transformedText)
+            assertThat(
+                text.getStringAnnotations(
+                    RichTextTag.HASHTAG,
+                    0,
+                    text.length
+                )
+            ).containsExactly(
+                AnnotatedString.Range(
+                    item = "#1team",
+                    start = 0,
+                    end = 6,
+                    tag = RichTextTag.HASHTAG
+                ),
+                AnnotatedString.Range(
+                    item = "#foodstr",
+                    start = 40,
+                    end = 48,
+                    tag = RichTextTag.HASHTAG
+                )
+            ).inOrder()
         }
     }
 

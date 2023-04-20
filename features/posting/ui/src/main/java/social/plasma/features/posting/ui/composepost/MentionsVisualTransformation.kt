@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import social.plasma.models.ProfileMention
+import social.plasma.ui.components.richtext.withHashTag
 import social.plasma.ui.components.richtext.withProfileMention
 
 class MentionsVisualTransformation constructor(
@@ -14,6 +15,7 @@ class MentionsVisualTransformation constructor(
     private val mentions: Map<String, ProfileMention>,
 ) : VisualTransformation {
     private val bech32Regex = Regex("(@npub)[\\da-z]{1,83}")
+    private val hashTagRegex = Regex("(#\\w+)")
 
     override fun filter(text: AnnotatedString): TransformedText {
         val (transformedText, offsetMapping) = replaceMentions(text)
@@ -38,32 +40,7 @@ class MentionsVisualTransformation constructor(
                 val words = line.split(" ")
 
                 for ((index, word) in words.withIndex()) {
-                    val match = bech32Regex.find(word)
-                    val mention = mentions[match?.value]
-                    var transformedWord = ""
-
-                    if (match != null && mention != null) {
-                        if (match.range.first != 0) {
-                            val textBefore = word.substring(0, match.range.first)
-                            append(textBefore)
-                            transformedWord += textBefore
-                        }
-
-                        // TODO replace .key.hex() with .hex() everywhere when nostrino is updated
-                        withProfileMention(mention.pubkey.key.hex(), highlightColor) {
-                            append(mention.text)
-                            transformedWord += mention.text
-                        }
-
-                        if (word.length > match.value.length) {
-                            val textAfter = word.substring(match.range.last + 1, word.length)
-                            append(textAfter)
-                            transformedWord += textAfter
-                        }
-                    } else {
-                        append(word)
-                        transformedWord = word
-                    }
+                    val transformedWord = getTransformedWord(word)
 
                     originalToTransformedOffsets.addAll(List(word.length) { transformedOffset + it })
                     transformedToOriginalOffsets.addAll(List(transformedWord.length) { originalOffset + it })
@@ -87,6 +64,79 @@ class MentionsVisualTransformation constructor(
             originalToTransformedOffsets,
             transformedToOriginalOffsets
         )
+    }
+
+    private fun AnnotatedString.Builder.getTransformedWord(word: String): String {
+        var transformedWord = ""
+
+        when {
+            bech32Regex.containsMatchIn(word) -> {
+                val match = bech32Regex.find(word)
+                val mention = mentions[match?.value]
+
+                if (match != null && mention != null) {
+                    transformedWord = prependTextBeforeMention(match, word)
+
+                    // TODO replace .key.hex() with .hex() everywhere when nostrino is updated
+                    withProfileMention(mention.pubkey.key.hex(), highlightColor) {
+                        append(mention.text)
+                        transformedWord += mention.text
+                    }
+
+                    transformedWord = appendTextAfterMention(word, match, transformedWord)
+                }
+            }
+
+            hashTagRegex.containsMatchIn(word) -> {
+                val match = hashTagRegex.find(word)
+
+                if (match != null) {
+                    transformedWord = prependTextBeforeMention(match, word)
+
+                    withHashTag(match.value, highlightColor) {
+                        append(match.value)
+                        transformedWord += match.value
+                    }
+
+                    transformedWord = appendTextAfterMention(word, match, transformedWord)
+                }
+            }
+
+            else -> {
+                append(word)
+                transformedWord = word
+            }
+        }
+
+
+        return transformedWord
+    }
+
+    private fun AnnotatedString.Builder.appendTextAfterMention(
+        word: String,
+        match: MatchResult,
+        transformedWord: String,
+    ): String {
+        return if (word.length > match.value.length) {
+            val textAfter = word.substring(match.range.last + 1, word.length)
+            append(textAfter)
+            transformedWord + textAfter
+        } else {
+            transformedWord
+        }
+    }
+
+    private fun AnnotatedString.Builder.prependTextBeforeMention(
+        match: MatchResult,
+        word: String,
+    ): String {
+        return if (match.range.first == 0) {
+            ""
+        } else {
+            val textBefore = word.substring(0, match.range.first)
+            append(textBefore)
+            textBefore
+        }
     }
 }
 
