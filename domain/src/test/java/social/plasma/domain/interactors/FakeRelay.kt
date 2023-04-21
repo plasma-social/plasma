@@ -1,8 +1,8 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.SecKey
 import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.Flow
-import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.RelayMessage
@@ -33,10 +33,10 @@ class FakeRelay : Relay {
         sendEventTurbine.add(event)
     }
 
-    override suspend fun sendNote(text: String, keyPair: KeyPair, tags: Set<List<String>>) {
-        sendNoteTurbine.add(SendNote(text = text, keyPair = keyPair, tags = tags))
+    override suspend fun sendNote(text: String, secKey: SecKey, tags: Set<List<String>>) {
+        sendNoteTurbine.add(SendNote(text = text, secKey = secKey, tags = tags))
     }
 
-    data class SendNote(val text: String, val keyPair: KeyPair, val tags: Set<List<String>>)
+    data class SendNote(val text: String, val secKey: SecKey, val tags: Set<List<String>>)
 
 }
