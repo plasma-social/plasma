@@ -16,7 +16,7 @@ class RichTextParser constructor(
     private val linkColor: Color,
 ) {
     private val urlRegex = Regex("(https?://\\S+)")
-    private val hashtagRegex = Regex("#[a-zA-Z]\\S+")
+    private val hashtagRegex = Regex("#\\w+")
     private val mentionRegex = Regex("#\\[\\d+]")
 
     /**

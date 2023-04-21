@@ -115,4 +115,32 @@ class RichTextParserTest {
             )
         )
     }
+
+    @Test
+    fun `note with numeric hashtag`() = runTest {
+        val plainText =
+            "It's #420 💨"
+
+
+        val result = parser.parse(plainText, emptyMap())
+
+        assertThat(result.text).isEqualTo(
+            "It's #420 💨"
+        )
+
+        assertThat(
+            result.getStringAnnotations(
+                RichTextTag.HASHTAG,
+                0,
+                result.length
+            )
+        ).containsExactly(
+            AnnotatedString.Range(
+                item = "#420",
+                start = 5,
+                end = 9,
+                tag = RichTextTag.HASHTAG
+            )
+        )
+    }
 }
