@@ -8,6 +8,7 @@ import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.domain.ResultInteractor
 import social.plasma.models.EventTag
+import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
@@ -23,6 +24,7 @@ class SendNote @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : ResultInteractor<SendNote.Params, InvokeStatus>() {
     private val bech32Regex = Regex("(@npub|@note|npub|note)[\\da-z]{1,83}")
+    private val hashTagRegex = Regex("#\\w+")
 
     data class Params(
         val content: String,
@@ -30,11 +32,9 @@ class SendNote @Inject constructor(
     )
 
     override suspend fun doWork(params: Params): InvokeStatus {
-        val additionalTags = if (params.parentNote != null) {
-            val noteEntity = params.parentNote.noteEntity
-
-            mutableSetOf<Tag>().apply {
-
+        val additionalTags = mutableSetOf<Tag>().apply {
+            if (params.parentNote != null) {
+                val noteEntity = params.parentNote.noteEntity
                 noteEntity.tags.forEachIndexed { index, tag ->
                     if (tag.firstOrNull() == "p" && tag.size >= 2) {
                         add(PubKeyTag(PubKey(tag[1].decodeHex())))
@@ -47,8 +47,8 @@ class SendNote @Inject constructor(
                 add(EventTag(NoteId(noteEntity.id)))
                 add(PubKeyTag(PubKey(noteEntity.pubkey.decodeHex())))
             }
-        } else {
-            emptySet()
+
+            addAll(getContentHashTags(params.content))
         }
 
         return withContext(ioDispatcher) {
@@ -57,6 +57,10 @@ class SendNote @Inject constructor(
             InvokeSuccess
         }
     }
+
+    private fun getContentHashTags(content: String): Set<Tag> = hashTagRegex.findAll(content)
+        .map { HashTag(it.value.substring(1)) }
+        .toSet()
 
     private fun replaceContentWithPlaceholders(
         content: String,
@@ -69,7 +73,8 @@ class SendNote @Inject constructor(
         val npubMentions = extractBech32Mentions(content, type = "npub")
         val noteMentions = extractBech32Mentions(content, type = "note")
 
-        val allPTags = additionalPTags + npubMentions.map { PubKeyTag(PubKey(it.second.toByteString())) }
+        val allPTags =
+            additionalPTags + npubMentions.map { PubKeyTag(PubKey(it.second.toByteString())) }
         val allETags = additionalETags + noteMentions.map { EventTag(NoteId.of(it.second)) }
 
         var contentWithPlaceholders =
@@ -85,7 +90,7 @@ class SendNote @Inject constructor(
                 acc.replace(originalContent, "#[$placeholderIndex]")
             }
 
-        val tags = allETags + allPTags
+        val tags = allETags + allPTags + additionalTags
 
         return Pair(contentWithPlaceholders, tags)
     }
