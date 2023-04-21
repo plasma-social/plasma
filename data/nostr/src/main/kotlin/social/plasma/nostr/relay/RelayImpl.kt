@@ -1,5 +1,6 @@
 package social.plasma.nostr.relay
 
+import app.cash.nostrino.crypto.SecKey
 import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -13,14 +14,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.reactive.asFlow
 import social.plasma.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
-import social.plasma.nostr.relay.message.ClientMessage.EventMessage
-import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
-import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.*
 import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
 import java.time.Instant
@@ -72,14 +69,14 @@ class RelayImpl(
 
     override suspend fun sendNote(
         text: String,
-        keyPair: social.plasma.models.crypto.KeyPair,
+        secKey: SecKey,
         tags: Set<List<String>>,
     ) =
         send(
             EventMessage(
                 Event.createEvent(
-                    keyPair.pub,
-                    keyPair.sec,
+                    secKey.pubKey.key,
+                    secKey.key,
                     Instant.now(),
                     Event.Kind.Note,
                     tags.toList(),

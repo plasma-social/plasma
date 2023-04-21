@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
 
+    implementation(libs.nostrino)
+
     implementation(libs.okhttp.interceptor.logging)
     implementation(libs.rxjava)
 

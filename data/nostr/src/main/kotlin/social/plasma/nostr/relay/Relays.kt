@@ -1,5 +1,6 @@
 package social.plasma.nostr.relay
 
+import app.cash.nostrino.crypto.SecKey
 import com.tinder.scarlet.Scarlet
 import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import kotlinx.coroutines.CoroutineScope
@@ -57,10 +58,10 @@ class Relays @Inject constructor(
 
     override suspend fun sendNote(
         text: String,
-        keyPair: social.plasma.models.crypto.KeyPair,
+        secKey: SecKey,
         tags: Set<List<String>>,
     ) {
-        relayList.forEach { it.sendNote(text, keyPair, tags) }
+        relayList.forEach { it.sendNote(text, secKey, tags) }
     }
 
     private fun createRelay(url: String, scope: CoroutineScope): Relay = RelayImpl(
