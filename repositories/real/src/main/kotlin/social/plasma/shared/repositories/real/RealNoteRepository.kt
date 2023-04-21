@@ -11,7 +11,6 @@ import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
 import social.plasma.models.Tag
-import social.plasma.models.crypto.KeyPair
 import social.plasma.nostr.relay.Relay
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
@@ -43,7 +42,7 @@ internal class RealNoteRepository @Inject constructor(
         relay.sendNote(
             content,
             tags = nostrTags,
-            keyPair = KeyPair(secKey.pubKey.key, secKey.key)
+            secKey = secKey
         )
     }
 

@@ -1,5 +1,6 @@
 package social.plasma.nostr.relay
 
+import app.cash.nostrino.crypto.SecKey
 import kotlinx.coroutines.flow.Flow
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
@@ -20,7 +21,7 @@ interface Relay {
     suspend fun send(event: EventMessage)
     suspend fun sendNote(
         text: String,
-        keyPair: social.plasma.models.crypto.KeyPair,
+        secKey: SecKey,
         tags: Set<List<String>> = emptySet(),
     )
 
