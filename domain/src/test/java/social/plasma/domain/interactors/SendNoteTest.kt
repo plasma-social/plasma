@@ -1,21 +1,22 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import org.junit.After
 import org.junit.Test
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.models.EventTag
+import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
-import app.cash.nostrino.crypto.PubKey
-import okio.ByteString.Companion.decodeHex
 import social.plasma.models.PubKeyTag
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
@@ -180,6 +181,24 @@ class SendNoteTest {
 
         }
 
+    }
+
+    @Test
+    fun `post new note with hashtags`() = runTest {
+        sendNote(SendNote.Params("Thanks to @$NOTE_BECH, for being @$NOTE_BECH #foodstr #bitcoin")).test {
+            assertSuccess()
+
+            with(noteRepository.sendNoteEvents.awaitItem()) {
+                assertThat(tags).containsExactly(
+                    EventTag(NOTE_ID),
+                    HashTag("foodstr"),
+                    HashTag("bitcoin"),
+                )
+                assertThat(content)
+                    .isEqualTo("Thanks to #[0], for being #[0] #foodstr #bitcoin")
+            }
+
+        }
     }
 
     private fun createNote(

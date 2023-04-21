@@ -6,6 +6,7 @@ import app.cash.nostrino.crypto.SecKey
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.NotesDao
 import social.plasma.models.EventTag
+import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
@@ -30,6 +31,7 @@ internal class RealNoteRepository @Inject constructor(
             when (tag) {
                 is EventTag -> listOf("e", tag.noteId.hex)
                 is PubKeyTag -> listOf("p", tag.pubKey.key.hex())
+                is HashTag -> listOf("t", tag.tag)
             }
         }.toSet()
 
