@@ -5,40 +5,64 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import social.plasma.models.events.EventEntity
 import social.plasma.models.events.EventReferenceEntity
+import social.plasma.models.events.HashTagReferenceEntity
 import social.plasma.models.events.PubkeyReferenceEntity
-import kotlin.streams.toList
 
 @Dao
 abstract class EventsDao {
     @Transaction
     open suspend fun insert(events: List<EventEntity>) {
-        val noteReferences = events.parallelStream().flatMap { event ->
-            event.tags.parallelStream().filter { it.firstOrNull() == "e" }.map { tag ->
-                EventReferenceEntity(
-                    sourceEvent = event.id,
-                    targetEvent = tag[1],
-                    relayUrl = tag.getOrNull(2),
-                    marker = tag.getOrNull(3)?.toMarkerOrNull(),
-                )
+        coroutineScope {
+            val noteReferences = async {
+                events.flatMap { event ->
+                    event.tags.filter { it.firstOrNull() == "e" }.map { tag ->
+                        EventReferenceEntity(
+                            sourceEvent = event.id,
+                            targetEvent = tag[1],
+                            relayUrl = tag.getOrNull(2),
+                            marker = tag.getOrNull(3)?.toMarkerOrNull(),
+                        )
+                    }
+                }
             }
-        }
 
-        val pubkeyReferences = events.parallelStream().flatMap { event ->
-            event.tags.parallelStream().filter { it.firstOrNull() == "p" }.map {
-                PubkeyReferenceEntity(
-                    event.id,
-                    pubkey = it[1],
-                    relayUrl = it.getOrNull(2)
-                )
+            val pubkeyReferences = async {
+                events.flatMap { event ->
+                    event.tags.filter { it.firstOrNull() == "p" }.map {
+                        PubkeyReferenceEntity(
+                            event.id,
+                            pubkey = it[1],
+                            relayUrl = it.getOrNull(2)
+                        )
+                    }
+                }
             }
-        }
 
-        insertEventReferences(noteReferences.toList())
-        insertPubkeyReferences(pubkeyReferences.toList())
-        insertInternal(events)
+            val hashtagReferences = async {
+                events.flatMap { event ->
+                    event.tags.filter { it.firstOrNull() == "t" && it.size > 1 }.map {
+                        HashTagReferenceEntity(
+                            sourceEvent = event.id,
+                            hashtag = it[1].lowercase(),
+                            pubkey = event.pubkey,
+                        )
+                    }
+                }
+            }
+
+            insertEventReferences(noteReferences.await())
+            insertPubkeyReferences(pubkeyReferences.await())
+            insertHashTagReferences(hashtagReferences.await())
+            insertInternal(events)
+        }
     }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    internal abstract fun insertHashTagReferences(references: List<HashTagReferenceEntity>)
 
     private fun String?.toMarkerOrNull(): EventReferenceEntity.EventMarker? = when (this) {
         "reply" -> EventReferenceEntity.EventMarker.Reply

@@ -25,11 +25,13 @@ import okio.ByteString.Companion.toByteString
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
+import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetNip5Status
-import social.plasma.domain.interactors.GetNoteTagSuggestions
+import social.plasma.domain.interactors.GetUserTagSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
+import social.plasma.features.posting.screens.AutoCompleteSuggestion.UserSuggestion
 import social.plasma.features.posting.screens.ComposePostUiEvent
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
@@ -44,7 +46,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val sendNote: SendNote,
     private val noteRepository: NoteRepository,
-    private val getNoteTagSuggestions: GetNoteTagSuggestions,
+    private val getUserTagSuggestions: GetUserTagSuggestions,
+    private val getHashtagSuggestions: GetHashtagSuggestions,
     private val getNip5Status: GetNip5Status,
     accountStateRepository: AccountStateRepository,
     observeMyMetadata: ObserveUserMetadata,
@@ -116,21 +119,49 @@ class ComposingScreenPresenter @AssistedInject constructor(
                 if (noteContent.selection.collapsed) noteContent.selection.start else 0
 
             value =
-                getNoteTagSuggestions.executeSync(
-                    GetNoteTagSuggestions.Params(
+                getUserTagSuggestions.executeSync(
+                    GetUserTagSuggestions.Params(
                         noteContent.text,
                         cursorPosition
                     )
                 )
         }
 
+        val suggestedHashTags by produceState<List<String>>(emptyList(), noteContent) {
+            val cursorPosition =
+                if (noteContent.selection.collapsed) noteContent.selection.start else 0
+
+            value = getHashtagSuggestions.executeSync(
+                GetHashtagSuggestions.Params(
+                    noteContent.text,
+                    cursorPosition
+                )
+            )
+        }
+
         val autoCompleteSuggestions by produceState<List<AutoCompleteSuggestion>>(
             emptyList(),
-            suggestedUsers
+            suggestedUsers,
+            suggestedHashTags,
         ) {
 
+            if (suggestedHashTags.isNotEmpty()) {
+                value = suggestedHashTags.map {
+                    AutoCompleteSuggestion.HashtagSuggestion(
+                        hashTag = it,
+                    )
+                }
+                return@produceState
+            }
+
+            if (suggestedUsers.isEmpty()) {
+                value = emptyList()
+                return@produceState
+            }
+
+
             val list = suggestedUsers.map {
-                AutoCompleteSuggestion(
+                UserSuggestion(
                     tagSuggestion = it,
                     nip5Valid = if (it.nip5Identifier == null) false else null
                 )
@@ -148,7 +179,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
                         )
                     ).isValid()
 
-                    list[index] = AutoCompleteSuggestion(suggestion, nip5Status)
+                    list[index] = UserSuggestion(suggestion, nip5Status)
                 }
             }
 
@@ -189,7 +220,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
                     submitting = true
                 }
 
-                is ComposePostUiEvent.OnSuggestionTapped -> {
+                is ComposePostUiEvent.OnUserSuggestionTapped -> {
                     val profileMention = ProfileMention(
                         text = "@${event.suggestion.title}",
                         pubkey = event.suggestion.pubKey,
@@ -199,18 +230,26 @@ class ComposingScreenPresenter @AssistedInject constructor(
                     mentions[replacement] = profileMention
 
                     noteContent =
-                        noteContent.replaceTextForCurrentMention("$replacement ") // trailing space to force the cursor to start a new "word"
+                        noteContent.replaceTextForCurrentMention("@", "$replacement ") // trailing space to force the cursor to start a new "word"
+                }
+
+                is ComposePostUiEvent.OnHashTagSuggestionTapped -> {
+                    noteContent =
+                        noteContent.replaceTextForCurrentMention("#", "${event.hashtag} ")
                 }
             }
         }
     }
 
-    private fun TextFieldValue.replaceTextForCurrentMention(replacement: String): TextFieldValue {
+    private fun TextFieldValue.replaceTextForCurrentMention(
+        mentionDelimiter: String,
+        replacement: String,
+    ): TextFieldValue {
         val cursorPosition = selection.end
         val contentBeforeCursor = text.substring(0, cursorPosition)
         val contentAfterCursor = text.substring(cursorPosition, text.length)
 
-        val contentBeforeCurrentMention = contentBeforeCursor.substringBeforeLast("@")
+        val contentBeforeCurrentMention = contentBeforeCursor.substringBeforeLast(mentionDelimiter)
 
         val updatedText = buildString {
             append(contentBeforeCurrentMention)

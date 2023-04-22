@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.timber)
 
     testImplementation(projects.common.utils.fakes)
+    testImplementation(projects.data.daos)
     testImplementation(projects.repositories.fakes)
     testImplementation(libs.junit)
     testImplementation(libs.circuit.test)

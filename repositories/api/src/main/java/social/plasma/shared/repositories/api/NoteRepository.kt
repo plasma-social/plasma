@@ -23,5 +23,7 @@ interface NoteRepository {
 
     suspend fun refreshContactsNotes(): List<NoteWithUser>
     suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean
+    fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser>
+    
     fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser>
 }

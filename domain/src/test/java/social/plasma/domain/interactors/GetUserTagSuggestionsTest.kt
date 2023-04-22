@@ -1,28 +1,28 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GetNoteTagSuggestionsTest {
+class GetUserTagSuggestionsTest {
     private val userMetadataRepository = FakeUserMetadataRepository()
-    private val getNoteTagSuggestions = GetNoteTagSuggestions(userMetadataRepository)
+    private val getUserTagSuggestions = GetUserTagSuggestions(userMetadataRepository)
 
     @Test
     fun `when last word starts with @, model contains tag suggestions`() = runTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
         val noteContent = "Tagging \n @j"
-        getNoteTagSuggestions(
-            GetNoteTagSuggestions.Params(
+        getUserTagSuggestions(
+            GetUserTagSuggestions.Params(
                 noteContent,
                 cursorPosition = noteContent.length
             )
@@ -43,7 +43,7 @@ class GetNoteTagSuggestionsTest {
     fun `when first word starts with @, model contains tag suggestions`() = runTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
-        getNoteTagSuggestions(GetNoteTagSuggestions.Params("@j", cursorPosition = 2)).test {
+        getUserTagSuggestions(GetUserTagSuggestions.Params("@j", cursorPosition = 2)).test {
             assertThat(awaitItem()).containsExactly(
                 TagSuggestion(
                     pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
@@ -61,8 +61,8 @@ class GetNoteTagSuggestionsTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
         val noteContent = "fsfds \n@j"
-        getNoteTagSuggestions(
-            GetNoteTagSuggestions.Params(
+        getUserTagSuggestions(
+            GetUserTagSuggestions.Params(
                 noteContent,
                 cursorPosition = noteContent.length
             )
@@ -84,7 +84,7 @@ class GetNoteTagSuggestionsTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
         val noteContent = "fsfds @jm fsdf"
-        getNoteTagSuggestions(GetNoteTagSuggestions.Params(noteContent, noteContent.length)).test {
+        getUserTagSuggestions(GetUserTagSuggestions.Params(noteContent, noteContent.length)).test {
             assertThat(awaitItem()).isEmpty()
             awaitComplete()
         }
@@ -95,7 +95,7 @@ class GetNoteTagSuggestionsTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
         val noteContent = "fdfd@fdfd"
-        getNoteTagSuggestions(GetNoteTagSuggestions.Params(noteContent, noteContent.length)).test {
+        getUserTagSuggestions(GetUserTagSuggestions.Params(noteContent, noteContent.length)).test {
             assertThat(awaitItem()).isEmpty()
             awaitComplete()
         }
@@ -107,7 +107,7 @@ class GetNoteTagSuggestionsTest {
             userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
             val noteContent = "fsfds @jm fsdf"
-            getNoteTagSuggestions(GetNoteTagSuggestions.Params(noteContent, 9)).test {
+            getUserTagSuggestions(GetUserTagSuggestions.Params(noteContent, 9)).test {
                 assertThat(awaitItem()).isNotEmpty()
                 awaitComplete()
             }

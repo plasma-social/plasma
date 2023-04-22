@@ -67,4 +67,17 @@ interface NotesDao {
         "SELECT n.* FROM noteview n WHERE content LIKE :query AND kind = ${Event.Kind.Note} AND NOT is_reply"
     )
     fun observePagedNotesWithContent(query: String): PagingSource<Int, NoteWithUser>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        """
+        SELECT * FROM noteview
+        INNER JOIN hashtag_ref
+        ON noteview.id = hashtag_ref.source_event
+        WHERE hashtag_ref.hashtag = :hashtagName
+        ORDER BY noteview.created_at DESC
+    """
+    )
+    fun observePagedNotesWithHashtag(hashtagName: String): PagingSource<Int, NoteWithUser>
 }
