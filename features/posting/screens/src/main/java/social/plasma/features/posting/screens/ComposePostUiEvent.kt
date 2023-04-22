@@ -10,5 +10,7 @@ sealed interface ComposePostUiEvent : CircuitUiEvent {
     object OnSubmitPost : ComposePostUiEvent
     object OnBackClick : ComposePostUiEvent
 
-    data class OnSuggestionTapped(val suggestion: TagSuggestion) : ComposePostUiEvent
+    data class OnUserSuggestionTapped(val suggestion: TagSuggestion) : ComposePostUiEvent
+
+    data class OnHashTagSuggestionTapped(val hashtag: String) : ComposePostUiEvent
 }

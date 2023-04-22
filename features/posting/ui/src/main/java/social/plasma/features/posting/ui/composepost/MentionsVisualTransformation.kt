@@ -67,15 +67,13 @@ class MentionsVisualTransformation constructor(
     }
 
     private fun AnnotatedString.Builder.getTransformedWord(word: String): String {
-        var transformedWord = ""
-
-        when {
+        return when {
             bech32Regex.containsMatchIn(word) -> {
                 val match = bech32Regex.find(word)
                 val mention = mentions[match?.value]
 
                 if (match != null && mention != null) {
-                    transformedWord = prependTextBeforeMention(match, word)
+                    var transformedWord = prependTextBeforeMention(match, word)
 
                     // TODO replace .key.hex() with .hex() everywhere when nostrino is updated
                     withProfileMention(mention.pubkey.key.hex(), highlightColor) {
@@ -83,7 +81,10 @@ class MentionsVisualTransformation constructor(
                         transformedWord += mention.text
                     }
 
-                    transformedWord = appendTextAfterMention(word, match, transformedWord)
+                    appendTextAfterMention(word, match, transformedWord)
+                } else {
+                    append(word)
+                    word
                 }
             }
 
@@ -91,25 +92,25 @@ class MentionsVisualTransformation constructor(
                 val match = hashTagRegex.find(word)
 
                 if (match != null) {
-                    transformedWord = prependTextBeforeMention(match, word)
+                    var transformedWord = prependTextBeforeMention(match, word)
 
                     withHashTag(match.value, highlightColor) {
                         append(match.value)
                         transformedWord += match.value
                     }
 
-                    transformedWord = appendTextAfterMention(word, match, transformedWord)
+                    appendTextAfterMention(word, match, transformedWord)
+                } else {
+                    append(word)
+                    word
                 }
             }
 
             else -> {
                 append(word)
-                transformedWord = word
+                word
             }
         }
-
-
-        return transformedWord
     }
 
     private fun AnnotatedString.Builder.appendTextAfterMention(

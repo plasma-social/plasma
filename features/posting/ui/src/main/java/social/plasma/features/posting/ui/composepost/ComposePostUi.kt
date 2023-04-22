@@ -36,8 +36,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.Ui
+import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.ComposePostUiEvent
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTapped
+import social.plasma.features.posting.screens.ComposePostUiEvent.OnHashTagSuggestionTapped
+import social.plasma.features.posting.screens.ComposePostUiEvent.OnUserSuggestionTapped
 import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
@@ -131,29 +133,61 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                         modifier = Modifier.height(300.dp),
                         contentPadding = PaddingValues(vertical = 16.dp)
                     ) {
-                        items(state.autoCompleteSuggestions) { (suggestion, nip5Valid) ->
-                            ListItem(modifier = Modifier.clickable {
-                                onEvent(
-                                    OnSuggestionTapped(
-                                        suggestion
-                                    )
+                        items(state.autoCompleteSuggestions) { suggestion ->
+                            when (suggestion) {
+                                is AutoCompleteSuggestion.HashtagSuggestion -> HashtagSuggestion(suggestion, onEvent)
+                                is AutoCompleteSuggestion.UserSuggestion -> UserSuggestion(
+                                    suggestion,
+                                    onEvent
                                 )
-                            }, headlineContent = {
-                                Text(suggestion.title)
-                            }, supportingContent = {
-                                suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
-                                    ?.let {
-                                        Nip5Badge(identifier = it, nip5Valid = nip5Valid)
-                                    }
-                            }, leadingContent = {
-                                Avatar(
-                                    imageUrl = suggestion.imageUrl, contentDescription = null
-                                )
-                            })
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    @Composable
+    private fun HashtagSuggestion(
+        suggestion: AutoCompleteSuggestion.HashtagSuggestion,
+        onEvent: (ComposePostUiEvent) -> Unit,
+    ) {
+        ListItem(modifier = Modifier.clickable {
+            onEvent(
+                OnHashTagSuggestionTapped(
+                    suggestion.hashTag
+                )
+            )
+        }, headlineContent = {
+            Text(suggestion.hashTag)
+        })
+    }
+
+    @Composable
+    private fun UserSuggestion(
+        autoCompleteSuggestion: AutoCompleteSuggestion.UserSuggestion,
+        onEvent: (ComposePostUiEvent) -> Unit,
+    ) {
+        val (suggestion, nip5Valid) = autoCompleteSuggestion
+
+        ListItem(modifier = Modifier.clickable {
+            onEvent(
+                OnUserSuggestionTapped(
+                    suggestion
+                )
+            )
+        }, headlineContent = {
+            Text(suggestion.title)
+        }, supportingContent = {
+            suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
+                ?.let {
+                    Nip5Badge(identifier = it, nip5Valid = nip5Valid)
+                }
+        }, leadingContent = {
+            Avatar(
+                imageUrl = suggestion.imageUrl, contentDescription = null
+            )
+        })
     }
 }

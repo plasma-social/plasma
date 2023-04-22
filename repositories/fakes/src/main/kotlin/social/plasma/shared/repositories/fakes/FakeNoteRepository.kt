@@ -49,6 +49,10 @@ class FakeNoteRepository : NoteRepository {
         return false
     }
 
+    override fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
+
     override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
         TODO("Not yet implemented")
     }

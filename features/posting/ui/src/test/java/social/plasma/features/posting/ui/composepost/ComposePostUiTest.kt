@@ -2,15 +2,15 @@ package social.plasma.features.posting.ui.composepost
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import app.cash.nostrino.crypto.PubKey
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import social.plasma.features.posting.screens.AutoCompleteSuggestion
+import social.plasma.features.posting.screens.AutoCompleteSuggestion.UserSuggestion
 import social.plasma.features.posting.screens.ComposePostUiState
-import app.cash.nostrino.crypto.PubKey
 import social.plasma.models.TagSuggestion
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
@@ -65,7 +65,7 @@ class ComposePostUiTest constructor(
                 showAutoComplete = true,
                 noteContent = TextFieldValue("@ko"),
                 autoCompleteSuggestions = listOf(
-                    AutoCompleteSuggestion(
+                    UserSuggestion(
                         TagSuggestion(
                             pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,
@@ -73,7 +73,7 @@ class ComposePostUiTest constructor(
                             nip5Identifier = "koalasat@nostros.net",
                         ), true
                     ),
-                    AutoCompleteSuggestion(
+                    UserSuggestion(
                         TagSuggestion(
                             pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,
@@ -81,7 +81,7 @@ class ComposePostUiTest constructor(
                             nip5Identifier = "koalasat@nostros.net",
                         ), true
                     ),
-                    AutoCompleteSuggestion(
+                    UserSuggestion(
                         TagSuggestion(
                             pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
                             imageUrl = null,

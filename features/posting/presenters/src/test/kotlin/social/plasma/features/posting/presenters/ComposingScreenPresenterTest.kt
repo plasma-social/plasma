@@ -2,24 +2,25 @@ package social.plasma.features.posting.presenters
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import app.cash.nostrino.crypto.PubKey
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import org.junit.Test
+import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetNip5Status
-import social.plasma.domain.interactors.GetNoteTagSuggestions
+import social.plasma.domain.interactors.GetUserTagSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnSubmitPost
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnSuggestionTapped
+import social.plasma.features.posting.screens.ComposePostUiEvent.OnUserSuggestionTapped
 import social.plasma.features.posting.screens.ComposingScreen
-import app.cash.nostrino.crypto.PubKey
-import okio.ByteString.Companion.decodeHex
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
@@ -50,10 +51,11 @@ class ComposingScreenPresenterTest {
                 ),
                 args = ComposingScreen(),
                 noteRepository = noteRepository,
-                getNoteTagSuggestions = GetNoteTagSuggestions(userMetadataRepository),
+                getUserTagSuggestions = GetUserTagSuggestions(userMetadataRepository),
                 getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext),
                 accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
-                observeMyMetadata = ObserveUserMetadata(userMetadataRepository)
+                observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
+                getHashtagSuggestions = GetHashtagSuggestions(FakeHashTagDao()),
             )
         }
 
@@ -172,7 +174,7 @@ class ComposingScreenPresenterTest {
             awaitItem().onEvent(OnNoteChange(TextFieldValue("@j", selection = TextRange(2))))
 
             awaitItem().onEvent(
-                OnSuggestionTapped(
+                OnUserSuggestionTapped(
                     TagSuggestion(
                         pubKey = pubKey,
                         title = "",
@@ -210,7 +212,8 @@ class ComposingScreenPresenterTest {
     )
 
     companion object {
-        val pubKey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex())
+        val pubKey =
+            PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex())
     }
 }
 

@@ -81,8 +81,15 @@ internal class RealNoteRepository @Inject constructor(
         return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
     }
 
-    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
-        // TODO use hashtags from tag list.
+    override fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser> {
         return notesDao.observePagedNotesWithContent("%$hashtag%")
+    }
+
+    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
+        val hashtagName = if (hashtag.startsWith("#")) hashtag.substring(
+            1
+        ) else hashtag
+
+        return notesDao.observePagedNotesWithHashtag(hashtagName.lowercase())
     }
 }
