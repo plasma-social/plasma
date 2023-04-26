@@ -50,6 +50,12 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
     ),
+    // AG: Section
+    labelSmall = FigmaStyle.copy(
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        lineHeight = 18.sp,
+    ),
     // AG: Detail
     labelMedium = FigmaStyle.copy(
         fontWeight = FontWeight.Normal,

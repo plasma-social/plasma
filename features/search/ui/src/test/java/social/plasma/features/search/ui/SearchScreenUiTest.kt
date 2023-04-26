@@ -14,10 +14,11 @@ import social.plasma.ui.testutils.TestThemeConfig
 import social.plasma.ui.theme.PlasmaTheme
 
 @RunWith(TestParameterInjector::class)
-internal class SearchScreenTest(
+internal class SearchScreenUiTest(
     @TestParameter private val textSize: TestFontScale,
     @TestParameter private val themeVariation: TestThemeConfig,
     @TestParameter private val testDevice: TestDevice,
+    @TestParameter(valuesProvider = SearchScreenTestValuesProvider::class) private val uiState: SearchUiState,
 ) {
     @get:Rule
     val paparazzi = Paparazzi(
@@ -25,12 +26,8 @@ internal class SearchScreenTest(
     )
 
     @Test
-    fun default() {
-        paparazzi.snapshot(
-            SearchUiState(
-                onEvent = {}
-            )
-        )
+    fun snapshot() {
+        paparazzi.snapshot(uiState)
     }
 
     private fun Paparazzi.snapshot(loginState: SearchUiState) {
@@ -46,4 +43,9 @@ internal class SearchScreenTest(
             }
         }
     }
+}
+
+private class SearchScreenTestValuesProvider : TestParameter.TestParameterValuesProvider {
+    private val searchScreenPreviewProvider = SearchScreenPreviewProvider()
+    override fun provideValues(): List<SearchUiState> = searchScreenPreviewProvider.values.toList()
 }
