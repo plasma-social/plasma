@@ -1,6 +1,7 @@
 package social.plasma.features.search.screens
 
 import com.slack.circuit.CircuitUiState
+import social.plasma.features.search.screens.SearchBarUiState.LeadingIcon
 
 data class SearchUiState(
     val onEvent: (SearchUiEvent) -> Unit,
@@ -8,6 +9,8 @@ data class SearchUiState(
         query = "",
         isActive = false,
         suggestionsTitle = null,
+        leadingIcon = LeadingIcon.Search,
+        trailingIcon = null,
         suggestions = emptyList()
     ),
 ) : CircuitUiState
@@ -15,9 +18,21 @@ data class SearchUiState(
 data class SearchBarUiState(
     val query: String,
     val isActive: Boolean,
+    val leadingIcon: LeadingIcon,
+    val trailingIcon: TrailingIcon?,
     val suggestionsTitle: String?,
     val suggestions: List<Suggestion>,
-)
+) {
+    enum class LeadingIcon {
+        Back,
+        Search,
+    }
+
+    enum class TrailingIcon {
+        Clear,
+    }
+}
+
 
 sealed interface Suggestion {
     val content: String

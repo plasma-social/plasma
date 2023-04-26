@@ -1,5 +1,11 @@
 package social.plasma.features.search.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,9 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.slack.circuit.Ui
 import social.plasma.features.search.screens.SearchBarUiState
 import social.plasma.features.search.screens.SearchUiEvent
+import social.plasma.features.search.screens.SearchUiEvent.OnLeadingIconTapped
+import social.plasma.features.search.screens.SearchUiEvent.OnTrailingIconTapped
 import social.plasma.features.search.screens.SearchUiState
 import social.plasma.features.search.screens.Suggestion
 import social.plasma.ui.R
@@ -81,10 +91,14 @@ private fun SearchBar(
         ),
         placeholder = { Text("Find people and communities") },
         leadingIcon = {
-            Icon(
-                painterResource(id = R.drawable.ic_plasma_search),
-                "Search",
-            )
+            LeadingIcon(
+                state.leadingIcon,
+                onClick = { onEvent(OnLeadingIconTapped) })
+        },
+        trailingIcon = {
+            TrailingIcon(
+                state.trailingIcon,
+                onClick = { onEvent(OnTrailingIconTapped) })
         },
     ) {
         state.suggestionsTitle?.let {
@@ -112,6 +126,55 @@ private fun SearchBar(
             }
         }
     }
+}
+
+@Composable
+private fun TrailingIcon(trailingIcon: SearchBarUiState.TrailingIcon?, onClick: () -> Unit) {
+    AnimatedVisibility(
+        visible = trailingIcon != null,
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        when (trailingIcon) {
+            SearchBarUiState.TrailingIcon.Clear -> IconButton(onClick = onClick) {
+                Icon(
+                    Icons.Default.Close,
+                    "Clear",
+                )
+            }
+
+            null -> Unit
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun LeadingIcon(leadingIcon: SearchBarUiState.LeadingIcon, onClick: () -> Unit) {
+    AnimatedContent(
+        targetState = leadingIcon,
+        label = "leadingIcon",
+        transitionSpec = {
+            fadeIn() with fadeOut()
+        }
+    ) { icon ->
+        when (icon) {
+            SearchBarUiState.LeadingIcon.Back -> IconButton(onClick = onClick) {
+                Icon(
+                    painterResource(id = R.drawable.ic_chevron_back),
+                    "Back",
+                )
+            }
+
+            SearchBarUiState.LeadingIcon.Search -> IconButton(onClick = onClick) {
+                Icon(
+                    painterResource(id = R.drawable.ic_plasma_search),
+                    "Search",
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
