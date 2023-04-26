@@ -37,6 +37,11 @@ android {
             isMinifyEnabled = false
             proguardFiles("proguard-rules.pro")
         }
+
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -76,6 +81,8 @@ dependencies {
     implementation(projects.features.profile.screens)
     implementation(projects.features.profile.presenters)
     implementation(projects.features.profile.ui)
+    implementation(projects.features.search.presenters)
+    implementation(projects.features.search.ui)
     implementation(projects.data.models)
     implementation(projects.data.nostr)
     implementation(projects.data.opengraph)

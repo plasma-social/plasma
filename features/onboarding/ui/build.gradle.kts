@@ -48,6 +48,7 @@ android {
 dependencies {
     implementation(projects.features.feeds.screens)
     implementation(projects.features.onboarding.screens)
+    implementation(projects.features.search.screens)
     implementation(projects.common.ui)
     implementation(projects.data.models)
 

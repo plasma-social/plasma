@@ -33,6 +33,7 @@ import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnChildNav
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
 import social.plasma.features.onboarding.ui.R
+import social.plasma.features.search.screens.SearchScreen
 import social.plasma.ui.components.AvatarToolBar
 import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.R as ComponentsR
@@ -46,6 +47,11 @@ class HomeScreenUi : Ui<HomeUiState> {
                     HomeFeeds,
                     ComponentsR.drawable.ic_plasma_feed,
                     R.string.feed
+                ),
+                BottomNavItem(
+                    SearchScreen,
+                    ComponentsR.drawable.ic_plasma_search,
+                    R.string.search,
                 ),
                 BottomNavItem(
                     FeedScreen(feedType = FeedType.Notifications),
