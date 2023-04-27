@@ -16,6 +16,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.slack.circuit.Ui
+import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
@@ -58,6 +61,11 @@ fun FeedUiContent(
 
     LaunchedEffect(pagingLazyItems.itemCount) {
         onEvent(OnFeedCountChange(pagingLazyItems.itemCount))
+    }
+
+    val isLoading by produceState(initialValue = false, pagingLazyItems.itemCount) {
+        delay(300)
+        value = pagingLazyItems.itemCount == 0
     }
 
     Box(
@@ -102,7 +110,8 @@ fun FeedUiContent(
                 }
             }
         }
-        if (pagingLazyItems.itemCount == 0) {
+
+        if (isLoading) {
             LinearProgressIndicator(
                 trackColor = Color.Transparent,
                 modifier = Modifier

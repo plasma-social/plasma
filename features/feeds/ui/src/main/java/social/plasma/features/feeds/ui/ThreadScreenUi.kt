@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.slack.circuit.Ui
+import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
@@ -62,6 +64,11 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
 
         val pagingLazyItems = state.pagingFlow.collectAsLazyPagingItems()
 
+        val isLoading by produceState(initialValue = false, pagingLazyItems.itemCount) {
+            delay(300)
+            value = pagingLazyItems.itemCount == 0
+        }
+
         Scaffold(
             containerColor = MaterialTheme.colorScheme.surface,
             topBar = {
@@ -83,7 +90,7 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                     .fillMaxSize()
                     .padding(paddingValue)
             ) {
-                if (pagingLazyItems.itemCount == 0) {
+                if (isLoading) {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -11,7 +11,6 @@ import com.slack.circuit.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -19,8 +18,8 @@ import social.plasma.domain.interactors.SyncThreadEvents
 import social.plasma.domain.observers.ObservePagedThreadFeed
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.feeds.screens.threads.ThreadItem
+import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiEvent
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiState
 import social.plasma.feeds.presenters.feed.FeedPresenter
@@ -45,7 +44,7 @@ class ThreadScreenPresenter @AssistedInject constructor(
             ObservePagedThreadFeed.Params(
                 noteId = args.noteId,
                 pagingConfig = PagingConfig(
-                    pageSize = 20,
+                    pageSize = 10,
                 )
             )
         )

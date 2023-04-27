@@ -39,7 +39,9 @@ class FeedsPresentersFactory @Inject constructor(
             HomeFeeds -> homeFeedsPresenter.create(navigator)
             is FeedScreen -> {
                 val pagingConfig = PagingConfig(
-                    pageSize = 20,
+                    pageSize = 10,
+                    prefetchDistance = 10,
+                    initialLoadSize = 10,
                 )
 
                 val pagingFlow = when (screen.feedType) {
