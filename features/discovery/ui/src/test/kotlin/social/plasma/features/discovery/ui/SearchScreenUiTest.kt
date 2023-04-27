@@ -1,5 +1,7 @@
 package social.plasma.features.discovery.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -40,7 +42,7 @@ internal class SearchScreenUiTest(
             ) {
                 SearchScreenUi().Content(
                     state = loginState,
-                    modifier = Modifier
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 )
             }
         }

@@ -6,15 +6,22 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material3.Card
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,18 +34,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.slack.circuit.Ui
 import social.plasma.features.discovery.screens.search.SearchBarUiState
 import social.plasma.features.discovery.screens.search.SearchUiEvent
 import social.plasma.features.discovery.screens.search.SearchUiState
 import social.plasma.features.discovery.screens.search.Suggestion
-import social.plasma.ui.R
+import social.plasma.features.discovery.ui.R
+import social.plasma.ui.R as UiR
 import social.plasma.ui.theme.PlasmaTheme
 
 class SearchScreenUi : Ui<SearchUiState> {
@@ -47,7 +59,6 @@ class SearchScreenUi : Ui<SearchUiState> {
         SearchScreenContent(state, modifier)
     }
 }
-
 
 
 @Composable
@@ -65,6 +76,68 @@ private fun SearchScreenContent(state: SearchUiState, modifier: Modifier = Modif
                 state = state.searchBarUiState,
                 onEvent = onEvent,
             )
+        }
+        Recommendations(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun Recommendations(
+    modifier: Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        item {
+            Text(
+                "RECOMMENDED",
+                modifier = Modifier.padding(bottom = 16.dp),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        items(10) {
+            Card {
+                ListItem(
+                    modifier = Modifier.padding(8.dp),
+                    leadingContent = {
+
+                        Image(
+                            painter = painterResource(id = R.drawable.foodstr),
+                            contentDescription = "Foodstr $it",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(MaterialTheme.shapes.medium),
+                            contentScale = ContentScale.Crop
+                        )
+                    },
+                    headlineContent = {
+                        Row(
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(Icons.Default.RestaurantMenu, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Text(
+                                "Foodstr $it",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    },
+                    supportingContent = {
+                        Text(
+                            "Culinary influencers of nostr",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                )
+            }
+            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }
@@ -161,14 +234,14 @@ private fun LeadingIcon(leadingIcon: SearchBarUiState.LeadingIcon, onClick: () -
         when (icon) {
             SearchBarUiState.LeadingIcon.Back -> IconButton(onClick = onClick) {
                 Icon(
-                    painterResource(id = R.drawable.ic_chevron_back),
+                    painterResource(id = UiR.drawable.ic_chevron_back),
                     "Back",
                 )
             }
 
             SearchBarUiState.LeadingIcon.Search -> IconButton(onClick = onClick) {
                 Icon(
-                    painterResource(id = R.drawable.ic_plasma_search),
+                    painterResource(id = UiR.drawable.ic_plasma_search),
                     "Search",
                 )
             }
