@@ -1,13 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.paparazzi)
-    id("kotlin-parcelize")
+    alias(libs.plugins.molecule)
     kotlin("kapt")
 }
 
 android {
-    namespace = "social.plasma.features.onboarding.ui"
+    namespace = "social.plasma.features.discovery.presenters"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -43,35 +42,33 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
-    implementation(projects.features.feeds.screens)
-    implementation(projects.features.onboarding.screens)
     implementation(projects.features.discovery.screens)
-    implementation(projects.common.ui)
+    implementation(projects.features.profile.screens)
+    implementation(projects.repositories.api)
+    implementation(projects.common.utils.api)
+    implementation(projects.domain)
     implementation(projects.data.models)
 
     implementation(libs.circuit.core)
-    implementation(libs.coil.compose)
-
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.material3)
-    implementation(libs.compose.material.materialicons)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.ui)
-    implementation(libs.compose.ui.uitoolingpreview)
-    implementation(libs.compose.ui.util)
+    implementation(libs.nostrino)
+    implementation(libs.timber)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
-    implementation(libs.timber)
-
-    debugImplementation(libs.compose.ui.test.manifest)
-    debugImplementation(libs.compose.ui.uitooling)
-
-    testImplementation(projects.common.ui.testutils)
+    testImplementation(projects.repositories.fakes)
+    testImplementation(projects.common.utils.fakes)
+    testImplementation(libs.circuit.test)
+    testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.testparameterinjector)
+    testImplementation(libs.truth)
+    testImplementation(libs.turbine)
 }

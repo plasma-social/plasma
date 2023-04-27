@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.CircuitContent
 import com.slack.circuit.Ui
+import social.plasma.features.discovery.screens.search.SearchScreen
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeeds
@@ -33,7 +34,6 @@ import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnChildNav
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
 import social.plasma.features.onboarding.ui.R
-import social.plasma.features.search.screens.SearchScreen
 import social.plasma.ui.components.AvatarToolBar
 import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.R as ComponentsR
