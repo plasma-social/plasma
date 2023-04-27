@@ -41,5 +41,6 @@ android {
 
 dependencies {
     implementation(libs.circuit.core)
+    implementation(libs.nostrino)
     implementation(libs.compose.runtime)
 }

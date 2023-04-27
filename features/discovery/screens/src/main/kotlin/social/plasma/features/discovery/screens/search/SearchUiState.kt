@@ -33,28 +33,9 @@ data class SearchBarUiState(
     }
 }
 
-
 data class SearchSuggestionGroup(
     val title: String?,
     val items: List<SearchSuggestion>,
 )
 
-sealed interface SearchSuggestion {
-    val content: String
-    val icon: SuggestionIcon?
 
-    enum class SuggestionIcon {
-        Recent,
-        Popular,
-    }
-
-    data class UserSearchSuggestionItem(
-        override val content: String,
-        override val icon: SuggestionIcon? = null,
-    ) : SearchSuggestion
-
-    data class HashTagSearchSuggestionItem(
-        override val content: String,
-        override val icon: SuggestionIcon? = null,
-    ) : SearchSuggestion
-}

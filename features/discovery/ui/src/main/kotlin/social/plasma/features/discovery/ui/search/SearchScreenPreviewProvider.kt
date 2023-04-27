@@ -1,18 +1,20 @@
 package social.plasma.features.discovery.ui.search
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState
-import social.plasma.features.discovery.screens.search.SearchSuggestion.HashTagSearchSuggestionItem
-import social.plasma.features.discovery.screens.search.SearchSuggestion.SuggestionIcon
-import social.plasma.features.discovery.screens.search.SearchSuggestion.UserSearchSuggestionItem
 import social.plasma.features.discovery.screens.search.SearchSuggestionGroup
 import social.plasma.features.discovery.screens.search.SearchUiState
+import social.plasma.features.discovery.screens.search.UserSearchItem
 
 internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiState> {
     private val searchSuggestionItems = listOf(
-        UserSearchSuggestionItem(
-            icon = SuggestionIcon.Recent,
-            content = "John",
+        UserSearchItem(
+            pubKeyHex = "test",
+            title = "John",
+            imageUrl = null,
+            nip5Identifier = null,
         ),
         HashTagSearchSuggestionItem(
             icon = SuggestionIcon.Recent,

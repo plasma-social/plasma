@@ -58,6 +58,7 @@ dependencies {
     implementation(projects.data.models)
 
     implementation(libs.circuit.core)
+    implementation(libs.circuit.retained)
     implementation(libs.nostrino)
     implementation(libs.timber)
 
