@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "social.plasma.features.onboarding.ui"
+    namespace = "social.plasma.features.discovery.ui"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
@@ -46,8 +46,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.features.feeds.screens)
-    implementation(projects.features.onboarding.screens)
     implementation(projects.features.discovery.screens)
     implementation(projects.common.ui)
     implementation(projects.data.models)
