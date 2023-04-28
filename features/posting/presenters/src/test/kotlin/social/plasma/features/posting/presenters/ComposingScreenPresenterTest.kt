@@ -55,7 +55,7 @@ class ComposingScreenPresenterTest {
                 getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext),
                 accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
                 observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
-                getHashtagSuggestions = GetHashtagSuggestions(FakeHashTagDao()),
+                getHashtagSuggestions = GetHashtagSuggestions(social.plasma.data.daos.fakes.FakeHashTagDao()),
             )
         }
 

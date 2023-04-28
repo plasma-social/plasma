@@ -50,6 +50,7 @@ android {
 
 dependencies {
     implementation(projects.features.discovery.screens)
+    implementation(projects.features.feeds.screens)
     implementation(projects.features.profile.screens)
     implementation(projects.repositories.api)
     implementation(projects.common.utils.api)
@@ -64,6 +65,7 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     testImplementation(projects.repositories.fakes)
+    testImplementation(projects.data.daos.fakes)
     testImplementation(projects.common.utils.fakes)
     testImplementation(libs.circuit.test)
     testImplementation(libs.coroutines.test)

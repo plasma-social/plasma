@@ -6,7 +6,10 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,11 +19,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,15 +48,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.slack.circuit.Ui
 import social.plasma.features.discovery.screens.search.SearchBarUiState
+import social.plasma.features.discovery.screens.search.SearchSuggestion
+import social.plasma.features.discovery.screens.search.SearchSuggestion.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchUiEvent
+import social.plasma.features.discovery.screens.search.SearchUiEvent.OnSearchSuggestionTapped
 import social.plasma.features.discovery.screens.search.SearchUiState
-import social.plasma.features.discovery.screens.search.Suggestion
 import social.plasma.features.discovery.ui.R
-import social.plasma.ui.R as UiR
 import social.plasma.ui.theme.PlasmaTheme
+import social.plasma.ui.R as UiR
 
 class SearchScreenUi : Ui<SearchUiState> {
     @Composable
@@ -69,7 +75,7 @@ private fun SearchScreenContent(state: SearchUiState, modifier: Modifier = Modif
         modifier = modifier.fillMaxSize()
     ) {
         Surface {
-            SearchBar(
+            SearchResultContainer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
@@ -121,7 +127,11 @@ private fun Recommendations(
                             modifier = Modifier.padding(bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(Icons.Default.RestaurantMenu, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Icon(
+                                Icons.Default.RestaurantMenu,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp)
+                            )
                             Spacer(modifier = Modifier.padding(4.dp))
                             Text(
                                 "Foodstr $it",
@@ -144,7 +154,7 @@ private fun Recommendations(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun SearchBar(
+private fun SearchResultContainer(
     state: SearchBarUiState,
     onEvent: (SearchUiEvent) -> Unit,
     modifier: Modifier = Modifier,
@@ -174,30 +184,52 @@ private fun SearchBar(
                 onClick = { onEvent(SearchUiEvent.OnTrailingIconTapped) })
         },
     ) {
-        state.suggestionsTitle?.let {
-            Text(
-                it,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
         LazyColumn {
-            items(state.suggestions) { suggestion ->
-                ListItem(
-                    leadingContent = suggestion.icon?.let { { SuggestionIcon(it) } },
-                    headlineContent = {
-                        Text(
-                            text = suggestion.content,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = Color.Transparent,
-                    ),
-                )
+            state.searchSuggestionGroups.forEach { group ->
+                group.title?.let { title ->
+                    SectionHeader(title)
+                }
+
+                items(group.items) { item ->
+                    SearchSuggestionItem(
+                        item = item,
+                        onEvent = onEvent,
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun SearchSuggestionItem(item: SearchSuggestion, onEvent: (SearchUiEvent) -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable { onEvent(OnSearchSuggestionTapped(item)) },
+        leadingContent = item.icon?.let { { SuggestionIcon(it) } },
+        headlineContent = {
+            Text(
+                text = item.content,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent,
+        ),
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.SectionHeader(title: String) {
+    stickyHeader {
+        Text(
+            title,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -251,9 +283,17 @@ private fun LeadingIcon(leadingIcon: SearchBarUiState.LeadingIcon, onClick: () -
 }
 
 @Composable
-private fun SuggestionIcon(icon: Suggestion.SuggestionIcon) {
+private fun SuggestionIcon(icon: SuggestionIcon) {
     when (icon) {
-        Suggestion.SuggestionIcon.Recent -> Icon(Icons.Default.AccessTime, "Recent")
+        SuggestionIcon.Recent -> Icon(
+            Icons.Default.AccessTime,
+            "Recent"
+        )
+
+        SuggestionIcon.Popular -> Icon(
+            Icons.Default.TrendingUp,
+            "Popular"
+        )
     }
 }
 

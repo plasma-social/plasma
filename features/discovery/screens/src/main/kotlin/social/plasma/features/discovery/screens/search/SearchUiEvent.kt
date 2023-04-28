@@ -10,4 +10,6 @@ sealed interface SearchUiEvent : CircuitUiEvent {
     object OnLeadingIconTapped : SearchUiEvent
 
     object OnTrailingIconTapped : SearchUiEvent
+
+    data class OnSearchSuggestionTapped(val item: SearchSuggestion) : SearchUiEvent
 }

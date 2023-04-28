@@ -3,6 +3,7 @@ package social.plasma.features.discovery.presenters
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -11,35 +12,24 @@ import com.slack.circuit.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import social.plasma.domain.interactors.GetHashtagSuggestions
+import social.plasma.domain.interactors.GetPopularHashTags
 import social.plasma.features.discovery.screens.search.SearchBarUiState
 import social.plasma.features.discovery.screens.search.SearchBarUiState.LeadingIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState.TrailingIcon
+import social.plasma.features.discovery.screens.search.SearchSuggestion
+import social.plasma.features.discovery.screens.search.SearchSuggestion.HashTagSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.SearchSuggestion.UserSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.SearchSuggestionGroup
 import social.plasma.features.discovery.screens.search.SearchUiEvent
 import social.plasma.features.discovery.screens.search.SearchUiState
-import social.plasma.features.discovery.screens.search.Suggestion
+import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 
 class SearchScreenPresenter @AssistedInject constructor(
+    private val getPopularHashTags: GetPopularHashTags,
+    private val getHashtagSuggestions: GetHashtagSuggestions,
     @Assisted private val navigator: Navigator,
 ) : Presenter<SearchUiState> {
-
-    private val fakeRecentSuggestions = listOf(
-        Suggestion.UserSuggestion(
-            content = "John",
-            icon = Suggestion.SuggestionIcon.Recent,
-        ),
-        Suggestion.CommunitySuggestion(
-            content = "#foodstr",
-            icon = Suggestion.SuggestionIcon.Recent,
-        ),
-        Suggestion.UserSuggestion(
-            content = "Jane",
-            icon = Suggestion.SuggestionIcon.Recent,
-        ),
-        Suggestion.CommunitySuggestion(
-            content = "#coffeechain",
-            icon = Suggestion.SuggestionIcon.Recent,
-        ),
-    )
 
     @Composable
     override fun present(): SearchUiState {
@@ -52,11 +42,59 @@ class SearchScreenPresenter @AssistedInject constructor(
         val trailingIcon =
             remember(query) { if (query.isEmpty()) null else TrailingIcon.Clear }
 
+        val popularHashTags by produceState<List<SearchSuggestion>>(initialValue = emptyList()) {
+            val suggestions = getPopularHashTags.executeSync(GetPopularHashTags.Params(10)).map {
+                HashTagSearchSuggestionItem(
+                    content = "#$it",
+                    icon = SearchSuggestion.SuggestionIcon.Popular,
+                )
+            }
+
+            value = suggestions
+        }
+
+        val suggestedHashTags by produceState<List<SearchSuggestion>>(
+            initialValue = emptyList(),
+            query
+        ) {
+            value = if (query.isEmpty()) emptyList() else getHashtagSuggestions.executeSync(
+                GetHashtagSuggestions.Params(query)
+            ).map {
+                HashTagSearchSuggestionItem(
+                    content = "#$it",
+                    icon = null,
+                )
+            }
+        }
+
+        val searchResultItems by produceState<List<SearchSuggestionGroup>>(
+            initialValue = emptyList(),
+            popularHashTags,
+            suggestedHashTags
+        ) {
+            val suggestions = mutableListOf<SearchSuggestionGroup>().apply {
+                if (suggestedHashTags.isNotEmpty()) add(
+                    SearchSuggestionGroup(
+                        title = null,
+                        suggestedHashTags
+                    )
+                )
+                if (popularHashTags.isNotEmpty()) add(
+                    SearchSuggestionGroup(
+                        title = "Popular",
+                        popularHashTags
+                    )
+                )
+            }
+
+            value = suggestions
+        }
+
         return SearchUiState(searchBarUiState = SearchBarUiState(
             query = query,
             isActive = isActive,
             suggestionsTitle = if (isActive) "RECENT" else null,
-            suggestions = if (isActive) fakeRecentSuggestions else emptyList(),
+            searchSuggestionGroups = if (isActive) searchResultItems else emptyList(),
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
         ), onEvent = { event ->
@@ -71,6 +109,11 @@ class SearchScreenPresenter @AssistedInject constructor(
 
                 SearchUiEvent.OnTrailingIconTapped -> if (trailingIcon == TrailingIcon.Clear) query =
                     ""
+
+                is SearchUiEvent.OnSearchSuggestionTapped -> when (val item = event.item) {
+                    is HashTagSearchSuggestionItem -> navigator.goTo(HashTagFeedScreen(item.content))
+                    is UserSearchSuggestionItem -> TODO()
+                }
             }
         })
     }

@@ -131,12 +131,18 @@ class ComposingScreenPresenter @AssistedInject constructor(
             val cursorPosition =
                 if (noteContent.selection.collapsed) noteContent.selection.start else 0
 
-            value = getHashtagSuggestions.executeSync(
-                GetHashtagSuggestions.Params(
-                    noteContent.text,
-                    cursorPosition
-                )
-            )
+            val contentBeforeCursor = noteContent.text.substring(0, cursorPosition)
+
+            val lastWord = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
+                .replace("\n", "")
+
+            value = if (lastWord.startsWith("#") && lastWord.length > 1) {
+                getHashtagSuggestions.executeSync(
+                    GetHashtagSuggestions.Params(lastWord)
+                ).map { "#$it" }
+            } else {
+                emptyList()
+            }
         }
 
         val autoCompleteSuggestions by produceState<List<AutoCompleteSuggestion>>(
