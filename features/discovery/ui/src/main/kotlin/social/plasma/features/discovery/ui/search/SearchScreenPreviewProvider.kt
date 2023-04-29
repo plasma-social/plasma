@@ -2,22 +2,32 @@ package social.plasma.features.discovery.ui.search
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import social.plasma.features.discovery.screens.search.SearchBarUiState
+import social.plasma.features.discovery.screens.search.SearchSuggestion.HashTagSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.SearchSuggestion.SuggestionIcon
+import social.plasma.features.discovery.screens.search.SearchSuggestion.UserSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.SearchSuggestionGroup
 import social.plasma.features.discovery.screens.search.SearchUiState
-import social.plasma.features.discovery.screens.search.Suggestion
 
 internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiState> {
-    private val suggestions = listOf(
-        Suggestion.UserSuggestion(
-            icon = Suggestion.SuggestionIcon.Recent,
+    private val searchSuggestionItems = listOf(
+        UserSearchSuggestionItem(
+            icon = SuggestionIcon.Recent,
             content = "John",
         ),
-        Suggestion.CommunitySuggestion(
-            icon = Suggestion.SuggestionIcon.Recent,
+        HashTagSearchSuggestionItem(
+            icon = SuggestionIcon.Recent,
             content = "#foodstr",
         ),
-        Suggestion.CommunitySuggestion(
-            icon = Suggestion.SuggestionIcon.Recent,
+        HashTagSearchSuggestionItem(
+            icon = SuggestionIcon.Recent,
             content = "#coffeechain",
+        )
+    )
+
+    private val searchSuggestionGroups = listOf(
+        SearchSuggestionGroup(
+            title = "RECENT",
+            items = searchSuggestionItems,
         )
     )
 
@@ -34,7 +44,7 @@ internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiSt
                 query = "",
                 isActive = true,
                 suggestionsTitle = "RECENT",
-                suggestions = suggestions,
+                searchSuggestionGroups = searchSuggestionGroups,
                 leadingIcon = SearchBarUiState.LeadingIcon.Back,
                 trailingIcon = null,
             ), onEvent = {}
@@ -44,7 +54,7 @@ internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiSt
                 query = "",
                 isActive = false,
                 suggestionsTitle = null,
-                suggestions = emptyList(),
+                searchSuggestionGroups = emptyList(),
                 leadingIcon = SearchBarUiState.LeadingIcon.Search,
                 trailingIcon = null,
             ),
@@ -55,7 +65,7 @@ internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiSt
                 query = "test",
                 isActive = true,
                 suggestionsTitle = "RECENT",
-                suggestions = suggestions,
+                searchSuggestionGroups = searchSuggestionGroups,
                 leadingIcon = SearchBarUiState.LeadingIcon.Back,
                 trailingIcon = SearchBarUiState.TrailingIcon.Clear,
             ),

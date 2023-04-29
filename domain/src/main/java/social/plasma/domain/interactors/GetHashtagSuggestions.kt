@@ -7,25 +7,26 @@ import javax.inject.Inject
 class GetHashtagSuggestions @Inject constructor(
     private val hashtagDao: HashtagDao,
 ) : ResultInteractor<GetHashtagSuggestions.Params, List<String>>() {
-    data class Params(val noteContent: String, val cursorPosition: Int)
+    data class Params(val query: String)
 
     override suspend fun doWork(params: Params): List<String> {
-        if (params.cursorPosition <= 0) return emptyList()
-
-        val contentBeforeCursor = params.noteContent.substring(0, params.cursorPosition)
-
-        val query = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
-            .replace("\n", "")
-
-        if (query.startsWith("#") && query.length > 1) {
-            val recommendations =
-                setOf(query) + hashtagDao.getHashTagRecommendations("${query.drop(1)}%")
-                    .map { "#$it" }
-            
-            return recommendations.toList()
+        val query = if (params.query.startsWith("#")) {
+            params.query.substring(1)
+        } else {
+            params.query
         }
 
-        return emptyList()
+        if (query.isEmpty()) {
+            return emptyList()
+        }
+
+        return mutableSetOf<String>().apply {
+            if (params.query.startsWith("#")) {
+                add(query)
+            }
+
+            addAll(hashtagDao.getHashTagRecommendations("$query%"))
+        }.toList()
     }
 }
 

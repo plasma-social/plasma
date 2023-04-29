@@ -11,7 +11,7 @@ data class SearchUiState(
         suggestionsTitle = null,
         leadingIcon = LeadingIcon.Search,
         trailingIcon = null,
-        suggestions = emptyList()
+        searchSuggestionGroups = emptyList()
     ),
 ) : CircuitUiState
 
@@ -21,7 +21,7 @@ data class SearchBarUiState(
     val leadingIcon: LeadingIcon,
     val trailingIcon: TrailingIcon?,
     val suggestionsTitle: String?,
-    val suggestions: List<Suggestion>,
+    val searchSuggestionGroups: List<SearchSuggestionGroup>,
 ) {
     enum class LeadingIcon {
         Back,
@@ -34,21 +34,27 @@ data class SearchBarUiState(
 }
 
 
-sealed interface Suggestion {
+data class SearchSuggestionGroup(
+    val title: String?,
+    val items: List<SearchSuggestion>,
+)
+
+sealed interface SearchSuggestion {
     val content: String
     val icon: SuggestionIcon?
 
     enum class SuggestionIcon {
         Recent,
+        Popular,
     }
 
-    data class UserSuggestion(
+    data class UserSearchSuggestionItem(
         override val content: String,
         override val icon: SuggestionIcon? = null,
-    ) : Suggestion
+    ) : SearchSuggestion
 
-    data class CommunitySuggestion(
+    data class HashTagSearchSuggestionItem(
         override val content: String,
         override val icon: SuggestionIcon? = null,
-    ) : Suggestion
+    ) : SearchSuggestion
 }

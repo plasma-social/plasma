@@ -15,4 +15,14 @@ interface HashtagDao {
     """
     )
     suspend fun getHashTagRecommendations(query: String, limit: Int = 10): List<String>
+
+    @Query(
+        """
+        SELECT DISTINCT hashtag FROM hashtag_ref
+        GROUP BY hashtag
+        ORDER BY COUNT(hashtag) DESC
+        LIMIT :limit
+    """
+    )
+    suspend fun getPopularHashTags(limit: Int = 10): List<String>
 }
