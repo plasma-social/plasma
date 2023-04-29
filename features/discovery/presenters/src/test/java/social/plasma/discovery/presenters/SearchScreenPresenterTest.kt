@@ -62,6 +62,7 @@ class SearchScreenPresenterTest {
                 }
             ),
             navigator = navigator,
+            forceActive = false,
         )
 
     @Test
