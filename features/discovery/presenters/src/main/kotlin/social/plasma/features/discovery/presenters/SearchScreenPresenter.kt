@@ -38,6 +38,7 @@ class SearchScreenPresenter @AssistedInject constructor(
     private val getUserSuggestions: GetUserSuggestions,
     private val getHashtagSuggestions: GetHashtagSuggestions,
     private val observeCurrentUserMetadata: ObserveCurrentUserMetadata,
+    @Assisted private val forceActive: Boolean,
     @Assisted private val navigator: Navigator,
 ) : Presenter<SearchUiState> {
 
@@ -54,10 +55,20 @@ class SearchScreenPresenter @AssistedInject constructor(
             getUserSuggestions(GetUserSuggestions.Params(query))
         }
 
-        var isActive by rememberSaveable { mutableStateOf(false) }
+        // TODO - uncomment once we add recommendations back.
+//        var isActive by rememberSaveable { mutableStateOf(false) }
+
+//        val leadingIcon =
+//            remember(isActive) { if (isActive) LeadingIcon.Back else LeadingIcon.Search }
+
+        val (activeState, setActive) = rememberSaveable { mutableStateOf(false) }
+
+        val isActive = if (forceActive) remember { true } else {
+            activeState
+        }
 
         val leadingIcon =
-            remember(isActive) { if (isActive) LeadingIcon.Back else LeadingIcon.Search }
+            remember(isActive) { if (isActive && !forceActive) LeadingIcon.Back else LeadingIcon.Search }
 
         val trailingIcon = remember(query, isActive, userMetadata) {
             when (isActive) {
@@ -146,13 +157,15 @@ class SearchScreenPresenter @AssistedInject constructor(
             trailingIcon = trailingIcon,
         ), onEvent = { event ->
             when (event) {
-                is SearchUiEvent.OnActiveChanged -> isActive = event.active
+                is SearchUiEvent.OnActiveChanged -> setActive(event.active)
                 is SearchUiEvent.OnQueryChanged -> query = event.query
-                SearchUiEvent.OnSearch -> isActive = false
-                SearchUiEvent.OnLeadingIconTapped -> isActive = when (leadingIcon) {
-                    LeadingIcon.Back -> false
-                    LeadingIcon.Search -> true
-                }
+                SearchUiEvent.OnSearch -> setActive(false)
+                SearchUiEvent.OnLeadingIconTapped -> setActive(
+                    when (leadingIcon) {
+                        LeadingIcon.Back -> false
+                        LeadingIcon.Search -> true
+                    }
+                )
 
                 SearchUiEvent.OnTrailingIconTapped -> when (trailingIcon) {
                     TrailingIcon.Clear -> query = ""
@@ -177,6 +190,6 @@ class SearchScreenPresenter @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navigator: Navigator): SearchScreenPresenter
+        fun create(navigator: Navigator, forceActive: Boolean): SearchScreenPresenter
     }
 }
