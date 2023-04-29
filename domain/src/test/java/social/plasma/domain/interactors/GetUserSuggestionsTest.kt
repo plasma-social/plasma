@@ -8,34 +8,40 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
+import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetUserSuggestionsTest {
     private val userMetadataRepository = FakeUserMetadataRepository()
-    private val getUserSuggestions = GetUserSuggestions(userMetadataRepository)
+    private val getUserSuggestions = GetUserSuggestions(
+        userMetadataRepository, GetNip5Status(
+            FakeNip5Validator(), EmptyCoroutineContext
+        )
+    )
 
     @Test
     fun `when last word starts with @, model contains tag suggestions`() = runTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
-        val noteContent = "Tagging \n @j"
-        getUserSuggestions(
-            GetUserSuggestions.Params(
-                noteContent,
-                cursorPosition = noteContent.length
+        val noteContent = "j"
+        getUserSuggestions.apply {
+            invoke(
+                GetUserSuggestions.Params(noteContent)
             )
-        ).test {
-            assertThat(awaitItem()).containsExactly(
-                TagSuggestion(
-                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
-                    imageUrl = null,
-                    title = "test",
-                    nip5Identifier = null
+            flow.test {
+                assertThat(awaitItem()).containsExactly(
+                    TagSuggestion(
+                        pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
+                        imageUrl = null,
+                        title = "test",
+                        nip5Identifier = null,
+                        isNip5Valid = null,
+                    )
                 )
-            )
-            awaitComplete()
+            }
         }
     }
 
@@ -43,76 +49,31 @@ class GetUserSuggestionsTest {
     fun `when first word starts with @, model contains tag suggestions`() = runTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
-        getUserSuggestions(GetUserSuggestions.Params("@j", cursorPosition = 2)).test {
-            assertThat(awaitItem()).containsExactly(
-                TagSuggestion(
-                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
-                    imageUrl = null,
-                    title = "test",
-                    nip5Identifier = null
+        getUserSuggestions.apply {
+            invoke(GetUserSuggestions.Params("@j"))
+            flow.test {
+                assertThat(awaitItem()).containsExactly(
+                    TagSuggestion(
+                        pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
+                        imageUrl = null,
+                        title = "test",
+                        nip5Identifier = null,
+                        isNip5Valid = null,
+                    )
                 )
-            )
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun `when the @ is on a new line, model contains suggestions`() = runTest {
-        userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
-
-        val noteContent = "fsfds \n@j"
-        getUserSuggestions(
-            GetUserSuggestions.Params(
-                noteContent,
-                cursorPosition = noteContent.length
-            )
-        ).test {
-            assertThat(awaitItem()).containsExactly(
-                TagSuggestion(
-                    pubKey = PubKey.parse("npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6"),
-                    imageUrl = null,
-                    title = "test",
-                    nip5Identifier = null
-                )
-            )
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun `when note contains a mention, model does not contain suggestions`() = runTest {
-        userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
-
-        val noteContent = "fsfds @jm fsdf"
-        getUserSuggestions(GetUserSuggestions.Params(noteContent, noteContent.length)).test {
-            assertThat(awaitItem()).isEmpty()
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun `when @ sign is within a word, model does not contain suggestions`() = runTest {
-        userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
-
-        val noteContent = "fdfd@fdfd"
-        getUserSuggestions(GetUserSuggestions.Params(noteContent, noteContent.length)).test {
-            assertThat(awaitItem()).isEmpty()
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun `when cursor position is after mention that's encountered within the text, model contains suggestions`() =
-        runTest {
-            userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
-
-            val noteContent = "fsfds @jm fsdf"
-            getUserSuggestions(GetUserSuggestions.Params(noteContent, 9)).test {
-                assertThat(awaitItem()).isNotEmpty()
-                awaitComplete()
             }
         }
+    }
 
+    @Test
+    fun `when query is empty, model emits empty suggestions`() = runTest {
+        getUserSuggestions.apply {
+            invoke(GetUserSuggestions.Params(""))
+            flow.test {
+                assertThat(awaitItem()).isEmpty()
+            }
+        }
+    }
 
     private fun createUserMetadata() = UserMetadataEntity(
         name = "test",
