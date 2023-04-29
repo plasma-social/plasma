@@ -10,7 +10,7 @@ data class SearchUiState(
         isActive = false,
         suggestionsTitle = null,
         leadingIcon = LeadingIcon.Search,
-        trailingIcon = null,
+        trailingIcon = SearchBarUiState.TrailingIcon.Clear,
         searchSuggestionGroups = emptyList()
     ),
 ) : CircuitUiState
@@ -28,8 +28,9 @@ data class SearchBarUiState(
         Search,
     }
 
-    enum class TrailingIcon {
-        Clear,
+    sealed interface TrailingIcon {
+        object Clear : TrailingIcon
+        data class Avatar(val url: String?) : TrailingIcon
     }
 }
 

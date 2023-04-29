@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Plasma" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Plasma" parent="Theme.MaterialComponents.DayNight">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:background">@color/background</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
@@ -12,12 +13,13 @@
 
         <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an
              animated drawable. One of these is required. -->
-        <!--        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_plasma_logo</item>-->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/plasma_logo</item>
         <!-- Required for animated icons -->
         <item name="windowSplashScreenAnimationDuration">2000</item>
 
         <!-- Set the theme of the Activity that directly follows your splash screen. -->
         <!-- Required -->
         <item name="postSplashScreenTheme">@style/Theme.Plasma</item>
+        <item name="windowSplashScreenBackground">@color/background</item>
     </style>
 </resources>

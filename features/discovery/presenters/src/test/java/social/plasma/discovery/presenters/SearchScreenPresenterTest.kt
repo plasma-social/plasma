@@ -10,6 +10,7 @@ import social.plasma.data.daos.fakes.FakeHashTagDao
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetPopularHashTags
 import social.plasma.domain.interactors.GetUserSuggestions
+import social.plasma.domain.observers.ObserveCurrentUserMetadata
 import social.plasma.features.discovery.presenters.SearchScreenPresenter
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
@@ -25,6 +26,8 @@ import social.plasma.features.discovery.screens.search.SearchUiEvent.OnSearchSug
 import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.UserMetadataEntity
+import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 
 
@@ -42,6 +45,14 @@ class SearchScreenPresenterTest {
             getPopularHashTags = getPopularHashTags,
             getHashtagSuggestions = getHashTagSuggestions,
             getUserSuggestions = getUserSuggestions,
+            observeCurrentUserMetadata = ObserveCurrentUserMetadata(
+                FakeUserMetadataRepository().apply {
+                    observeUserMetaDataResult.value = USER_METADATA
+                },
+                FakeAccountStateRepository().apply {
+                    setPublicKey(USER_METADATA.pubkey.toByteArray())
+                }
+            ),
             navigator = navigator,
         )
 
@@ -56,7 +67,20 @@ class SearchScreenPresenterTest {
                         suggestionsTitle = null,
                         searchSuggestionGroups = emptyList(),
                         leadingIcon = LeadingIcon.Search,
-                        trailingIcon = null,
+                        trailingIcon = TrailingIcon.Avatar(null),
+                    )
+                )
+            }
+
+            with(awaitItem()) {
+                assertThat(this.searchBarUiState).isEqualTo(
+                    SearchBarUiState(
+                        query = "",
+                        isActive = false,
+                        suggestionsTitle = null,
+                        searchSuggestionGroups = emptyList(),
+                        leadingIcon = LeadingIcon.Search,
+                        trailingIcon = TrailingIcon.Avatar(USER_METADATA.picture),
                     )
                 )
             }
@@ -66,6 +90,8 @@ class SearchScreenPresenterTest {
     @Test
     fun `activating searchbar shows back arrow`() = runTest {
         presenter.test {
+            awaitItem()
+
             awaitItem().onEvent(OnActiveChanged(true))
 
             assertThat(awaitItem().searchBarUiState.leadingIcon).isEqualTo(
@@ -77,14 +103,18 @@ class SearchScreenPresenterTest {
     @Test
     fun `query updates clear icon`() = runTest {
         presenter.test {
+
+            awaitItem().onEvent(OnActiveChanged(true))
             awaitItem().onEvent(OnQueryChanged("test"))
+
+            awaitItem()
 
             with(awaitItem()) {
                 assertThat(searchBarUiState.trailingIcon).isEqualTo(TrailingIcon.Clear)
 
                 onEvent(OnQueryChanged(""))
 
-                assertThat(awaitItem().searchBarUiState.trailingIcon).isNull()
+                assertThat(awaitItem().searchBarUiState.trailingIcon).isEqualTo(null)
             }
         }
     }
@@ -92,6 +122,8 @@ class SearchScreenPresenterTest {
     @Test
     fun `on back arrow tapped, searchbar is deactivated`() = runTest {
         presenter.test {
+            awaitItem()
+            
             awaitItem().onEvent(OnActiveChanged(true))
 
             with(awaitItem()) {
@@ -108,6 +140,8 @@ class SearchScreenPresenterTest {
     @Test
     fun `on search icon tapped, searchbar is activated`() = runTest {
         presenter.test {
+            awaitItem()
+
             with(awaitItem()) {
                 assertThat(searchBarUiState.isActive).isFalse()
                 assertThat(searchBarUiState.leadingIcon).isEqualTo(LeadingIcon.Search)
@@ -122,6 +156,9 @@ class SearchScreenPresenterTest {
     @Test
     fun `on clear icon tapped, query is cleared`() = runTest {
         presenter.test {
+            awaitItem()
+
+            awaitItem().onEvent(OnActiveChanged(true))
             awaitItem().onEvent(OnQueryChanged("test"))
 
             with(awaitItem()) {
@@ -211,6 +248,8 @@ class SearchScreenPresenterTest {
     @Test
     fun `tapping on hashtag suggestion opens community feed`() = runTest {
         presenter.test {
+            awaitItem()
+
             awaitItem().onEvent(
                 OnSearchSuggestionTapped(
                     HashTagSearchSuggestionItem(
@@ -227,6 +266,8 @@ class SearchScreenPresenterTest {
     @Test
     fun `tapping on an user suggestion opens profile screen`() = runTest {
         presenter.test {
+            awaitItem()
+
             awaitItem().onEvent(
                 OnSearchSuggestionTapped(
                     UserSearchItem(
@@ -240,5 +281,20 @@ class SearchScreenPresenterTest {
 
             assertThat(navigator.awaitNextScreen()).isEqualTo(ProfileScreen(pubKeyHex = "test"))
         }
+    }
+
+    companion object {
+        private val USER_METADATA = UserMetadataEntity(
+            pubkey = "test",
+            name = null,
+            about = null,
+            picture = "testavatar",
+            banner = null,
+            displayName = null,
+            nip05 = null,
+            lud = null,
+            website = null,
+            createdAt = null
+        )
     }
 }

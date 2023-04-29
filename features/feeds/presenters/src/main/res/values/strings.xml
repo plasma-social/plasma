@@ -12,9 +12,10 @@
     <string name="new_notes_count">
         {count, plural,
             =0 {No new notes}
-            =1 {<xliff:g id="count" example="1">{count}</xliff:g> note}
-            other {<xliff:g id="count" example="4">{count}</xliff:g> notes}
+            =1 {<xliff:g id="count" example="1">{count}</xliff:g> new}
+            other {<xliff:g id="count" example="4">{count}</xliff:g> new}
         }
     </string>
-    <string name="many_new_notes"><xliff:g id="count" example="50+">{count}</xliff:g> notes</string>
+    <string name="many_new_notes"><xliff:g id="count" example="50+">{count}</xliff:g> new</string>
+    <string name="feeds">Feeds</string>
 </resources>

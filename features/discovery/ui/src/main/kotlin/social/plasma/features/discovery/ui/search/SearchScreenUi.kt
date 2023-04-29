@@ -3,6 +3,7 @@ package social.plasma.features.discovery.ui.search
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
@@ -10,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,18 +29,18 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
-import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,14 +77,22 @@ class SearchScreenUi : Ui<SearchUiState> {
 private fun SearchScreenContent(state: SearchUiState, modifier: Modifier = Modifier) {
     val onEvent = state.onEvent
 
+    val bottomPadding by animateDpAsState(
+        targetValue = if (state.searchBarUiState.isActive) 0.dp else 24.dp,
+        label = "bottomPadding"
+    )
+
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        Surface {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
             SearchResultContainer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                modifier = Modifier.padding(bottom = bottomPadding),
                 state = state.searchBarUiState,
                 onEvent = onEvent,
             )
@@ -163,7 +173,7 @@ private fun SearchResultContainer(
     onEvent: (SearchUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    DockedSearchBar(
+    SearchBar(
         modifier = modifier,
         query = state.query,
         onQueryChange = { onEvent(SearchUiEvent.OnQueryChanged(it)) },
@@ -270,7 +280,8 @@ private fun LazyListScope.SectionHeader(title: String) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp),
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                ,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -291,6 +302,12 @@ private fun TrailingIcon(trailingIcon: SearchBarUiState.TrailingIcon?, onClick: 
                     "Clear",
                 )
             }
+            is SearchBarUiState.TrailingIcon.Avatar -> Avatar(
+                size = 32.dp,
+                imageUrl = trailingIcon.url,
+                contentDescription = null,
+                onClick = onClick,
+            )
 
             null -> Unit
         }

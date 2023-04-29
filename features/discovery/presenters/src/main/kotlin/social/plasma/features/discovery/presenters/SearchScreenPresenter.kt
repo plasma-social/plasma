@@ -1,6 +1,7 @@
 package social.plasma.features.discovery.presenters
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -9,12 +10,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
+import com.slack.circuit.retained.rememberRetained
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetPopularHashTags
 import social.plasma.domain.interactors.GetUserSuggestions
+import social.plasma.domain.observers.ObserveCurrentUserMetadata
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState
@@ -32,11 +36,17 @@ class SearchScreenPresenter @AssistedInject constructor(
     private val getPopularHashTags: GetPopularHashTags,
     private val getUserSuggestions: GetUserSuggestions,
     private val getHashtagSuggestions: GetHashtagSuggestions,
+    private val observeCurrentUserMetadata: ObserveCurrentUserMetadata,
     @Assisted private val navigator: Navigator,
 ) : Presenter<SearchUiState> {
 
+    private val userMetadataFlow = observeCurrentUserMetadata.flow.onStart {
+        observeCurrentUserMetadata(Unit)
+    }
+
     @Composable
     override fun present(): SearchUiState {
+        val userMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
         var query by rememberSaveable { mutableStateOf("") }
 
         var isActive by rememberSaveable { mutableStateOf(false) }
@@ -44,8 +54,12 @@ class SearchScreenPresenter @AssistedInject constructor(
         val leadingIcon =
             remember(isActive) { if (isActive) LeadingIcon.Back else LeadingIcon.Search }
 
-        val trailingIcon =
-            remember(query) { if (query.isEmpty()) null else TrailingIcon.Clear }
+        val trailingIcon = remember(query, isActive, userMetadata) {
+            when (isActive) {
+                true -> if (query.isEmpty()) null else TrailingIcon.Clear
+                false -> TrailingIcon.Avatar(userMetadata?.picture)
+            }
+        }
 
         val popularHashTags by produceState<List<SearchSuggestion>>(initialValue = emptyList()) {
             val suggestions = getPopularHashTags.executeSync(GetPopularHashTags.Params(10)).map {
@@ -136,8 +150,11 @@ class SearchScreenPresenter @AssistedInject constructor(
                     LeadingIcon.Search -> true
                 }
 
-                SearchUiEvent.OnTrailingIconTapped -> if (trailingIcon == TrailingIcon.Clear) query =
-                    ""
+                SearchUiEvent.OnTrailingIconTapped -> when(trailingIcon) {
+                    TrailingIcon.Clear -> query = ""
+                    is TrailingIcon.Avatar -> userMetadata?.let { navigator.goTo(ProfileScreen(it.pubkey)) }
+                    null -> {}
+                }
 
                 is SearchUiEvent.OnSearchSuggestionTapped -> when (val item = event.item) {
                     is HashTagSearchSuggestionItem -> navigator.goTo(HashTagFeedScreen(item.content))
