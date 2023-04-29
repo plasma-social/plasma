@@ -9,19 +9,23 @@ import org.junit.Test
 import social.plasma.data.daos.fakes.FakeHashTagDao
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetPopularHashTags
+import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.features.discovery.presenters.SearchScreenPresenter
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState
 import social.plasma.features.discovery.screens.search.SearchBarUiState.LeadingIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState.TrailingIcon
-import social.plasma.features.discovery.screens.search.SearchSuggestion.HashTagSearchSuggestionItem
-import social.plasma.features.discovery.screens.search.SearchSuggestion.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchSuggestionGroup
 import social.plasma.features.discovery.screens.search.SearchUiEvent
 import social.plasma.features.discovery.screens.search.SearchUiEvent.OnActiveChanged
 import social.plasma.features.discovery.screens.search.SearchUiEvent.OnLeadingIconTapped
 import social.plasma.features.discovery.screens.search.SearchUiEvent.OnQueryChanged
 import social.plasma.features.discovery.screens.search.SearchUiEvent.OnSearchSuggestionTapped
+import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
+import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -30,12 +34,14 @@ class SearchScreenPresenterTest {
     private val hashtagsDao = FakeHashTagDao()
     private val getPopularHashTags = GetPopularHashTags(hashtagsDao)
     private val getHashTagSuggestions = GetHashtagSuggestions(hashtagsDao)
+    private val getUserSuggestions = GetUserSuggestions(FakeUserMetadataRepository())
 
 
     private val presenter: SearchScreenPresenter
         get() = SearchScreenPresenter(
             getPopularHashTags = getPopularHashTags,
             getHashtagSuggestions = getHashTagSuggestions,
+            getUserSuggestions = getUserSuggestions,
             navigator = navigator,
         )
 
@@ -215,6 +221,24 @@ class SearchScreenPresenterTest {
             )
 
             assertThat(navigator.awaitNextScreen()).isEqualTo(HashTagFeedScreen("test"))
+        }
+    }
+
+    @Test
+    fun `tapping on an user suggestion opens profile screen`() = runTest {
+        presenter.test {
+            awaitItem().onEvent(
+                OnSearchSuggestionTapped(
+                    UserSearchItem(
+                        pubKeyHex = "test",
+                        imageUrl = null,
+                        title = "test",
+                        nip5Identifier = null
+                    )
+                )
+            )
+
+            assertThat(navigator.awaitNextScreen()).isEqualTo(ProfileScreen(pubKeyHex = "test"))
         }
     }
 }

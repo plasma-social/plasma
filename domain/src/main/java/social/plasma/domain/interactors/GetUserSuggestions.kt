@@ -7,9 +7,9 @@ import social.plasma.models.TagSuggestion
 import social.plasma.shared.repositories.api.UserMetadataRepository
 import javax.inject.Inject
 
-class GetUserTagSuggestions @Inject constructor(
+class GetUserSuggestions @Inject constructor(
     private val userMetadataRepository: UserMetadataRepository,
-) : ResultInteractor<GetUserTagSuggestions.Params, List<TagSuggestion>>() {
+) : ResultInteractor<GetUserSuggestions.Params, List<TagSuggestion>>() {
     data class Params(val noteContent: String, val cursorPosition: Int)
 
     override suspend fun doWork(params: Params): List<TagSuggestion> {

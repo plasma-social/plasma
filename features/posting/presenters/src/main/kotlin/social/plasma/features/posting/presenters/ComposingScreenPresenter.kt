@@ -27,7 +27,7 @@ import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetNip5Status
-import social.plasma.domain.interactors.GetUserTagSuggestions
+import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
@@ -46,7 +46,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val sendNote: SendNote,
     private val noteRepository: NoteRepository,
-    private val getUserTagSuggestions: GetUserTagSuggestions,
+    private val getUserSuggestions: GetUserSuggestions,
     private val getHashtagSuggestions: GetHashtagSuggestions,
     private val getNip5Status: GetNip5Status,
     accountStateRepository: AccountStateRepository,
@@ -119,8 +119,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
                 if (noteContent.selection.collapsed) noteContent.selection.start else 0
 
             value =
-                getUserTagSuggestions.executeSync(
-                    GetUserTagSuggestions.Params(
+                getUserSuggestions.executeSync(
+                    GetUserSuggestions.Params(
                         noteContent.text,
                         cursorPosition
                     )
@@ -128,21 +128,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
         }
 
         val suggestedHashTags by produceState<List<String>>(emptyList(), noteContent) {
-            val cursorPosition =
-                if (noteContent.selection.collapsed) noteContent.selection.start else 0
-
-            val contentBeforeCursor = noteContent.text.substring(0, cursorPosition)
-
-            val lastWord = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
-                .replace("\n", "")
-
-            value = if (lastWord.startsWith("#") && lastWord.length > 1) {
-                getHashtagSuggestions.executeSync(
-                    GetHashtagSuggestions.Params(lastWord)
-                ).map { "#$it" }
-            } else {
-                emptyList()
-            }
+            value = fetchHashTagSuggestions(noteContent)
         }
 
         val autoCompleteSuggestions by produceState<List<AutoCompleteSuggestion>>(
@@ -236,7 +222,10 @@ class ComposingScreenPresenter @AssistedInject constructor(
                     mentions[replacement] = profileMention
 
                     noteContent =
-                        noteContent.replaceTextForCurrentMention("@", "$replacement ") // trailing space to force the cursor to start a new "word"
+                        noteContent.replaceTextForCurrentMention(
+                            "@",
+                            "$replacement "
+                        ) // trailing space to force the cursor to start a new "word"
                 }
 
                 is ComposePostUiEvent.OnHashTagSuggestionTapped -> {
@@ -245,6 +234,25 @@ class ComposingScreenPresenter @AssistedInject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun fetchHashTagSuggestions(noteContent: TextFieldValue): List<String> {
+        val cursorPosition =
+            if (noteContent.selection.collapsed) noteContent.selection.start else 0
+
+        val contentBeforeCursor = noteContent.text.substring(0, cursorPosition)
+
+        val lastWord = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
+            .replace("\n", "")
+
+        val suggestions = if (lastWord.startsWith("#") && lastWord.length > 1) {
+            getHashtagSuggestions.executeSync(
+                GetHashtagSuggestions.Params(lastWord)
+            ).map { "#$it" }
+        } else {
+            emptyList()
+        }
+        return suggestions
     }
 
     private fun TextFieldValue.replaceTextForCurrentMention(

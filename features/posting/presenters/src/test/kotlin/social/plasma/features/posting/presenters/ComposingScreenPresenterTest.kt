@@ -13,7 +13,7 @@ import okio.ByteString.Companion.decodeHex
 import org.junit.Test
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetNip5Status
-import social.plasma.domain.interactors.GetUserTagSuggestions
+import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
@@ -51,7 +51,7 @@ class ComposingScreenPresenterTest {
                 ),
                 args = ComposingScreen(),
                 noteRepository = noteRepository,
-                getUserTagSuggestions = GetUserTagSuggestions(userMetadataRepository),
+                getUserSuggestions = GetUserSuggestions(userMetadataRepository),
                 getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext),
                 accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
                 observeMyMetadata = ObserveUserMetadata(userMetadataRepository),

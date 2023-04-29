@@ -49,13 +49,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.Ui
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
+import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState
 import social.plasma.features.discovery.screens.search.SearchSuggestion
-import social.plasma.features.discovery.screens.search.SearchSuggestion.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchUiEvent
 import social.plasma.features.discovery.screens.search.SearchUiEvent.OnSearchSuggestionTapped
 import social.plasma.features.discovery.screens.search.SearchUiState
+import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.discovery.ui.R
+import social.plasma.ui.components.Avatar
+import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.theme.PlasmaTheme
 import social.plasma.ui.R as UiR
 
@@ -153,7 +157,7 @@ private fun Recommendations(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 private fun SearchResultContainer(
     state: SearchBarUiState,
     onEvent: (SearchUiEvent) -> Unit,
@@ -191,10 +195,13 @@ private fun SearchResultContainer(
                 }
 
                 items(group.items) { item ->
-                    SearchSuggestionItem(
-                        item = item,
-                        onEvent = onEvent,
-                    )
+                    AnimatedContent(targetState = item, label = "item:$item") {
+                        SearchSuggestionItem(
+                            item = it,
+                            onEvent = onEvent,
+                        )
+                    }
+
                 }
             }
         }
@@ -203,13 +210,47 @@ private fun SearchResultContainer(
 
 @Composable
 private fun SearchSuggestionItem(item: SearchSuggestion, onEvent: (SearchUiEvent) -> Unit) {
+    when (item) {
+        is HashTagSearchSuggestionItem -> ListItem(
+            modifier = Modifier.clickable { onEvent(OnSearchSuggestionTapped(item)) },
+            leadingContent = item.icon?.let { { SuggestionIcon(it) } },
+            headlineContent = {
+                Text(
+                    text = item.content,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = Color.Transparent,
+            ),
+        )
+
+        is UserSearchItem -> UserSearchSuggestionItem(item, onEvent)
+    }
+}
+
+@Composable
+fun UserSearchSuggestionItem(suggestion: UserSearchItem, onEvent: (SearchUiEvent) -> Unit) {
     ListItem(
-        modifier = Modifier.clickable { onEvent(OnSearchSuggestionTapped(item)) },
-        leadingContent = item.icon?.let { { SuggestionIcon(it) } },
+        modifier = Modifier.clickable {
+            onEvent(
+                OnSearchSuggestionTapped(
+                    suggestion
+                )
+            )
+        },
         headlineContent = {
-            Text(
-                text = item.content,
-                style = MaterialTheme.typography.titleMedium
+            Text(suggestion.title)
+        },
+        supportingContent = {
+            suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
+                ?.let {
+                    Nip5Badge(identifier = it, nip5Valid = false)
+                }
+        },
+        leadingContent = {
+            Avatar(
+                imageUrl = suggestion.imageUrl, contentDescription = null
             )
         },
         colors = ListItemDefaults.colors(
@@ -218,18 +259,21 @@ private fun SearchSuggestionItem(item: SearchSuggestion, onEvent: (SearchUiEvent
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 private fun LazyListScope.SectionHeader(title: String) {
     stickyHeader {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        AnimatedContent(targetState = title, label = title) {
+            Text(
+                it,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
