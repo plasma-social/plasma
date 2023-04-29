@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.getTextBeforeSelection
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
@@ -109,10 +110,10 @@ class ComposingScreenPresenter @AssistedInject constructor(
         }
 
         LaunchedEffect(noteContent) {
-            val cursorPosition =
-                if (noteContent.selection.collapsed) noteContent.selection.start else 0
+            val lastWordBeforeCursor = noteContent.lastWordBeforeCursor
+            val query = if (lastWordBeforeCursor.startsWith("@")) lastWordBeforeCursor.drop(1) else ""
 
-            getUserSuggestions(GetUserSuggestions.Params(noteContent.text, cursorPosition))
+            getUserSuggestions(GetUserSuggestions.Params(query))
         }
 
         val suggestedHashTags by produceState<List<String>>(emptyList(), noteContent) {
@@ -203,23 +204,24 @@ class ComposingScreenPresenter @AssistedInject constructor(
     }
 
     private suspend fun fetchHashTagSuggestions(noteContent: TextFieldValue): List<String> {
-        val cursorPosition =
-            if (noteContent.selection.collapsed) noteContent.selection.start else 0
+        val lastWordBeforeCursorPosition = noteContent.lastWordBeforeCursor
 
-        val contentBeforeCursor = noteContent.text.substring(0, cursorPosition)
-
-        val lastWord = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
-            .replace("\n", "")
-
-        val suggestions = if (lastWord.startsWith("#") && lastWord.length > 1) {
-            getHashtagSuggestions.executeSync(
-                GetHashtagSuggestions.Params(lastWord)
-            ).map { "#$it" }
-        } else {
-            emptyList()
-        }
+        val suggestions =
+            if (lastWordBeforeCursorPosition.startsWith("#") && lastWordBeforeCursorPosition.length > 1) {
+                getHashtagSuggestions.executeSync(
+                    GetHashtagSuggestions.Params(lastWordBeforeCursorPosition.drop(1))
+                ).map { "#$it" }
+            } else {
+                emptyList()
+            }
         return suggestions
     }
+
+    private val TextFieldValue.lastWordBeforeCursor: String
+        get() = getTextBeforeSelection(text.length).text
+            .replace("\n",  " ")
+            .split(" ")
+            .lastOrNull() ?: ""
 
     private fun TextFieldValue.replaceTextForCurrentMention(
         mentionDelimiter: String,
