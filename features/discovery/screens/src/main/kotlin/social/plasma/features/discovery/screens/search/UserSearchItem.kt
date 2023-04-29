@@ -5,4 +5,5 @@ data class UserSearchItem(
     val imageUrl: String?,
     val title: String,
     val nip5Identifier: String?,
+    val isNip5Valid: Boolean?,
 ) : SearchSuggestion, SearchResult

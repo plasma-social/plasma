@@ -1,6 +1,7 @@
 package social.plasma.features.discovery.presenters
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +47,12 @@ class SearchScreenPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): SearchUiState {
-        val userMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
         var query by rememberSaveable { mutableStateOf("") }
+        val userMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
+        val userSuggestions by remember { getUserSuggestions.flow }.collectAsState(emptyList())
+        LaunchedEffect(query) {
+            getUserSuggestions(GetUserSuggestions.Params(query, query.length))
+        }
 
         var isActive by rememberSaveable { mutableStateOf(false) }
 
@@ -86,18 +91,17 @@ class SearchScreenPresenter @AssistedInject constructor(
             }
         }
 
-        val suggestedUsers by produceState<List<SearchSuggestion>>(
+        val suggestedUserItems by produceState<List<SearchSuggestion>>(
             initialValue = emptyList(),
-            query
+            userSuggestions
         ) {
-            value = if (query.isEmpty()) emptyList() else getUserSuggestions.executeSync(
-                GetUserSuggestions.Params(query, query.length)
-            ).map {
+            value = userSuggestions.map {
                 UserSearchItem(
                     pubKeyHex = it.pubKey.hex(),
                     imageUrl = it.imageUrl,
                     title = it.title,
                     nip5Identifier = it.nip5Identifier,
+                    isNip5Valid = it.isNip5Valid,
                 )
             }
         }
@@ -106,11 +110,11 @@ class SearchScreenPresenter @AssistedInject constructor(
             initialValue = emptyList(),
             popularHashTags,
             suggestedHashTags,
-            suggestedUsers,
+            suggestedUserItems,
         ) {
             val suggestions = mutableListOf<SearchSuggestionGroup>().apply {
-                if (suggestedUsers.isNotEmpty()) {
-                    add(SearchSuggestionGroup(title = "Users", suggestedUsers))
+                if (suggestedUserItems.isNotEmpty()) {
+                    add(SearchSuggestionGroup(title = "Users", suggestedUserItems))
                 }
                 if (suggestedHashTags.isNotEmpty()) {
                     add(
@@ -150,9 +154,16 @@ class SearchScreenPresenter @AssistedInject constructor(
                     LeadingIcon.Search -> true
                 }
 
-                SearchUiEvent.OnTrailingIconTapped -> when(trailingIcon) {
+                SearchUiEvent.OnTrailingIconTapped -> when (trailingIcon) {
                     TrailingIcon.Clear -> query = ""
-                    is TrailingIcon.Avatar -> userMetadata?.let { navigator.goTo(ProfileScreen(it.pubkey)) }
+                    is TrailingIcon.Avatar -> userMetadata?.let {
+                        navigator.goTo(
+                            ProfileScreen(
+                                it.pubkey
+                            )
+                        )
+                    }
+
                     null -> {}
                 }
 

@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.nostrino.crypto.PubKey
@@ -19,14 +18,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.domain.interactors.GetHashtagSuggestions
-import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
@@ -37,7 +34,6 @@ import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.models.NoteWithUser
 import social.plasma.models.ProfileMention
-import social.plasma.models.TagSuggestion
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
@@ -48,7 +44,6 @@ class ComposingScreenPresenter @AssistedInject constructor(
     private val noteRepository: NoteRepository,
     private val getUserSuggestions: GetUserSuggestions,
     private val getHashtagSuggestions: GetHashtagSuggestions,
-    private val getNip5Status: GetNip5Status,
     accountStateRepository: AccountStateRepository,
     observeMyMetadata: ObserveUserMetadata,
     @Assisted private val args: ComposingScreen,
@@ -68,6 +63,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
         var submitting by remember { mutableStateOf(false) }
         var noteContent by remember { mutableStateOf(TextFieldValue()) }
         val mentions = remember { mutableStateMapOf<String, ProfileMention>() }
+
+        val suggestedUsers by remember { getUserSuggestions.flow }.collectAsState(emptyList())
 
         val rootNote by produceState<NoteWithUser?>(initialValue = null) {
             args.parentNote?.let { noteId ->
@@ -111,20 +108,11 @@ class ComposingScreenPresenter @AssistedInject constructor(
             }
         }
 
-        val suggestedUsers by produceState<List<TagSuggestion>>(
-            initialValue = emptyList(),
-            noteContent
-        ) {
+        LaunchedEffect(noteContent) {
             val cursorPosition =
                 if (noteContent.selection.collapsed) noteContent.selection.start else 0
 
-            value =
-                getUserSuggestions.executeSync(
-                    GetUserSuggestions.Params(
-                        noteContent.text,
-                        cursorPosition
-                    )
-                )
+            getUserSuggestions(GetUserSuggestions.Params(noteContent.text, cursorPosition))
         }
 
         val suggestedHashTags by produceState<List<String>>(emptyList(), noteContent) {
@@ -151,31 +139,9 @@ class ComposingScreenPresenter @AssistedInject constructor(
                 return@produceState
             }
 
-
-            val list = suggestedUsers.map {
-                UserSuggestion(
-                    tagSuggestion = it,
-                    nip5Valid = if (it.nip5Identifier == null) false else null
-                )
-            }.toMutableStateList()
-
-            suggestedUsers.forEachIndexed { index, suggestion ->
-                val nip5Identifier = suggestion.nip5Identifier ?: return@forEachIndexed
-                if (nip5Identifier.trim().isEmpty()) return@forEachIndexed
-
-                launch {
-                    val nip5Status = getNip5Status.executeSync(
-                        GetNip5Status.Params(
-                            suggestion.pubKey,
-                            nip5Identifier
-                        )
-                    ).isValid()
-
-                    list[index] = UserSuggestion(suggestion, nip5Status)
-                }
+            value = suggestedUsers.map {
+                UserSuggestion(tagSuggestion = it)
             }
-
-            value = list
         }
 
         LaunchedEffect(noteSubmitStatus) {

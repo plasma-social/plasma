@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import social.plasma.data.daos.fakes.FakeHashTagDao
 import social.plasma.domain.interactors.GetHashtagSuggestions
+import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetPopularHashTags
 import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.observers.ObserveCurrentUserMetadata
@@ -28,7 +29,9 @@ import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
+import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,7 +40,12 @@ class SearchScreenPresenterTest {
     private val hashtagsDao = FakeHashTagDao()
     private val getPopularHashTags = GetPopularHashTags(hashtagsDao)
     private val getHashTagSuggestions = GetHashtagSuggestions(hashtagsDao)
-    private val getUserSuggestions = GetUserSuggestions(FakeUserMetadataRepository())
+    private val getUserSuggestions = GetUserSuggestions(
+        FakeUserMetadataRepository(),
+        GetNip5Status(
+            FakeNip5Validator(), EmptyCoroutineContext
+        )
+    )
 
 
     private val presenter: SearchScreenPresenter
@@ -123,7 +131,7 @@ class SearchScreenPresenterTest {
     fun `on back arrow tapped, searchbar is deactivated`() = runTest {
         presenter.test {
             awaitItem()
-            
+
             awaitItem().onEvent(OnActiveChanged(true))
 
             with(awaitItem()) {
@@ -274,7 +282,8 @@ class SearchScreenPresenterTest {
                         pubKeyHex = "test",
                         imageUrl = null,
                         title = "test",
-                        nip5Identifier = null
+                        nip5Identifier = null,
+                        isNip5Valid = null,
                     )
                 )
             )
