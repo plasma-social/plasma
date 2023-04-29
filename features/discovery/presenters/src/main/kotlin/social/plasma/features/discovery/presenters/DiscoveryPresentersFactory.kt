@@ -16,7 +16,7 @@ class DiscoveryPresentersFactory @Inject constructor(
         context: CircuitContext,
     ): Presenter<*>? {
         return when (screen) {
-            SearchScreen -> searchScreenPresenter.create(navigator)
+            SearchScreen -> searchScreenPresenter.create(navigator, forceActive = true)
             else -> null
         }
     }
