@@ -18,4 +18,5 @@
     </string>
     <string name="many_new_notes"><xliff:g id="count" example="50+">{count}</xliff:g> new</string>
     <string name="feeds">Feeds</string>
+    <string name="notifications">Notifications</string>
 </resources>
