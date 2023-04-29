@@ -16,8 +16,10 @@ import com.slack.circuit.Ui
 import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
+import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent.ChildNav
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiState
+import social.plasma.ui.components.AvatarToolBar
 import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.components.PlasmaTab
 import social.plasma.ui.components.PlasmaTabRow
@@ -49,6 +51,11 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
         Column(
             modifier = modifier,
         ) {
+            AvatarToolBar(
+                title = state.title,
+                avatarUrl = state.toolbarAvatar,
+                onAvatarClick = { onEvent(HomeFeedsUiEvent.OnToolbarAvatarTapped) },
+            )
             PlasmaTabRow(
                 selectedTabIndex = selectedTab,
             ) {
@@ -62,7 +69,7 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                 }
             }
             HorizontalSeparator()
-            
+
             HorizontalPager(pageCount = tabs.size, state = pagerState) {
                 CircuitContent(
                     screen = tabs[it].screen,

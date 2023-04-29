@@ -1,6 +1,10 @@
 package social.plasma.features.onboarding.ui.home
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -29,12 +33,10 @@ import social.plasma.features.discovery.screens.search.SearchScreen
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeeds
-import social.plasma.features.onboarding.screens.home.HomeUiEvent
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnChildNav
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
 import social.plasma.features.onboarding.ui.R
-import social.plasma.ui.components.AvatarToolBar
 import social.plasma.ui.components.HorizontalSeparator
 import social.plasma.ui.R as ComponentsR
 
@@ -69,6 +71,7 @@ class HomeScreenUi : Ui<HomeUiState> {
 
         Scaffold(
             modifier = modifier,
+            contentWindowInsets = WindowInsets.navigationBars,
             floatingActionButton = {
                 FloatingActionButton(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -81,13 +84,6 @@ class HomeScreenUi : Ui<HomeUiState> {
                     )
                 }
             },
-            topBar = {
-                AvatarToolBar(
-                    title = stringResource(selectedNavItem.label),
-                    avatarUrl = state.avatarUrl,
-                    onAvatarClick = { onEvent(HomeUiEvent.OnAvatarClick) },
-                )
-            },
             bottomBar = {
                 BottomNavigationBar(
                     barNavItems = bottomNavItems,
@@ -97,12 +93,18 @@ class HomeScreenUi : Ui<HomeUiState> {
                     }
                 )
             }) { paddingValues ->
-
-            CircuitContent(
-                modifier = modifier.padding(paddingValues),
-                screen = selectedNavItem.screen,
-                onNavEvent = { navEvent -> onEvent(OnChildNav(navEvent)) }
-            )
+            Crossfade(
+                targetState = selectedNavItem,
+                label = "HomeScreenContent"
+            ) { navItem ->
+                CircuitContent(
+                    modifier = modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(paddingValues),
+                    screen = navItem.screen,
+                    onNavEvent = { navEvent -> onEvent(OnChildNav(navEvent)) }
+                )
+            }
         }
     }
 }

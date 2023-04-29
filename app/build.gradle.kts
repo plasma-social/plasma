@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
+    implementation(libs.android.material)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.core.ktx)
