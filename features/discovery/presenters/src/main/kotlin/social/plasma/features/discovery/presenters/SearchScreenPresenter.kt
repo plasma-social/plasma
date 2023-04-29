@@ -51,7 +51,7 @@ class SearchScreenPresenter @AssistedInject constructor(
         val userMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
         val userSuggestions by remember { getUserSuggestions.flow }.collectAsState(emptyList())
         LaunchedEffect(query) {
-            getUserSuggestions(GetUserSuggestions.Params(query, query.length))
+            getUserSuggestions(GetUserSuggestions.Params(query))
         }
 
         var isActive by rememberSaveable { mutableStateOf(false) }
