@@ -135,7 +135,11 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                     ) {
                         items(state.autoCompleteSuggestions) { suggestion ->
                             when (suggestion) {
-                                is AutoCompleteSuggestion.HashtagSuggestion -> HashtagSuggestion(suggestion, onEvent)
+                                is AutoCompleteSuggestion.HashtagSuggestion -> HashtagSuggestion(
+                                    suggestion,
+                                    onEvent
+                                )
+
                                 is AutoCompleteSuggestion.UserSuggestion -> UserSuggestion(
                                     suggestion,
                                     onEvent
@@ -166,10 +170,10 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
 
     @Composable
     private fun UserSuggestion(
-        autoCompleteSuggestion: AutoCompleteSuggestion.UserSuggestion,
+        userSuggestion: AutoCompleteSuggestion.UserSuggestion,
         onEvent: (ComposePostUiEvent) -> Unit,
     ) {
-        val (suggestion, nip5Valid) = autoCompleteSuggestion
+        val (suggestion) = userSuggestion
 
         ListItem(modifier = Modifier.clickable {
             onEvent(
@@ -182,7 +186,10 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
         }, supportingContent = {
             suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
                 ?.let {
-                    Nip5Badge(identifier = it, nip5Valid = nip5Valid)
+                    Nip5Badge(
+                        identifier = it,
+                        nip5Valid = suggestion.isNip5Valid
+                    )
                 }
         }, leadingContent = {
             Avatar(

@@ -15,6 +15,7 @@ internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiSt
             title = "John",
             imageUrl = null,
             nip5Identifier = null,
+            isNip5Valid = null,
         ),
         HashTagSearchSuggestionItem(
             icon = SuggestionIcon.Recent,
