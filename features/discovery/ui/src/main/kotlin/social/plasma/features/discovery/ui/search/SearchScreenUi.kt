@@ -205,13 +205,10 @@ private fun SearchResultContainer(
                 }
 
                 items(group.items) { item ->
-                    AnimatedContent(targetState = item, label = "item:$item") {
-                        SearchSuggestionItem(
-                            item = it,
-                            onEvent = onEvent,
-                        )
-                    }
-
+                    SearchSuggestionItem(
+                        item = item,
+                        onEvent = onEvent,
+                    )
                 }
             }
         }
@@ -255,7 +252,7 @@ fun UserSearchSuggestionItem(suggestion: UserSearchItem, onEvent: (SearchUiEvent
         supportingContent = {
             suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
                 ?.let {
-                    Nip5Badge(identifier = it, nip5Valid = false)
+                    Nip5Badge(identifier = it, nip5Valid = suggestion.isNip5Valid)
                 }
         },
         leadingContent = {
@@ -280,8 +277,7 @@ private fun LazyListScope.SectionHeader(title: String) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                ,
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -302,6 +298,7 @@ private fun TrailingIcon(trailingIcon: SearchBarUiState.TrailingIcon?, onClick: 
                     "Clear",
                 )
             }
+
             is SearchBarUiState.TrailingIcon.Avatar -> Avatar(
                 size = 32.dp,
                 imageUrl = trailingIcon.url,

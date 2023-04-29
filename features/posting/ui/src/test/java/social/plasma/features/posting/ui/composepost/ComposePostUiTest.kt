@@ -71,7 +71,8 @@ class ComposePostUiTest constructor(
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",
-                        ), true
+                            isNip5Valid = true,
+                        )
                     ),
                     UserSuggestion(
                         TagSuggestion(
@@ -79,7 +80,8 @@ class ComposePostUiTest constructor(
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",
-                        ), true
+                            isNip5Valid = true
+                        )
                     ),
                     UserSuggestion(
                         TagSuggestion(
@@ -87,7 +89,8 @@ class ComposePostUiTest constructor(
                             imageUrl = null,
                             title = "KoalaSat",
                             nip5Identifier = "koalasat@nostros.net",
-                        ), true
+                            isNip5Valid = true
+                        )
                     ),
                 )
             ) {}

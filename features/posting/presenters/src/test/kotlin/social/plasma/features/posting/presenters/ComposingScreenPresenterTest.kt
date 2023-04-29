@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.decodeHex
 import org.junit.Test
+import social.plasma.data.daos.fakes.FakeHashTagDao
 import social.plasma.domain.interactors.GetHashtagSuggestions
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetUserSuggestions
@@ -51,11 +52,13 @@ class ComposingScreenPresenterTest {
                 ),
                 args = ComposingScreen(),
                 noteRepository = noteRepository,
-                getUserSuggestions = GetUserSuggestions(userMetadataRepository),
-                getNip5Status = GetNip5Status(FakeNip5Validator(), coroutineContext),
+                getUserSuggestions = GetUserSuggestions(
+                    userMetadataRepository,
+                    GetNip5Status(FakeNip5Validator(), coroutineContext)
+                ),
                 accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
                 observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
-                getHashtagSuggestions = GetHashtagSuggestions(social.plasma.data.daos.fakes.FakeHashTagDao()),
+                getHashtagSuggestions = GetHashtagSuggestions(FakeHashTagDao()),
             )
         }
 
@@ -180,14 +183,15 @@ class ComposingScreenPresenterTest {
                         title = "",
                         nip5Identifier = "",
                         imageUrl = null,
+                        isNip5Valid = null,
                     )
                 )
             )
 
-            awaitItem()
-            awaitItem()
-            awaitItem()
-            awaitItem()
+
+            repeat(4) {
+                awaitItem()
+            }
 
             with(awaitItem()) {
                 assertThat(noteContent.text).isEqualTo("@${pubKey.encoded()} ")
