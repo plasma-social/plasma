@@ -30,9 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.slack.circuit.CircuitContent
 import com.slack.circuit.Ui
 import social.plasma.features.discovery.screens.search.SearchScreen
-import social.plasma.features.feeds.screens.feed.FeedScreen
-import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeeds
+import social.plasma.features.feeds.screens.notifications.NotificationsFeedScreen
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnChildNav
 import social.plasma.features.onboarding.screens.home.HomeUiEvent.OnFabClick
 import social.plasma.features.onboarding.screens.home.HomeUiState
@@ -56,7 +55,7 @@ class HomeScreenUi : Ui<HomeUiState> {
                     R.string.search,
                 ),
                 BottomNavItem(
-                    FeedScreen(feedType = FeedType.Notifications),
+                    NotificationsFeedScreen,
                     ComponentsR.drawable.ic_plasma_notifications_outline,
                     R.string.notifications
                 ),
