@@ -14,21 +14,18 @@ class GetUserSuggestions @Inject constructor(
     private val userMetadataRepository: UserMetadataRepository,
     private val getNip5Status: GetNip5Status,
 ) : SubjectInteractor<GetUserSuggestions.Params, List<TagSuggestion>>() {
-    data class Params(val noteContent: String, val cursorPosition: Int)
+    data class Params(val query: String)
 
     override fun createObservable(params: Params): Flow<List<TagSuggestion>> = flow {
-        if (params.cursorPosition <= 0) {
+        if (params.query.isEmpty()) {
             emit(emptyList())
             return@flow
         }
 
-        val contentBeforeCursor = params.noteContent.substring(0, params.cursorPosition)
+        val query = if (params.query.startsWith("@")) params.query.drop(1) else params.query
 
-        val query = contentBeforeCursor.substring(contentBeforeCursor.lastIndexOf(" ").inc())
-            .replace("\n", "")
-
-        if (query.startsWith("@") && query.length > 1) {
-            val userEntities = userMetadataRepository.searchUsers(query.drop(1))
+        if (query.isNotEmpty()) {
+            val userEntities = userMetadataRepository.searchUsers(query)
 
             val tagSuggestions = userEntities.map {
                 TagSuggestion(
