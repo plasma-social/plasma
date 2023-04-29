@@ -120,7 +120,7 @@ inline fun <R : Any> AnnotatedString.Builder.withProfileMention(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.PROFILE, pubkey) {
-        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
             block(this)
         }
     }
@@ -133,7 +133,7 @@ inline fun <R : Any> AnnotatedString.Builder.withHashTag(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.HASHTAG, tag) {
-        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
             block(this)
         }
     }
@@ -146,7 +146,7 @@ inline fun <R : Any> AnnotatedString.Builder.withNoteMention(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.NOTE, id) {
-        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
             block(this)
         }
     }
@@ -159,7 +159,7 @@ inline fun <R : Any> AnnotatedString.Builder.withUrl(
     crossinline block: AnnotatedString.Builder.() -> R,
 ): R {
     return withAnnotation(RichTextTag.URL, url) {
-        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) {
+        withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) {
             block(this)
         }
     }
