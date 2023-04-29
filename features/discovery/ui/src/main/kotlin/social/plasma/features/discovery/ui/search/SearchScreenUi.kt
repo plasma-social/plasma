@@ -97,11 +97,11 @@ private fun SearchScreenContent(state: SearchUiState, modifier: Modifier = Modif
                 onEvent = onEvent,
             )
         }
-        Recommendations(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-        )
+//        Recommendations(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .weight(1f)
+//        )
     }
 }
 
