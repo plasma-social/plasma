@@ -52,7 +52,9 @@ class SearchScreenPresenter @AssistedInject constructor(
         val userMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
         val userSuggestions by remember { getUserSuggestions.flow }.collectAsState(emptyList())
         LaunchedEffect(query) {
-            getUserSuggestions(GetUserSuggestions.Params(query))
+            if (query.startsWith("#").not()) {
+                getUserSuggestions(GetUserSuggestions.Params(query))
+            }
         }
 
         // TODO - uncomment once we add recommendations back.
