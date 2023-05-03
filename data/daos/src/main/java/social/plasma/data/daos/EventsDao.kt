@@ -92,4 +92,5 @@ abstract class EventsDao {
 
     @Query("SELECT * FROM events WHERE id = :id")
     abstract suspend fun getById(id: String): EventEntity?
+
 }

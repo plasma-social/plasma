@@ -20,8 +20,8 @@ interface ContactsDao {
     @Query("SELECT EXISTS(SELECT id FROM contacts WHERE owner = :ownerPubKey AND pubkey = :contactPubKey)")
     fun observeOwnerFollowsContact(ownerPubKey: String, contactPubKey: String): Flow<Boolean>
 
-    @Query("SELECT COUNT(id) FROM contacts WHERE owner = :pubkey")
-    fun observeFollowingCount(pubkey: String): Flow<Long>
+    @Query("SELECT * FROM events WHERE pubkey = :pubkey AND kind = ${Event.Kind.ContactList} ORDER BY created_at DESC")
+    fun observeContactListEvent(pubkey: String): Flow<EventEntity>
 
     @Query("DELETE FROM contacts WHERE owner = :owner")
     fun delete(owner: String)
