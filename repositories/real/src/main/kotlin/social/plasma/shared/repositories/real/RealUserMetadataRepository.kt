@@ -15,7 +15,7 @@ internal class RealUserMetadataRepository @Inject constructor(
     }
 
     override suspend fun searchUsers(query: String): List<UserMetadataEntity> {
-        val nameQuery = "$query%"
+        val nameQuery = "name:$query* OR displayName:$query*"
         return userMetadataDao.search(nameQuery)
     }
 }

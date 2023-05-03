@@ -15,8 +15,11 @@ import social.plasma.models.ContactEntity
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.NoteView
 import social.plasma.models.UserMetadataEntity
+import social.plasma.models.UserMetadataFtsEntity
 import social.plasma.models.events.EventEntity
 import social.plasma.models.events.EventReferenceEntity
+import social.plasma.models.events.HashTagEntity
+import social.plasma.models.events.HashTagFtsEntity
 import social.plasma.models.events.HashTagReferenceEntity
 import social.plasma.models.events.PubkeyReferenceEntity
 
@@ -27,17 +30,21 @@ import social.plasma.models.events.PubkeyReferenceEntity
         EventReferenceEntity::class,
         PubkeyReferenceEntity::class,
         HashTagReferenceEntity::class,
+        HashTagEntity::class,
+        HashTagFtsEntity::class,
         UserMetadataEntity::class,
+        UserMetadataFtsEntity::class,
         ContactEntity::class,
     ],
     views = [
         NoteView::class,
     ],
-    version = 4,
+    version = 5,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
     ]
 )
 @TypeConverters(TagsTypeConverter::class)

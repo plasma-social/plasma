@@ -27,6 +27,15 @@ abstract class UserMetadataDao {
         }
     }
 
-    @Query("SELECT * FROM user_metadata WHERE name LIKE :nameQuery OR displayName LIKE :nameQuery ORDER BY displayName COLLATE NOCASE ASC ")
-    abstract suspend fun search(nameQuery: String): List<UserMetadataEntity>
+    @Query(
+        """
+        SELECT * FROM user_metadata
+        JOIN user_suggestion ON user_metadata.pubkey == user_suggestion.pubkey
+        WHERE user_suggestion MATCH :query
+        GROUP BY user_metadata.pubkey
+        ORDER BY user_suggestion.name COLLATE NOCASE ASC
+        LIMIT :limit
+    """
+    )
+    abstract suspend fun search(query: String, limit: Int = 5): List<UserMetadataEntity>
 }
