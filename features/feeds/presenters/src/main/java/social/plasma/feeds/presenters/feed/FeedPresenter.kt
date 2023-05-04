@@ -61,7 +61,7 @@ class FeedPresenter @AssistedInject constructor(
     @Composable
     override fun present(): FeedUiState {
         val listState = rememberLazyListState()
-        val feedPagingFlow = rememberRetained { notePagingFlowMapper.map(pagingFlow) }
+        val feedPagingFlow = remember { notePagingFlowMapper.map(pagingFlow) }
         val coroutineScope = rememberCoroutineScope()
         val currentVisibleIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
