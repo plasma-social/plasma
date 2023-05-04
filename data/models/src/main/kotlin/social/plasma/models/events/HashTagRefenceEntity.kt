@@ -13,7 +13,7 @@ import androidx.room.Index
 @Entity(
     tableName = "hashtag_ref",
     primaryKeys = ["source_event", "hashtag"],
-    indices = [Index("hashtag", "source_event", unique = true)]
+    indices = [Index("hashtag"), Index("hashtag", "source_event", unique = true)]
 )
 data class HashTagReferenceEntity(
     @ColumnInfo("source_event")
