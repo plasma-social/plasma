@@ -18,6 +18,7 @@ import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.push
 import com.slack.circuit.rememberCircuitNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import social.plasma.domain.interactors.SyncContactsEvents
 import social.plasma.domain.interactors.SyncMyEvents
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.ui.theme.PlasmaTheme
@@ -31,6 +32,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var syncMyEvents: SyncMyEvents
 
+    @Inject
+    lateinit var syncMyContactsEvents: SyncContactsEvents
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -38,7 +42,15 @@ class MainActivity : ComponentActivity() {
         val startScreens: List<Screen> = listOf(HeadlessAuthenticator)
 
         setContent {
+            // TODO find a better home for these
             LaunchedEffect(Unit) { syncMyEvents.executeSync(Unit) }
+            LaunchedEffect(Unit) {
+                // TODO this API looks awkward. But perhaps it'll make more sense outside of compose
+                syncMyContactsEvents.apply {
+                    invoke(Unit)
+                    flow.collect {}
+                }
+            }
 
             PlasmaTheme(dynamicStatusBar = true) {
                 val backstack =
