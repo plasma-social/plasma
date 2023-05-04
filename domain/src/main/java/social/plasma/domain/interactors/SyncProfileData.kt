@@ -1,5 +1,6 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -7,7 +8,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import social.plasma.domain.Interactor
-import app.cash.nostrino.crypto.PubKey
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.Filter
@@ -17,7 +17,6 @@ import kotlin.coroutines.CoroutineContext
 
 class SyncProfileData @Inject constructor(
     private val relay: Relay,
-    private val storeContactList: StoreContactList,
     private val storeMetadataEvents: StoreMetadataEvents,
     private val storeEvents: StoreEvents,
     @Named("io") private val ioDispatcher: CoroutineContext,
@@ -37,7 +36,6 @@ class SyncProfileData @Inject constructor(
             .map { it.event }
 
         merge(
-            storeContactList.flow.onStart { storeContactList(subscription) },
             storeMetadataEvents.flow.onStart { storeMetadataEvents(subscription) },
             storeEvents.flow.onStart { storeEvents(subscription) },
         ).collect()
