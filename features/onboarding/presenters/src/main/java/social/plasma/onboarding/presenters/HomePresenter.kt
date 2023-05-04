@@ -1,6 +1,10 @@
 package social.plasma.onboarding.presenters
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
 import com.slack.circuit.onNavEvent
@@ -18,9 +22,16 @@ class HomePresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): HomeUiState {
+        var navigationInFlight by remember { mutableStateOf(false) }
         return HomeUiState { event ->
             when (event) {
-                OnFabClick -> navigator.goTo(ComposingScreen())
+                OnFabClick -> {
+                    if (!navigationInFlight) {
+                        navigationInFlight = true
+                        navigator.goTo(ComposingScreen())
+                    }
+                }
+
                 is HomeUiEvent.OnChildNav -> navigator.onNavEvent(event.navEvent)
             }
         }
