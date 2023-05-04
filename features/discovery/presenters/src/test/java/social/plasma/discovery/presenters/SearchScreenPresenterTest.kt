@@ -40,21 +40,21 @@ class SearchScreenPresenterTest {
     private val hashtagsDao = FakeHashTagDao()
     private val getPopularHashTags = GetPopularHashTags(hashtagsDao)
     private val getHashTagSuggestions = GetHashtagSuggestions(hashtagsDao)
+    private val userMetadataRepository = FakeUserMetadataRepository()
+
     private val getUserSuggestions = GetUserSuggestions(
-        FakeUserMetadataRepository(),
+        userMetadataRepository,
         GetNip5Status(
             FakeNip5Validator(), EmptyCoroutineContext
         )
     )
-
-
     private val presenter: SearchScreenPresenter
         get() = SearchScreenPresenter(
             getPopularHashTags = getPopularHashTags,
             getHashtagSuggestions = getHashTagSuggestions,
             getUserSuggestions = getUserSuggestions,
             observeCurrentUserMetadata = ObserveCurrentUserMetadata(
-                FakeUserMetadataRepository().apply {
+                userMetadataRepository.apply {
                     observeUserMetaDataResult.value = USER_METADATA
                 },
                 FakeAccountStateRepository().apply {
@@ -290,6 +290,20 @@ class SearchScreenPresenterTest {
             )
 
             assertThat(navigator.awaitNextScreen()).isEqualTo(ProfileScreen(pubKeyHex = "test"))
+        }
+    }
+
+    @Test
+    fun `if query starts with # sign, search results contain only hashtags`() = runTest {
+        presenter.test {
+            awaitItem().onEvent(OnActiveChanged(true))
+            awaitItem().onEvent(OnQueryChanged("#test"))
+
+            repeat(4) {
+                awaitItem()
+            }
+
+            userMetadataRepository.searchUsersCalls.expectNoEvents()
         }
     }
 
