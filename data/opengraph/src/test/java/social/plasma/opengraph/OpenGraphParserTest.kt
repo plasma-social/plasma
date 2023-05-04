@@ -4,21 +4,20 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
 import java.net.URL
+import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OpenGraphParserTest {
     @Test
-    @Ignore("Twitter scraping seems to be broken")
-    fun `can parse from twitter without image`() = runTest {
+    fun `can parse from twitter`() = runTest {
         val metadata = ogParser().parse(URL("https://twitter.com/jack/status/20"))
 
         with(metadata!!) {
             assertThat(title).isEqualTo("jack on Twitter")
             assertThat(description).isEqualTo("“just setting up my twttr”")
-            assertThat(image).isNull()
+            assertThat(image).isNotEmpty()
             assertThat(siteName).isEqualTo("Twitter")
         }
     }
@@ -45,6 +44,6 @@ class OpenGraphParserTest {
     }
 
     private fun CoroutineScope.ogParser(): OpenGraphParser {
-        return OpenGraphParser(RealDocumentProvider(coroutineContext))
+        return OpenGraphParser(RealDocumentProvider(coroutineContext), EmptyCoroutineContext)
     }
 }
