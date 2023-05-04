@@ -25,7 +25,7 @@ class GetHashtagSuggestions @Inject constructor(
                 add(query)
             }
 
-            addAll(hashtagDao.getHashTagRecommendations("$query%"))
+            addAll(hashtagDao.getHashTagRecommendations("$query*"))
         }.toList()
     }
 }

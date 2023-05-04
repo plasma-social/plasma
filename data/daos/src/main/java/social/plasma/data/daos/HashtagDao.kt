@@ -7,10 +7,13 @@ import androidx.room.Query
 interface HashtagDao {
     @Query(
         """
-        SELECT DISTINCT hashtag FROM hashtag_ref
-        WHERE hashtag LIKE LOWER(:query)
-        GROUP BY hashtag
-        ORDER BY COUNT(hashtag) DESC
+        SELECT h.hashtag
+        FROM hashtag_search hs
+        JOIN hashtag h ON hs.rowid = h.id
+        JOIN hashtag_ref hr ON h.hashtag = hr.hashtag
+        WHERE hashtag_search MATCH :query
+        GROUP BY h.hashtag
+        ORDER BY COUNT(hr.hashtag) DESC
         LIMIT :limit
     """
     )

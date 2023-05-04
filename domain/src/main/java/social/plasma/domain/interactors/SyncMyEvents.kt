@@ -25,6 +25,7 @@ class SyncMyEvents @Inject constructor(
     private val storeEvents: StoreEvents,
     private val accountStateRepository: AccountStateRepository,
     private val syncMetadata: SyncMetadata,
+    private val storeContactList: StoreContactList,
     private val syncProfileData: SyncProfileData,
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : Interactor<Unit>() {
@@ -48,6 +49,7 @@ class SyncMyEvents @Inject constructor(
 
                 merge(
                     storeEvents.flow.onStart { storeEvents(subscription) },
+                    storeContactList.flow.onStart { storeContactList(subscription) },
                     syncProfileData(SyncProfileData.Params(pubkey)),
                     syncMetadata(SyncMetadata.Params(pubkey)),
                 )

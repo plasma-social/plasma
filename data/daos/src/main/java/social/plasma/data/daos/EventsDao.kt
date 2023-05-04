@@ -9,6 +9,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import social.plasma.models.events.EventEntity
 import social.plasma.models.events.EventReferenceEntity
+import social.plasma.models.events.HashTagEntity
 import social.plasma.models.events.HashTagReferenceEntity
 import social.plasma.models.events.PubkeyReferenceEntity
 
@@ -54,12 +55,21 @@ abstract class EventsDao {
                 }
             }
 
+            insertInternal(events)
             insertEventReferences(noteReferences.await())
             insertPubkeyReferences(pubkeyReferences.await())
-            insertHashTagReferences(hashtagReferences.await())
-            insertInternal(events)
+
+            val hashTagReferences = hashtagReferences.await()
+            val hashTagEntities =
+                hashTagReferences.map { HashTagEntity(hashtag = it.hashtag) }.distinct()
+
+            insertHashTagReferences(hashTagReferences)
+            insertHashTags(hashTagEntities)
         }
     }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    internal abstract fun insertHashTags(tags: List<HashTagEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     internal abstract fun insertHashTagReferences(references: List<HashTagReferenceEntity>)
@@ -82,4 +92,5 @@ abstract class EventsDao {
 
     @Query("SELECT * FROM events WHERE id = :id")
     abstract suspend fun getById(id: String): EventEntity?
+
 }

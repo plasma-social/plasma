@@ -1,0 +1,586 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "587eab1fad43fbb4c4eee68c35984bbf",
+    "entities": [
+      {
+        "tableName": "events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `pubkey` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `kind` INTEGER NOT NULL, `tags` TEXT NOT NULL, `content` TEXT NOT NULL, `sig` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pubkey",
+            "columnName": "pubkey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sig",
+            "columnName": "sig",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_events_created_at_id_kind",
+            "unique": false,
+            "columnNames": [
+              "created_at",
+              "id",
+              "kind"
+            ],
+            "orders": [
+              "DESC",
+              "ASC",
+              "ASC"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_created_at_id_kind` ON `${TABLE_NAME}` (`created_at` DESC, `id` ASC, `kind` ASC)"
+          },
+          {
+            "name": "index_events_created_at_pubkey_kind",
+            "unique": false,
+            "columnNames": [
+              "created_at",
+              "pubkey",
+              "kind"
+            ],
+            "orders": [
+              "DESC",
+              "ASC",
+              "ASC"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_created_at_pubkey_kind` ON `${TABLE_NAME}` (`created_at` DESC, `pubkey` ASC, `kind` ASC)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "last_requests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `request` TEXT NOT NULL, `resource_id` TEXT NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "request",
+            "columnName": "request",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resourceId",
+            "columnName": "resource_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "_timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_last_requests_request_resource_id",
+            "unique": true,
+            "columnNames": [
+              "request",
+              "resource_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_last_requests_request_resource_id` ON `${TABLE_NAME}` (`request`, `resource_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "event_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`source_event` TEXT NOT NULL, `target_event` TEXT NOT NULL, `relay_url` TEXT, `marker` TEXT, PRIMARY KEY(`source_event`, `target_event`))",
+        "fields": [
+          {
+            "fieldPath": "sourceEvent",
+            "columnName": "source_event",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetEvent",
+            "columnName": "target_event",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relayUrl",
+            "columnName": "relay_url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "marker",
+            "columnName": "marker",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "source_event",
+            "target_event"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_event_ref_target_event",
+            "unique": false,
+            "columnNames": [
+              "target_event"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_event_ref_target_event` ON `${TABLE_NAME}` (`target_event`)"
+          },
+          {
+            "name": "index_event_ref_source_event",
+            "unique": false,
+            "columnNames": [
+              "source_event"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_event_ref_source_event` ON `${TABLE_NAME}` (`source_event`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "pubkey_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`source_event` TEXT NOT NULL, `pubkey` TEXT NOT NULL, `relay_url` TEXT, PRIMARY KEY(`source_event`, `pubkey`))",
+        "fields": [
+          {
+            "fieldPath": "sourceEvent",
+            "columnName": "source_event",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pubkey",
+            "columnName": "pubkey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relayUrl",
+            "columnName": "relay_url",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "source_event",
+            "pubkey"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pubkey_ref_source_event",
+            "unique": false,
+            "columnNames": [
+              "source_event"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pubkey_ref_source_event` ON `${TABLE_NAME}` (`source_event`)"
+          },
+          {
+            "name": "index_pubkey_ref_pubkey",
+            "unique": false,
+            "columnNames": [
+              "pubkey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pubkey_ref_pubkey` ON `${TABLE_NAME}` (`pubkey`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "hashtag_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`source_event` TEXT NOT NULL, `hashtag` TEXT NOT NULL, `pubkey` TEXT NOT NULL, PRIMARY KEY(`source_event`, `hashtag`))",
+        "fields": [
+          {
+            "fieldPath": "sourceEvent",
+            "columnName": "source_event",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hashtag",
+            "columnName": "hashtag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pubkey",
+            "columnName": "pubkey",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "source_event",
+            "hashtag"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_hashtag_ref_hashtag",
+            "unique": false,
+            "columnNames": [
+              "hashtag"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_hashtag_ref_hashtag` ON `${TABLE_NAME}` (`hashtag`)"
+          },
+          {
+            "name": "index_hashtag_ref_hashtag_source_event",
+            "unique": true,
+            "columnNames": [
+              "hashtag",
+              "source_event"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_hashtag_ref_hashtag_source_event` ON `${TABLE_NAME}` (`hashtag`, `source_event`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "hashtag",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hashtag` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hashtag",
+            "columnName": "hashtag",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_hashtag_hashtag",
+            "unique": true,
+            "columnNames": [
+              "hashtag"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_hashtag_hashtag` ON `${TABLE_NAME}` (`hashtag`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "hashtag",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_hashtag_search_BEFORE_UPDATE BEFORE UPDATE ON `hashtag` BEGIN DELETE FROM `hashtag_search` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_hashtag_search_BEFORE_DELETE BEFORE DELETE ON `hashtag` BEGIN DELETE FROM `hashtag_search` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_hashtag_search_AFTER_UPDATE AFTER UPDATE ON `hashtag` BEGIN INSERT INTO `hashtag_search`(`docid`, `hashtag`) VALUES (NEW.`rowid`, NEW.`hashtag`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_hashtag_search_AFTER_INSERT AFTER INSERT ON `hashtag` BEGIN INSERT INTO `hashtag_search`(`docid`, `hashtag`) VALUES (NEW.`rowid`, NEW.`hashtag`); END"
+        ],
+        "tableName": "hashtag_search",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`hashtag` TEXT NOT NULL, content=`hashtag`)",
+        "fields": [
+          {
+            "fieldPath": "hashtag",
+            "columnName": "hashtag",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "user_metadata",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pubkey` TEXT NOT NULL, `name` TEXT, `about` TEXT, `picture` TEXT, `displayName` TEXT, `banner` TEXT, `nip05` TEXT, `lud` TEXT, `website` TEXT, `createdAt` INTEGER, PRIMARY KEY(`pubkey`))",
+        "fields": [
+          {
+            "fieldPath": "pubkey",
+            "columnName": "pubkey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "about",
+            "columnName": "about",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "picture",
+            "columnName": "picture",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "banner",
+            "columnName": "banner",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nip05",
+            "columnName": "nip05",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lud",
+            "columnName": "lud",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "website",
+            "columnName": "website",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "pubkey"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "user_metadata",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_user_suggestion_BEFORE_UPDATE BEFORE UPDATE ON `user_metadata` BEGIN DELETE FROM `user_suggestion` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_user_suggestion_BEFORE_DELETE BEFORE DELETE ON `user_metadata` BEGIN DELETE FROM `user_suggestion` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_user_suggestion_AFTER_UPDATE AFTER UPDATE ON `user_metadata` BEGIN INSERT INTO `user_suggestion`(`docid`, `pubkey`, `name`, `displayName`, `nip05`) VALUES (NEW.`rowid`, NEW.`pubkey`, NEW.`name`, NEW.`displayName`, NEW.`nip05`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_user_suggestion_AFTER_INSERT AFTER INSERT ON `user_metadata` BEGIN INSERT INTO `user_suggestion`(`docid`, `pubkey`, `name`, `displayName`, `nip05`) VALUES (NEW.`rowid`, NEW.`pubkey`, NEW.`name`, NEW.`displayName`, NEW.`nip05`); END"
+        ],
+        "tableName": "user_suggestion",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`pubkey` TEXT NOT NULL, `name` TEXT, `displayName` TEXT, `nip05` TEXT, content=`user_metadata`)",
+        "fields": [
+          {
+            "fieldPath": "pubkey",
+            "columnName": "pubkey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nip05",
+            "columnName": "nip05",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "contacts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `owner` TEXT NOT NULL, `pubKey` TEXT NOT NULL, `homeRelay` TEXT, `petName` TEXT, `created_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "owner",
+            "columnName": "owner",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pubKey",
+            "columnName": "pubKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "homeRelay",
+            "columnName": "homeRelay",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "petName",
+            "columnName": "petName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_contacts_owner",
+            "unique": false,
+            "columnNames": [
+              "owner"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_contacts_owner` ON `${TABLE_NAME}` (`owner`)"
+          },
+          {
+            "name": "index_contacts_owner_pubKey",
+            "unique": true,
+            "columnNames": [
+              "owner",
+              "pubKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_contacts_owner_pubKey` ON `${TABLE_NAME}` (`owner`, `pubKey`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [
+      {
+        "viewName": "NoteView",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT events.id, events.pubkey, events.content, events.created_at, events.tags, events.kind, COUNT(reactions.id) AS reactionCount, EXISTS( SELECT 1 from event_ref WHERE source_event = events.id) as is_reply FROM events LEFT JOIN event_ref reactions_ref on reactions_ref.target_event == events.id LEFT JOIN events reactions on reactions_ref.source_event == reactions.id AND reactions.kind = 7 WHERE events.kind IN (1, 6) GROUP BY events.id ORDER BY events.created_at DESC"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '587eab1fad43fbb4c4eee68c35984bbf')"
+    ]
+  }
+}

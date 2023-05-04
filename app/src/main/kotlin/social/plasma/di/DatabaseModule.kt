@@ -12,6 +12,7 @@ import social.plasma.data.daos.HashtagDao
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.data.daos.NotesDao
 import social.plasma.data.daos.UserMetadataDao
+import social.plasma.db.MIGRATION_5_6
 import social.plasma.db.PlasmaDb
 import social.plasma.db.converters.TagsTypeConverter
 import javax.inject.Singleton
@@ -31,6 +32,7 @@ object DatabaseModule {
         )
             .addTypeConverter(tagsTypeConverter)
             .fallbackToDestructiveMigration()
+            .addMigrations(MIGRATION_5_6)
             .build()
     }
 
@@ -58,3 +60,4 @@ object DatabaseModule {
     @Singleton
     fun providesHashTagDao(db: PlasmaDb): HashtagDao = db.hashtagDao()
 }
+
