@@ -1,33 +1,37 @@
 package social.plasma.opengraph
 
 import androidx.collection.LruCache
+import kotlinx.coroutines.withContext
 import org.jsoup.nodes.Document
 import java.net.URL
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 class OpenGraphParser @Inject constructor(
     private val documentProvider: DocumentProvider,
+    @Named("default") private val defaultDispatcher: CoroutineContext,
 ) {
     private val lruCache = LruCache<String, OpenGraphMetadata>(100)
 
-    suspend fun parse(url: URL): OpenGraphMetadata? {
+    suspend fun parse(url: URL): OpenGraphMetadata? = withContext(defaultDispatcher) {
         val cached = lruCache[url.toString()]
 
         if (cached != null) {
-            return cached
+            return@withContext cached
         }
 
         val doc = documentProvider.get(url)
 
-        doc ?: return null
+        doc ?: return@withContext null
 
         val metadata = getOpenGraphMetadata(doc, url)
 
         lruCache.put(url.toString(), metadata)
 
-        return metadata
+        return@withContext metadata
     }
 
     private fun getOpenGraphMetadata(
