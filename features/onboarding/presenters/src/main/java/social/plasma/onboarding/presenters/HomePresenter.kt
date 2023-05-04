@@ -1,7 +1,10 @@
 package social.plasma.onboarding.presenters
 
-import android.os.SystemClock
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
 import com.slack.circuit.onNavEvent
@@ -19,17 +22,16 @@ class HomePresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): HomeUiState {
-        var mLastClickTime: Long = 0
+        var navigationInFlight by remember { mutableStateOf(false) }
         return HomeUiState { event ->
             when (event) {
                 OnFabClick -> {
-                    if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
-                        return@HomeUiState
-                    } else {
-                        mLastClickTime = SystemClock.elapsedRealtime()
+                    if (!navigationInFlight) {
+                        navigationInFlight = true
                         navigator.goTo(ComposingScreen())
                     }
                 }
+
                 is HomeUiEvent.OnChildNav -> navigator.onNavEvent(event.navEvent)
             }
         }
