@@ -158,6 +158,7 @@ dependencies {
 
     debugImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.uitooling)
+    debugImplementation(libs.leakcanary)
 
     testImplementation(projects.common.utils.fakes)
     testImplementation(libs.androidx.paging.common)
