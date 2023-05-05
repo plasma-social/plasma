@@ -6,5 +6,6 @@ import social.plasma.models.NoteId
 
 @Parcelize
 data class ComposingScreen(
+    val content: String = "",
     val parentNote: NoteId? = null,
 ) : Screen

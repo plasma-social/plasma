@@ -5,7 +5,7 @@ import com.slack.circuit.CircuitUiState
 import social.plasma.models.ProfileMention
 import social.plasma.models.TagSuggestion
 
-data class ComposePostUiState(
+data class CreatePostUiState(
     val postButtonEnabled: Boolean = false,
     val title: String = "",
     val avatarUrl: String? = null,
@@ -15,7 +15,7 @@ data class ComposePostUiState(
     val autoCompleteSuggestions: List<AutoCompleteSuggestion> = emptyList(),
     val noteContent: TextFieldValue,
     val mentions: Map<String, ProfileMention> = emptyMap(),
-    val onEvent: (ComposePostUiEvent) -> Unit,
+    val onEvent: (CreatePostUiEvent) -> Unit,
 ) : CircuitUiState
 
 sealed interface AutoCompleteSuggestion {

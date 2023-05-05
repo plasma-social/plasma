@@ -4,4 +4,6 @@ import com.slack.circuit.Screen
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-object HeadlessAuthenticator : Screen
+data class HeadlessAuthenticator(
+    val exitScreen: Screen? = null,
+) : Screen

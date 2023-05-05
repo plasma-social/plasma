@@ -1,11 +1,14 @@
 package social.plasma
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle.State.CREATED
@@ -22,6 +25,7 @@ import com.slack.circuit.rememberCircuitNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
+import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.ui.theme.PlasmaTheme
 import javax.inject.Inject
 
@@ -33,11 +37,14 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var syncManager: SyncManager
 
+    private val newScreenRequest = mutableStateOf<Screen?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val startScreens: List<Screen> = listOf(HeadlessAuthenticator)
+        val startScreens: List<Screen> =
+            listOf(HeadlessAuthenticator(exitScreen = getStartingScreen(intent)))
 
         syncGlobalEvents()
         setContent {
@@ -45,6 +52,15 @@ class MainActivity : ComponentActivity() {
                 val backstack =
                     rememberSaveableBackStack { startScreens.forEach { screen -> push(screen) } }
                 val circuitNavigator = rememberCircuitNavigator(backstack)
+
+                LaunchedEffect(newScreenRequest.value, circuitNavigator) {
+                    val newScreen = newScreenRequest.value
+                    if (newScreen != null) {
+                        circuitNavigator.goTo(newScreen)
+                        newScreenRequest.value = null
+                    }
+                }
+
                 BackHandler(enabled = backstack.size > 1, onBack = circuitNavigator::pop)
                 Surface(color = MaterialTheme.colorScheme.background) {
                     CircuitCompositionLocals(circuitConfig) {
@@ -62,6 +78,27 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(CREATED) {
                 syncManager.startSync()
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val screen = getStartingScreen(intent)
+        newScreenRequest.value = screen
+    }
+
+    private fun getStartingScreen(intent: Intent?): Screen? {
+        return when (intent?.action) {
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) {
+                    ComposingScreen(content = text)
+                } else {
+                    null
+                }
+            }
+
+            else -> null
         }
     }
 }

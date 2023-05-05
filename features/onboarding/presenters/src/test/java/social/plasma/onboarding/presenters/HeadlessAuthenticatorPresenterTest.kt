@@ -5,9 +5,11 @@ import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import social.plasma.domain.interactors.GetAuthStatus
+import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.onboarding.screens.home.HomeScreen
 import social.plasma.features.onboarding.screens.login.LoginScreen
 import social.plasma.shared.repositories.api.AccountStateRepository
@@ -22,16 +24,24 @@ class HeadlessAuthenticatorPresenterTest {
     private val getAuthStatus = GetAuthStatus(accountStateRepository)
 
     private val presenter: HeadlessAuthenticatorPresenter
-        get() {
-            return HeadlessAuthenticatorPresenter(
-                navigator = navigator,
-                getAuthStatus = getAuthStatus
-            )
-        }
+        get() = presenter(HeadlessAuthenticator())
+
+    private fun presenter(args: HeadlessAuthenticator): HeadlessAuthenticatorPresenter {
+        return HeadlessAuthenticatorPresenter(
+            navigator = navigator,
+            getAuthStatus = getAuthStatus,
+            args = args
+        )
+    }
 
     @Before
     fun setup() {
         accountStateRepository.clearKeys()
+    }
+
+    @After
+    fun tearDown() {
+        navigator.assertIsEmpty()
     }
 
     @Test
@@ -62,6 +72,18 @@ class HeadlessAuthenticatorPresenterTest {
             awaitItem()
 
             assertThat(navigator.awaitResetRoot()).isEqualTo(LoginScreen)
+        }
+    }
+
+    @Test
+    fun `if args has exit screen go to exit screen`() = runTest {
+        accountStateRepository.setPublicKey(UUID.randomUUID().toString().encodeToByteArray())
+        val args = HeadlessAuthenticator(exitScreen = LoginScreen)
+        presenter(args).test {
+            awaitItem()
+
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitNextScreen()).isEqualTo(LoginScreen)
         }
     }
 }

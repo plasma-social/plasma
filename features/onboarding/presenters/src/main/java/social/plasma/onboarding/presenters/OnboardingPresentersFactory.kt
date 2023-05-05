@@ -13,14 +13,14 @@ class OnboardingPresentersFactory @Inject constructor(
     private val headlessAuthenticatorPresenter: HeadlessAuthenticatorPresenter.Factory,
     private val loginScreenPresenter: LoginPresenter.Factory,
     private val homePresenter: HomePresenter.Factory,
-): Presenter.Factory {
+) : Presenter.Factory {
     override fun create(
         screen: Screen,
         navigator: Navigator,
         context: CircuitContext,
     ): Presenter<*>? {
-        return when(screen) {
-            HeadlessAuthenticator -> headlessAuthenticatorPresenter.create(navigator)
+        return when (screen) {
+            is HeadlessAuthenticator -> headlessAuthenticatorPresenter.create(screen, navigator)
             LoginScreen -> loginScreenPresenter.create(navigator)
             HomeScreen -> homePresenter.create(navigator)
             else -> null
