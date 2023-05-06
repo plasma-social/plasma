@@ -6,9 +6,11 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle.State.CREATED
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.slack.circuit.CircuitCompositionLocals
 import com.slack.circuit.CircuitConfig
 import com.slack.circuit.NavigableCircuitContent
@@ -18,8 +20,7 @@ import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.push
 import com.slack.circuit.rememberCircuitNavigator
 import dagger.hilt.android.AndroidEntryPoint
-import social.plasma.domain.interactors.SyncContactsEvents
-import social.plasma.domain.interactors.SyncMyEvents
+import kotlinx.coroutines.launch
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.ui.theme.PlasmaTheme
 import javax.inject.Inject
@@ -30,10 +31,7 @@ class MainActivity : ComponentActivity() {
     lateinit var circuitConfig: CircuitConfig
 
     @Inject
-    lateinit var syncMyEvents: SyncMyEvents
-
-    @Inject
-    lateinit var syncMyContactsEvents: SyncContactsEvents
+    lateinit var syncManager: SyncManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,17 +39,8 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val startScreens: List<Screen> = listOf(HeadlessAuthenticator)
 
+        syncGlobalEvents()
         setContent {
-            // TODO find a better home for these
-            LaunchedEffect(Unit) { syncMyEvents.executeSync(Unit) }
-            LaunchedEffect(Unit) {
-                // TODO this API looks awkward. But perhaps it'll make more sense outside of compose
-                syncMyContactsEvents.apply {
-                    invoke(Unit)
-                    flow.collect {}
-                }
-            }
-
             PlasmaTheme(dynamicStatusBar = true) {
                 val backstack =
                     rememberSaveableBackStack { startScreens.forEach { screen -> push(screen) } }
@@ -64,6 +53,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun syncGlobalEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(CREATED) {
+                syncManager.startSync()
             }
         }
     }

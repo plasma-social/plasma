@@ -54,7 +54,8 @@ class ComposingScreenPresenterTest {
                 noteRepository = noteRepository,
                 getUserSuggestions = GetUserSuggestions(
                     userMetadataRepository,
-                    GetNip5Status(FakeNip5Validator(), coroutineContext)
+                    GetNip5Status(FakeNip5Validator(), coroutineContext),
+                    coroutineContext,
                 ),
                 accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
                 observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
@@ -141,6 +142,7 @@ class ComposingScreenPresenterTest {
 
             awaitItem()
             awaitItem()
+            awaitItem()
 
             with(awaitItem()) {
                 assertThat(showAutoComplete).isTrue()
@@ -189,9 +191,7 @@ class ComposingScreenPresenterTest {
             )
 
 
-            repeat(4) {
-                awaitItem()
-            }
+            awaitItem()
 
             with(awaitItem()) {
                 assertThat(noteContent.text).isEqualTo("@${pubKey.encoded()} ")

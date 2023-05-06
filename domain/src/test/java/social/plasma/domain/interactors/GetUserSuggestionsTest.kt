@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import org.junit.Test
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
@@ -16,10 +17,13 @@ import kotlin.coroutines.EmptyCoroutineContext
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetUserSuggestionsTest {
     private val userMetadataRepository = FakeUserMetadataRepository()
+    private val nip5Validator = FakeNip5Validator()
     private val getUserSuggestions = GetUserSuggestions(
-        userMetadataRepository, GetNip5Status(
-            FakeNip5Validator(), EmptyCoroutineContext
-        )
+        userMetadataRepository,
+        GetNip5Status(
+            nip5Validator, EmptyCoroutineContext
+        ),
+        EmptyCoroutineContext,
     )
 
     @Test
@@ -75,7 +79,33 @@ class GetUserSuggestionsTest {
         }
     }
 
-    private fun createUserMetadata() = UserMetadataEntity(
+    @Test
+    fun `emit initial suggestions and then emit suggestions with nip5 validation`() = runTest {
+        val userMetadata = createUserMetadata(nip5Identifier = "test@nip5.com")
+        userMetadataRepository.searchUsersResult = listOf(userMetadata)
+        nip5Validator.isValidResult = true
+
+        getUserSuggestions.apply {
+            invoke(GetUserSuggestions.Params("test"))
+
+            flow.test {
+                val expectedTag = TagSuggestion(
+                    pubKey = PubKey(userMetadata.pubkey.decodeHex()),
+                    imageUrl = null,
+                    title = userMetadata.name!!,
+                    nip5Identifier = userMetadata.nip05,
+                    isNip5Valid = null,
+                )
+                
+                assertThat(awaitItem()).containsExactly(expectedTag)
+                assertThat(awaitItem()).containsExactly(expectedTag.copy(isNip5Valid = true))
+            }
+        }
+    }
+
+    private fun createUserMetadata(
+        nip5Identifier: String? = null,
+    ) = UserMetadataEntity(
         name = "test",
         displayName = "",
         about = null,
@@ -84,7 +114,7 @@ class GetUserSuggestionsTest {
         pubkey = "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
         website = null,
         lud = null,
-        nip05 = null,
+        nip05 = nip5Identifier,
         picture = null,
     )
 }
