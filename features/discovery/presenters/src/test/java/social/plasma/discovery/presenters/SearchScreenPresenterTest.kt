@@ -43,10 +43,11 @@ class SearchScreenPresenterTest {
     private val userMetadataRepository = FakeUserMetadataRepository()
 
     private val getUserSuggestions = GetUserSuggestions(
-        userMetadataRepository,
-        GetNip5Status(
+        userMetadataRepository = userMetadataRepository,
+        getNip5Status = GetNip5Status(
             FakeNip5Validator(), EmptyCoroutineContext
-        )
+        ),
+        coroutineContext = EmptyCoroutineContext,
     )
     private val presenter: SearchScreenPresenter
         get() = SearchScreenPresenter(
