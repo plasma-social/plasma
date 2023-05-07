@@ -17,11 +17,11 @@ import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnBackClick
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnNoteChange
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnSubmitPost
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnUserSuggestionTapped
 import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnBackClick
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnNoteChange
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnSubmitPost
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnUserSuggestionTapped
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
@@ -31,7 +31,7 @@ import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import social.plasma.shared.utils.fakes.FakeStringManager
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ComposingScreenPresenterTest {
+class CreatePostScreenPresenterTest {
     private val navigator = FakeNavigator()
     private val stringManager = FakeStringManager(
         R.string.post to "post",
@@ -41,27 +41,31 @@ class ComposingScreenPresenterTest {
     private val noteRepository = FakeNoteRepository()
     private val userMetadataRepository = FakeUserMetadataRepository()
 
-    private val TestScope.presenter: ComposingScreenPresenter
-        get() {
-            return ComposingScreenPresenter(
-                navigator = navigator,
-                stringManager = stringManager,
-                sendNote = SendNote(
-                    ioDispatcher = coroutineContext,
-                    noteRepository = noteRepository
-                ),
-                args = ComposingScreen(),
-                noteRepository = noteRepository,
-                getUserSuggestions = GetUserSuggestions(
-                    userMetadataRepository,
-                    GetNip5Status(FakeNip5Validator(), coroutineContext),
-                    coroutineContext,
-                ),
-                accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
-                observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
-                getHashtagSuggestions = GetHashtagSuggestions(FakeHashTagDao()),
-            )
-        }
+    private val TestScope.presenter: CreatePostScreenPresenter
+        get() = presenter()
+
+    private fun TestScope.presenter(
+        args: ComposingScreen = ComposingScreen(),
+    ): CreatePostScreenPresenter {
+        return CreatePostScreenPresenter(
+            navigator = navigator,
+            stringManager = stringManager,
+            sendNote = SendNote(
+                ioDispatcher = coroutineContext,
+                noteRepository = noteRepository
+            ),
+            args = args,
+            noteRepository = noteRepository,
+            getUserSuggestions = GetUserSuggestions(
+                userMetadataRepository,
+                GetNip5Status(FakeNip5Validator(), coroutineContext),
+                coroutineContext,
+            ),
+            accountStateRepository = FakeAccountStateRepository(publicKey = "test".toByteArray()),
+            observeMyMetadata = ObserveUserMetadata(userMetadataRepository),
+            getHashtagSuggestions = GetHashtagSuggestions(FakeHashTagDao()),
+        )
+    }
 
     @Test
     fun `emits default state`() = runTest {
@@ -197,6 +201,21 @@ class ComposingScreenPresenterTest {
                 assertThat(noteContent.text).isEqualTo("@${pubKey.encoded()} ")
             }
 
+        }
+    }
+
+    @Test
+    fun `when screen args has note content, ui state content is prefilled`() = runTest {
+        val note = "test note"
+        val args = ComposingScreen(content = note)
+
+        presenter(args).test {
+            awaitItem()
+
+            with(awaitItem()) {
+                assertThat(noteContent.text).isEqualTo(note)
+                assertThat(noteContent.selection).isEqualTo(TextRange(note.length))
+            }
         }
     }
 

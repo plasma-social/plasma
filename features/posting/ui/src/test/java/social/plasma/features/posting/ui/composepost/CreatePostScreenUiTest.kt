@@ -10,7 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import social.plasma.features.posting.screens.AutoCompleteSuggestion.UserSuggestion
-import social.plasma.features.posting.screens.ComposePostUiState
+import social.plasma.features.posting.screens.CreatePostUiState
 import social.plasma.models.TagSuggestion
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
@@ -18,7 +18,7 @@ import social.plasma.ui.testutils.TestThemeConfig
 import social.plasma.ui.theme.PlasmaTheme
 
 @RunWith(TestParameterInjector::class)
-class ComposePostUiTest constructor(
+class CreatePostScreenUiTest constructor(
     @TestParameter testDevice: TestDevice,
     @TestParameter private val themeVariation: TestThemeConfig,
     @TestParameter fontScale: TestFontScale,
@@ -31,7 +31,7 @@ class ComposePostUiTest constructor(
     @Test
     fun default() {
         snapshot(
-            ComposePostUiState(
+            CreatePostUiState(
                 postButtonLabel = "Post",
                 placeholder = "What's zappening?",
                 postButtonEnabled = false,
@@ -44,7 +44,7 @@ class ComposePostUiTest constructor(
     @Test
     fun `button enabled`() {
         snapshot(
-            ComposePostUiState(
+            CreatePostUiState(
                 postButtonLabel = "Post",
                 placeholder = "What's zappening?",
                 postButtonEnabled = true,
@@ -57,7 +57,7 @@ class ComposePostUiTest constructor(
     @Test
     fun `displaying tag suggestions`() {
         snapshot(
-            ComposePostUiState(
+            CreatePostUiState(
                 postButtonLabel = "Post",
                 placeholder = "What's zappening?",
                 postButtonEnabled = true,
@@ -97,10 +97,10 @@ class ComposePostUiTest constructor(
         )
     }
 
-    private fun snapshot(uiState: ComposePostUiState) {
+    private fun snapshot(uiState: CreatePostUiState) {
         paparazzi.snapshot {
             PlasmaTheme(darkTheme = themeVariation.isDarkTheme) {
-                ComposePostUi().Content(
+                CreatePostScreenUi().Content(
                     state = uiState,
                     modifier = Modifier,
                 )

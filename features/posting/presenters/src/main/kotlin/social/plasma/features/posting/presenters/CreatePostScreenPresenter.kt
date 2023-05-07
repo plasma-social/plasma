@@ -30,16 +30,16 @@ import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.AutoCompleteSuggestion.UserSuggestion
-import social.plasma.features.posting.screens.ComposePostUiEvent
-import social.plasma.features.posting.screens.ComposePostUiState
 import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.features.posting.screens.CreatePostUiEvent
+import social.plasma.features.posting.screens.CreatePostUiState
 import social.plasma.models.NoteWithUser
 import social.plasma.models.ProfileMention
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
 
-class ComposingScreenPresenter @AssistedInject constructor(
+class CreatePostScreenPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val sendNote: SendNote,
     private val noteRepository: NoteRepository,
@@ -49,7 +49,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
     observeMyMetadata: ObserveUserMetadata,
     @Assisted private val args: ComposingScreen,
     @Assisted private val navigator: Navigator,
-) : Presenter<ComposePostUiState> {
+) : Presenter<CreatePostUiState> {
 
     private val myPubKey = PubKey(accountStateRepository.getPublicKey()!!.toByteString())
     private val avatarUrlFlow = observeMyMetadata.flow.map { it?.picture }
@@ -60,9 +60,16 @@ class ComposingScreenPresenter @AssistedInject constructor(
     }
 
     @Composable
-    override fun present(): ComposePostUiState {
+    override fun present(): CreatePostUiState {
         var submitting by remember { mutableStateOf(false) }
-        var noteContent by remember { mutableStateOf(TextFieldValue()) }
+        var noteContent by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    args.content,
+                    selection = TextRange(args.content.length)
+                )
+            )
+        }
         val mentions = remember { mutableStateMapOf<String, ProfileMention>() }
 
         val suggestedUsers by remember { getUserSuggestions.flow }.collectAsState(emptyList())
@@ -111,7 +118,8 @@ class ComposingScreenPresenter @AssistedInject constructor(
 
         LaunchedEffect(noteContent) {
             val lastWordBeforeCursor = noteContent.lastWordBeforeCursor
-            val query = if (lastWordBeforeCursor.startsWith("@")) lastWordBeforeCursor.drop(1) else ""
+            val query =
+                if (lastWordBeforeCursor.startsWith("@")) lastWordBeforeCursor.drop(1) else ""
 
             getUserSuggestions(GetUserSuggestions.Params(query))
         }
@@ -161,7 +169,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
             }
         }
 
-        return ComposePostUiState(
+        return CreatePostUiState(
             title = title,
             placeholder = stringManager[R.string.your_message],
             postButtonLabel = stringManager[R.string.post],
@@ -173,13 +181,13 @@ class ComposingScreenPresenter @AssistedInject constructor(
             autoCompleteSuggestions = autoCompleteSuggestions,
         ) { event ->
             when (event) {
-                ComposePostUiEvent.OnBackClick -> navigator.pop()
-                is ComposePostUiEvent.OnNoteChange -> noteContent = event.content
-                ComposePostUiEvent.OnSubmitPost -> {
+                CreatePostUiEvent.OnBackClick -> navigator.pop()
+                is CreatePostUiEvent.OnNoteChange -> noteContent = event.content
+                CreatePostUiEvent.OnSubmitPost -> {
                     submitting = true
                 }
 
-                is ComposePostUiEvent.OnUserSuggestionTapped -> {
+                is CreatePostUiEvent.OnUserSuggestionTapped -> {
                     val profileMention = ProfileMention(
                         text = "@${event.suggestion.title}",
                         pubkey = event.suggestion.pubKey,
@@ -195,7 +203,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
                         ) // trailing space to force the cursor to start a new "word"
                 }
 
-                is ComposePostUiEvent.OnHashTagSuggestionTapped -> {
+                is CreatePostUiEvent.OnHashTagSuggestionTapped -> {
                     noteContent =
                         noteContent.replaceTextForCurrentMention("#", "${event.hashtag} ")
                 }
@@ -219,7 +227,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
 
     private val TextFieldValue.lastWordBeforeCursor: String
         get() = getTextBeforeSelection(text.length).text
-            .replace("\n",  " ")
+            .replace("\n", " ")
             .split(" ")
             .lastOrNull() ?: ""
 
@@ -249,7 +257,7 @@ class ComposingScreenPresenter @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(args: ComposingScreen, navigator: Navigator): ComposingScreenPresenter
+        fun create(args: ComposingScreen, navigator: Navigator): CreatePostScreenPresenter
     }
 }
 

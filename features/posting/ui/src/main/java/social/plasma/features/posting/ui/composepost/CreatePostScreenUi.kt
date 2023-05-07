@@ -37,20 +37,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.Ui
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
-import social.plasma.features.posting.screens.ComposePostUiEvent
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnHashTagSuggestionTapped
-import social.plasma.features.posting.screens.ComposePostUiEvent.OnUserSuggestionTapped
-import social.plasma.features.posting.screens.ComposePostUiState
+import social.plasma.features.posting.screens.CreatePostUiEvent
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnHashTagSuggestionTapped
+import social.plasma.features.posting.screens.CreatePostUiEvent.OnUserSuggestionTapped
+import social.plasma.features.posting.screens.CreatePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
 import javax.inject.Inject
 
-class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
+class CreatePostScreenUi @Inject constructor() : Ui<CreatePostUiState> {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
-        state: ComposePostUiState, modifier: Modifier,
+        state: CreatePostUiState, modifier: Modifier,
     ) {
         val onEvent = state.onEvent
 
@@ -75,7 +75,7 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
         ) {
             Column {
                 CenterAlignedTopAppBar(title = { Text(state.title) }, navigationIcon = {
-                    IconButton(onClick = { onEvent(ComposePostUiEvent.OnBackClick) }) {
+                    IconButton(onClick = { onEvent(CreatePostUiEvent.OnBackClick) }) {
                         Icon(
                             painterResource(R.drawable.ic_chevron_back),
                             contentDescription = null,
@@ -84,7 +84,7 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                 }, actions = {
                     Button(
                         modifier = Modifier.padding(end = 16.dp),
-                        onClick = { onEvent(ComposePostUiEvent.OnSubmitPost) },
+                        onClick = { onEvent(CreatePostUiEvent.OnSubmitPost) },
                         enabled = state.postButtonEnabled
                     ) {
                         Text(state.postButtonLabel)
@@ -109,7 +109,7 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
                         value = state.noteContent,
                         onValueChange = { newValue ->
                             if (newValue != state.noteContent) {
-                                onEvent(ComposePostUiEvent.OnNoteChange(newValue))
+                                onEvent(CreatePostUiEvent.OnNoteChange(newValue))
                             }
                         },
                         visualTransformation = visualTransformation,
@@ -155,7 +155,7 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
     @Composable
     private fun HashtagSuggestion(
         suggestion: AutoCompleteSuggestion.HashtagSuggestion,
-        onEvent: (ComposePostUiEvent) -> Unit,
+        onEvent: (CreatePostUiEvent) -> Unit,
     ) {
         ListItem(modifier = Modifier.clickable {
             onEvent(
@@ -171,7 +171,7 @@ class ComposePostUi @Inject constructor() : Ui<ComposePostUiState> {
     @Composable
     private fun UserSuggestion(
         userSuggestion: AutoCompleteSuggestion.UserSuggestion,
-        onEvent: (ComposePostUiEvent) -> Unit,
+        onEvent: (CreatePostUiEvent) -> Unit,
     ) {
         val (suggestion) = userSuggestion
 

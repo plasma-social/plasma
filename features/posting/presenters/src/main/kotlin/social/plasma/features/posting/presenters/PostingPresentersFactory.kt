@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 
 class PostingPresentersFactory @Inject constructor(
-    private val composingScreen: ComposingScreenPresenter.Factory,
+    private val composingScreen: CreatePostScreenPresenter.Factory,
 ) : Presenter.Factory {
     override fun create(
         screen: Screen,
