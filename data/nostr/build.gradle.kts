@@ -66,7 +66,6 @@ dependencies {
 
     implementation(libs.secp256k1.jvm)
     implementation(libs.secp256k1.jvm.jni)
-    implementation(files("lib/secp256k1-kmp-jni-jvm-darwin-0.7.1.jar"))
 
     implementation(libs.timber)
 
