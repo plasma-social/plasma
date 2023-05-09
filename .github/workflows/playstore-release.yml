@@ -1,0 +1,47 @@
+name: Deploy to Google Play Store
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: 'adopt'
+      
+      - run: bash ./gradlew assembleRelease --stacktrace
+
+      - uses: r0adkll/sign-android-release@v1
+        name: Sign app APK
+        # ID used to access action output
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "30.0.2"
+
+      - name: Deploy APK to Google Play
+        run: |
+          echo "$PLAY_STORE_SERVICE_ACCOUNT_JSON" > service_account.json
+          curl -sSL "https://get.sdkman.io" | bash
+          source "/home/runner/.sdkman/bin/sdkman-init.sh"
+          sdk install fastlane
+          fastlane supply --apk ${{steps.sign_app.outputs.signedReleaseFile}} --track beta --json_key service_account.json
+        env:
+          PLAY_STORE_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}

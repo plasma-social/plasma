@@ -1,5 +1,6 @@
 package social.plasma.features.feeds.ui
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -29,6 +30,8 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
     @Composable
     override fun Content(state: HomeFeedsUiState, modifier: Modifier) {
         val onEvent = state.onEvent
+
+        Log.d("@@@", "Recompose HomeFeedsUi")
 
         val tabs = remember {
             listOf(

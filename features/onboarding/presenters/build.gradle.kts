@@ -49,6 +49,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.features.feeds.screens)
     implementation(projects.features.onboarding.screens)
     implementation(projects.features.posting.screens)
     implementation(projects.features.profile.screens)

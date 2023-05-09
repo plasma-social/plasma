@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -22,6 +23,8 @@ import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.push
 import com.slack.circuit.rememberCircuitNavigator
+import com.slack.circuit.retained.LocalRetainedStateRegistry
+import com.slack.circuit.retained.continuityRetainedStateRegistry
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
@@ -63,9 +66,11 @@ class MainActivity : ComponentActivity() {
 
                 BackHandler(enabled = backstack.size > 1, onBack = circuitNavigator::pop)
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    CircuitCompositionLocals(circuitConfig) {
-                        ContentWithOverlays {
-                            NavigableCircuitContent(circuitNavigator, backstack)
+                    CompositionLocalProvider(LocalRetainedStateRegistry provides continuityRetainedStateRegistry()) {
+                        CircuitCompositionLocals(circuitConfig) {
+                            ContentWithOverlays {
+                                NavigableCircuitContent(circuitNavigator, backstack)
+                            }
                         }
                     }
                 }

@@ -15,8 +15,8 @@ android {
         applicationId = "social.plasma"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 14
-        versionName = "0.0.14"
+        versionCode = 15
+        versionName = "0.0.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -112,6 +112,7 @@ dependencies {
     implementation(libs.androidx.workmanager)
 
     implementation(libs.circuit.core)
+    implementation(libs.circuit.retained)
     implementation(libs.circuit.overlay)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
@@ -158,6 +159,7 @@ dependencies {
 
     debugImplementation(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.uitooling)
+//    debugImplementation(libs.compose.runtime.tracing)
     debugImplementation(libs.leakcanary)
 
     testImplementation(projects.common.utils.fakes)
