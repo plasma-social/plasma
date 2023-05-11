@@ -93,4 +93,18 @@ abstract class EventsDao {
     @Query("SELECT * FROM events WHERE id = :id")
     abstract suspend fun getById(id: String): EventEntity?
 
+    /**
+     * Purges events that where not created by the given pubkey,
+     * or that do not make a reference to the given pubkey.
+     *
+     * @param excludedPubkey The pubkey to exclude from the purge.
+     * @param keepCount The maximum number of events to keep outside of the excluded pubkey.
+     */
+    @Query(
+        """DELETE FROM events WHERE pubkey != :excludedPubkey 
+        AND id NOT IN (SELECT source_event FROM pubkey_ref WHERE pubkey = :excludedPubkey)
+        AND id NOT IN (SELECT id FROM events WHERE pubkey != :excludedPubkey ORDER BY created_at DESC LIMIT :keepCount)"""
+    )
+    abstract suspend fun purgeEvents(excludedPubkey: String, keepCount: Int)
+
 }

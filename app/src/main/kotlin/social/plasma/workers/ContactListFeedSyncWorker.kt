@@ -1,4 +1,4 @@
-package social.plasma.sync
+package social.plasma.workers
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker

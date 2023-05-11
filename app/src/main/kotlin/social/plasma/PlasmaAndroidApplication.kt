@@ -12,8 +12,9 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 import io.sentry.android.core.SentryAndroid
-import social.plasma.sync.ContactListFeedSyncWorker
 import social.plasma.utils.CrashReportingTree
+import social.plasma.workers.ContactListFeedSyncWorker
+import social.plasma.workers.DatabasePurgeWorker
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -36,17 +37,31 @@ class PlasmaAndroidApplication : Application(), ImageLoaderFactory, Configuratio
             Timber.plant(CrashReportingTree())
         }
 
+        enqueueWorkers()
+    }
+
+    private fun enqueueWorkers() {
         val workManager = WorkManager.getInstance(this)
         // TODO move this to a better place
         val refreshContactListRequest =
             PeriodicWorkRequestBuilder<ContactListFeedSyncWorker>(15, TimeUnit.MINUTES)
                 .build()
+
+        val purgeDbRequest = PeriodicWorkRequestBuilder<DatabasePurgeWorker>(
+            24, TimeUnit.HOURS,
+        ).build()
+
         workManager.enqueueUniquePeriodicWork(
             "sync-contactlist-feed",
             ExistingPeriodicWorkPolicy.UPDATE,
             refreshContactListRequest
         )
 
+        workManager.enqueueUniquePeriodicWork(
+            "purge-db",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            purgeDbRequest
+        )
     }
 
     private fun setStrictMode() {

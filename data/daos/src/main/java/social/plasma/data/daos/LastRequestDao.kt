@@ -16,4 +16,7 @@ abstract class LastRequestDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsert(entity: LastRequestEntity): Long
+
+    @Query("DELETE FROM last_requests WHERE request in (:requests)")
+    abstract suspend fun purgeRequests(requests: List<Request>)
 }
