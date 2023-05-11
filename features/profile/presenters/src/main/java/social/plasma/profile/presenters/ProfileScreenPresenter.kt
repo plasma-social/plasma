@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.paging.PagingConfig
+import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.Navigator
 import com.slack.circuit.Presenter
 import dagger.assisted.Assisted
@@ -14,6 +15,9 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.toByteString
+import shortBech32
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.Nip5Status
 import social.plasma.domain.interactors.SyncProfileData
@@ -27,17 +31,15 @@ import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
 import social.plasma.feeds.presenters.feed.FeedPresenter
+import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
 import social.plasma.shared.repositories.api.AccountStateRepository
-import app.cash.nostrino.crypto.PubKey
-import okio.ByteString.Companion.decodeHex
-import okio.ByteString.Companion.toByteString
-import shortBech32
 
 class ProfileScreenPresenter @AssistedInject constructor(
     private val observeFollowingCount: ObserveFollowingCount,
     private val observeUserMetadata: ObserveUserMetadata,
     private val observePagedProfileFeed: ObservePagedProfileFeed,
     private val syncProfileData: SyncProfileData,
+    private val notePagingFlowMapper: NotePagingFlowMapper,
     private val observeUserIsInContacts: ObserveUserIsInContacts,
     private val getNip5Status: GetNip5Status,
     accountStateRepository: AccountStateRepository,
@@ -62,15 +64,18 @@ class ProfileScreenPresenter @AssistedInject constructor(
         )
 
     private val feedsPresenter =
-        feedPresenterFactory.create(navigator, observePagedProfileFeed.flow.onStart {
-            observePagedProfileFeed(
-                ObservePagedProfileFeed.Params(
-                    pubKey = pubKey, pagingConfig = PagingConfig(
-                        pageSize = 20,
+        feedPresenterFactory.create(
+            navigator,
+            notePagingFlowMapper.map(observePagedProfileFeed.flow).onStart {
+                observePagedProfileFeed(
+                    ObservePagedProfileFeed.Params(
+                        pubKey = pubKey,
+                        pagingConfig = PagingConfig(
+                            pageSize = 20,
+                        )
                     )
                 )
-            )
-        })
+            })
 
     private val contactsCount = observeFollowingCount.flow.onStart {
         observeFollowingCount(pubKey)
@@ -132,6 +137,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
                         is FeedUiEvent.OnProfileClick -> {
                             if (event.pubKey != userData.publicKey) onFeedEvent(event)
                         }
+
                         else -> onFeedEvent(event)
                     }
                 }

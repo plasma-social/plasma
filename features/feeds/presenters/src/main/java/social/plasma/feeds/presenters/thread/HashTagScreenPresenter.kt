@@ -17,6 +17,7 @@ import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.feeds.presenters.feed.FeedPresenter
+import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
 import social.plasma.shared.utils.api.StringManager
@@ -28,6 +29,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
     feedPresenterFactory: FeedPresenter.Factory,
     observePagedHashTagFeed: ObservePagedHashTagFeed,
     private val syncHashTagEvents: SyncHashTagEvents,
+    notePagingFlowMapper: NotePagingFlowMapper,
     private val stringManager: StringManager,
     private val openGraphParser: OpenGraphParser,
     @Assisted private val args: HashTagFeedScreen,
@@ -44,7 +46,8 @@ class HashTagScreenPresenter @AssistedInject constructor(
         )
     }
 
-    private val feedPresenter = feedPresenterFactory.create(navigator, pagingFlow)
+    private val feedPresenter =
+        feedPresenterFactory.create(navigator, notePagingFlowMapper.map(pagingFlow))
     private val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata? =
         {
             try {
