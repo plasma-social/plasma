@@ -5,26 +5,29 @@ import com.tinder.scarlet.WebSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.reactive.asFlow
 import social.plasma.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
-import social.plasma.nostr.relay.message.ClientMessage.*
+import social.plasma.nostr.relay.message.ClientMessage.EventMessage
+import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
 import timber.log.Timber
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
 class RelayImpl(
-    url: String,
+    private val url: String,
     private val service: RelayService,
     private val scope: CoroutineScope,
 ) : Relay {
@@ -32,17 +35,20 @@ class RelayImpl(
     private val tag = "relay-$url"
     private val logger get() = Timber.tag(tag)
 
-    override val connectionStatus: Flow<Relay.RelayStatus> =
-        service.webSocketEventFlow().asFlow()
-            .filterNot { it is WebSocket.Event.OnMessageReceived }
-            .map { Relay.RelayStatus(url, it.toStatus()) }
+    override val connectionStatus: Flow<Relay.RelayStatus> = service.webSocketEventChannel()
+        .consumeAsFlow()
+        .filterNot { it is WebSocket.Event.OnMessageReceived }
+        .mapLatest { Relay.RelayStatus(url, it.toStatus()) }
 
-    override val relayMessages = service.relayMessageFlow().asFlow()
-    private val subscriptions: AtomicReference<Set<SubscribeMessage>> = AtomicReference(setOf())
-    private val pendingSendEvents: AtomicReference<List<ClientMessage>> = AtomicReference(listOf())
+    private val subscriptions = AtomicReference<Set<SubscribeMessage>>(setOf())
+    private val pendingSendEvents = AtomicReference<List<ClientMessage>>(listOf())
     private val status = MutableStateFlow<Relay.Status?>(null)
 
+    override val relayMessages =
+        MutableSharedFlow<RelayMessage>(replay = 0, extraBufferCapacity = 500)
+
     private var connectionLoop: Job? = null
+    private var messagesJob: Job? = null
 
     override fun subscribe(subscribeMessage: SubscribeMessage): Flow<RelayMessage.EventRelayMessage> {
         subscriptions.getAndUpdate { it.plus(subscribeMessage) }
@@ -110,6 +116,7 @@ class RelayImpl(
             when (it.status) {
                 is Relay.Status.Connected -> {
                     logger.d("connection opened: %s", it)
+                    consumeRelayMessages()
                     publishPendingEvents()
                     reSubscribeAll() // TODO - do we need to resubscribe on each reconnect?
                 }
@@ -120,6 +127,7 @@ class RelayImpl(
 
                 is Relay.Status.ConnectionClosed -> {
                     logger.d("connection closed: %s", it.status.shutdownReason)
+                    messagesJob?.cancel()
                 }
 
                 is Relay.Status.ConnectionFailed -> {
@@ -127,6 +135,15 @@ class RelayImpl(
                 }
             }
         }.launchIn(scope)
+    }
+
+    private fun consumeRelayMessages() {
+        messagesJob?.cancel()
+        messagesJob = service.relayMessageChannel()
+            .consumeAsFlow()
+            .filterIsInstance<RelayMessage.EventRelayMessage>()
+            .onEach { relayMessages.emit(it) }
+            .launchIn(scope)
     }
 
     override fun disconnect() {
