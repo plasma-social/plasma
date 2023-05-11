@@ -140,6 +140,7 @@ dependencies {
 
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
+    implementation(libs.nostrino)
 
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.interceptor.logging)
