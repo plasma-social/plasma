@@ -2,6 +2,7 @@ package social.plasma.models.events
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 
 /**
@@ -14,7 +15,15 @@ import androidx.room.Index
 @Entity(
     tableName = "pubkey_ref",
     primaryKeys = ["source_event", "pubkey"],
-    indices = [Index("source_event"), Index("pubkey")]
+    indices = [Index("source_event"), Index("pubkey")],
+    foreignKeys = [
+        ForeignKey(
+            entity = EventEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["source_event"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
 )
 data class PubkeyReferenceEntity(
     @ColumnInfo("source_event")

@@ -2,6 +2,7 @@ package social.plasma.models.events
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 
 /**
@@ -13,7 +14,15 @@ import androidx.room.Index
 @Entity(
     tableName = "hashtag_ref",
     primaryKeys = ["source_event", "hashtag"],
-    indices = [Index("hashtag"), Index("hashtag", "source_event", unique = true)]
+    indices = [Index("hashtag"), Index("hashtag", "source_event", unique = true)],
+    foreignKeys = [
+        ForeignKey(
+            entity = EventEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["source_event"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
 )
 data class HashTagReferenceEntity(
     @ColumnInfo("source_event")
