@@ -113,6 +113,7 @@ dependencies {
 
     implementation(libs.circuit.core)
     implementation(libs.circuit.overlay)
+    implementation(libs.circuit.retained)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)

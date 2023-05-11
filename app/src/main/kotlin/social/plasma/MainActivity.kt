@@ -7,13 +7,11 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.Lifecycle.State.CREATED
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.slack.circuit.CircuitCompositionLocals
 import com.slack.circuit.CircuitConfig
 import com.slack.circuit.NavigableCircuitContent
@@ -22,8 +20,12 @@ import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.push
 import com.slack.circuit.rememberCircuitNavigator
+import com.slack.circuit.retained.LocalRetainedStateRegistry
+import com.slack.circuit.retained.continuityRetainedStateRegistry
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import dagger.hilt.android.scopes.ActivityRetainedScoped
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.ui.theme.PlasmaTheme
@@ -37,6 +39,10 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var syncManager: SyncManager
 
+    @Inject
+    @ActivityRetainedScoped
+    lateinit var coroutineScope: CoroutineScope
+
     private val newScreenRequest = mutableStateOf<Screen?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +52,6 @@ class MainActivity : ComponentActivity() {
         val startScreens: List<Screen> =
             listOf(HeadlessAuthenticator(exitScreen = getStartingScreen(intent)))
 
-        syncGlobalEvents()
         setContent {
             PlasmaTheme(dynamicStatusBar = true) {
                 val backstack =
@@ -63,9 +68,11 @@ class MainActivity : ComponentActivity() {
 
                 BackHandler(enabled = backstack.size > 1, onBack = circuitNavigator::pop)
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    CircuitCompositionLocals(circuitConfig) {
-                        ContentWithOverlays {
-                            NavigableCircuitContent(circuitNavigator, backstack)
+                    CompositionLocalProvider(LocalRetainedStateRegistry provides continuityRetainedStateRegistry()) {
+                        CircuitCompositionLocals(circuitConfig) {
+                            ContentWithOverlays {
+                                NavigableCircuitContent(circuitNavigator, backstack)
+                            }
                         }
                     }
                 }
@@ -73,13 +80,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun syncGlobalEvents() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(CREATED) {
-                syncManager.startSync()
-            }
-        }
-    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -99,6 +99,13 @@ class MainActivity : ComponentActivity() {
             }
 
             else -> null
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isChangingConfigurations.not()) {
+            coroutineScope.cancel()
         }
     }
 }
