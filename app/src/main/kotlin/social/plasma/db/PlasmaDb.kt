@@ -39,7 +39,7 @@ import social.plasma.models.events.PubkeyReferenceEntity
     views = [
         NoteView::class,
     ],
-    version = 6,
+    version = 7,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),

@@ -2,6 +2,7 @@ package social.plasma.models.events
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 
 /**
@@ -16,7 +17,13 @@ import androidx.room.Index
 @Entity(
     tableName = "event_ref",
     primaryKeys = ["source_event", "target_event"],
-    indices = [Index("target_event"), Index("source_event")]
+    indices = [Index("target_event"), Index("source_event")],
+    foreignKeys = [ForeignKey(
+        entity = EventEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["source_event"],
+        onDelete = ForeignKey.CASCADE
+    )]
 )
 data class EventReferenceEntity(
     @ColumnInfo("source_event")
