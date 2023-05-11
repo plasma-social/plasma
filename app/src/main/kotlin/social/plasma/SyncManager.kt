@@ -1,8 +1,7 @@
 package social.plasma
 
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import social.plasma.domain.interactors.SyncContactsEvents
@@ -10,24 +9,26 @@ import social.plasma.domain.interactors.SyncMyEvents
 import social.plasma.shared.repositories.api.AccountStateRepository
 import javax.inject.Inject
 
+@ActivityRetainedScoped
 class SyncManager @Inject constructor(
     accountStateRepository: AccountStateRepository,
     private val syncMyEvents: SyncMyEvents,
     private val syncMyContactsEvents: SyncContactsEvents,
+    private val coroutineScope: CoroutineScope,
 ) {
 
     private val isLoggedInFlow = accountStateRepository.isLoggedIn
-    private var job: Job? = null
 
-    suspend fun startSync() {
-        job?.cancel()
-        job = coroutineScope {
-            launch {
-                isLoggedInFlow.collect { isLoggedIn ->
-                    if (isLoggedIn) {
-                        launchSyncMyEvents()
-                        launchSyncMyContactsEvents()
-                    }
+    init {
+        startSync()
+    }
+
+    private fun startSync() {
+        coroutineScope.launch {
+            isLoggedInFlow.collect { isLoggedIn ->
+                if (isLoggedIn) {
+                    launchSyncMyEvents()
+                    launchSyncMyContactsEvents()
                 }
             }
         }
