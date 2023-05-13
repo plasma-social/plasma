@@ -11,13 +11,13 @@ import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
 import social.plasma.models.Tag
-import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
 
 internal class RealNoteRepository @Inject constructor(
-    private val relay: Relay,
+    private val relay: RelayManager,
     private val accountStateRepository: AccountStateRepository,
     private val notesDao: NotesDao,
 ) : NoteRepository {

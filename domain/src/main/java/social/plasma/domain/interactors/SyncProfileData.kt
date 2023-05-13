@@ -3,20 +3,24 @@ package social.plasma.domain.interactors
 import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import social.plasma.domain.Interactor
-import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.Filter
+import social.plasma.nostr.relay.message.RelayMessage
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 class SyncProfileData @Inject constructor(
-    private val relay: Relay,
+    private val relay: RelayManager,
     private val storeMetadataEvents: StoreMetadataEvents,
     private val storeEvents: StoreEvents,
     @Named("io") private val ioDispatcher: CoroutineContext,
@@ -31,14 +35,20 @@ class SyncProfileData @Inject constructor(
             Filter.userNotes(pubkey.key.hex()),
         )
 
-        val subscription = relay.subscribe(subscribeMessage)
+        val unsubscribeMessage = relay.subscribe(subscribeMessage)
+        val subscriptionMessages = relay.relayMessages
+            .filterIsInstance<RelayMessage.EventRelayMessage>()
+            .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
             .distinctUntilChanged()
             .map { it.event }
 
+
         merge(
-            storeMetadataEvents.flow.onStart { storeMetadataEvents(subscription) },
-            storeEvents.flow.onStart { storeEvents(subscription) },
-        ).collect()
+            storeMetadataEvents.flow.onStart { storeMetadataEvents(subscriptionMessages) },
+            storeEvents.flow.onStart { storeEvents(subscriptionMessages) },
+        ).onCompletion {
+            relay.unsubscribe(unsubscribeMessage)
+        }.collect()
     }
 
     data class Params(

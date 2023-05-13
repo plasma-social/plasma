@@ -25,4 +25,7 @@ interface ContactsDao {
 
     @Query("DELETE FROM contacts WHERE owner = :owner")
     fun delete(owner: String)
+
+    @Query("SELECT * FROM events WHERE kind = ${Event.Kind.ContactList} AND pubkey = :pubkey ORDER BY created_at DESC LIMIT 1")
+    suspend fun getNewestEvent(pubkey: String): EventEntity?
 }

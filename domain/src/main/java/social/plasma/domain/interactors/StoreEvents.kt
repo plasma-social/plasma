@@ -1,6 +1,7 @@
 package social.plasma.domain.interactors
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -21,6 +22,9 @@ class StoreEvents @Inject constructor(
     override fun createObservable(params: Flow<Event>): Flow<List<EventEntity>> {
         return params.map { it.toEventEntity() }
             .chunked(500, 500)
+            .catch { e ->
+                e.printStackTrace()
+            }
             .onEach { events ->
                 eventsDao.insert(events)
             }

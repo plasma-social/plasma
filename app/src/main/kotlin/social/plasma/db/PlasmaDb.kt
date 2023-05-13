@@ -9,11 +9,13 @@ import social.plasma.data.daos.EventsDao
 import social.plasma.data.daos.HashtagDao
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.data.daos.NotesDao
+import social.plasma.data.daos.RelayInfoDao
 import social.plasma.data.daos.UserMetadataDao
 import social.plasma.db.converters.TagsTypeConverter
 import social.plasma.models.ContactEntity
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.NoteView
+import social.plasma.models.RelayEntity
 import social.plasma.models.UserMetadataEntity
 import social.plasma.models.UserMetadataFtsEntity
 import social.plasma.models.events.EventEntity
@@ -35,16 +37,18 @@ import social.plasma.models.events.PubkeyReferenceEntity
         UserMetadataEntity::class,
         UserMetadataFtsEntity::class,
         ContactEntity::class,
+        RelayEntity::class,
     ],
     views = [
         NoteView::class,
     ],
-    version = 7,
+    version = 8,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 7, to = 8),
     ]
 )
 @TypeConverters(TagsTypeConverter::class)
@@ -57,4 +61,6 @@ abstract class PlasmaDb : RoomDatabase() {
     abstract fun lastRequestDao(): LastRequestDao
 
     abstract fun hashtagDao(): HashtagDao
+
+    abstract fun relayInfoDao(): RelayInfoDao
 }
