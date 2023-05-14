@@ -53,6 +53,7 @@ dependencies {
     implementation(projects.common.utils.api)
     implementation(projects.data.daos)
     implementation(projects.data.models)
+    implementation(projects.data.nostr)
     implementation(projects.domain)
     implementation(projects.features.feeds.screens)
     implementation(projects.features.posting.screens)

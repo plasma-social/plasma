@@ -2,8 +2,11 @@ package social.plasma.domain.interactors
 
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.withContext
@@ -13,16 +16,17 @@ import social.plasma.domain.Interactor
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.NoteId
 import social.plasma.models.Request
-import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
+import social.plasma.nostr.relay.message.RelayMessage
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 class SyncThreadEvents @Inject constructor(
-    private val relay: Relay,
+    private val relay: RelayManager,
     private val storeEvents: StoreEvents,
     private val notesDao: NotesDao,
     private val lastRequestDao: LastRequestDao,
@@ -36,8 +40,11 @@ class SyncThreadEvents @Inject constructor(
             lastRequestDao.lastRequest(Request.SYNC_THREAD, noteId.hex)?.timestamp ?: Instant.EPOCH
 
         val noteTags: List<List<String>> = notesDao.getById(noteId.hex)?.noteEntity?.tags ?: run {
-            relay.subscribe(SubscribeMessage(filter = Filter(ids = setOf(noteId.hex))))
-                .take(1)
+            val unsubscribeMessage =
+                relay.subscribe(SubscribeMessage(filter = Filter(ids = setOf(noteId.hex))))
+
+            relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+                .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }.take(1)
                 .map { it.event.tags }
                 .first()
         }
@@ -49,8 +56,11 @@ class SyncThreadEvents @Inject constructor(
             Filter(eTags = setOf(noteId.hex), since = lastRequest),
         )
 
-        val subscription =
-            relay.subscribe(subscribeMessage).distinctUntilChanged().map { it.event }
+        val unsubscribeMessage = relay.subscribe(subscribeMessage)
+        val subscription = relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+            .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
+            .distinctUntilChanged().map { it.event }
+            .onCompletion { relay.unsubscribe(unsubscribeMessage) }
 
         storeEvents(subscription)
         storeEvents.flow.onStart {

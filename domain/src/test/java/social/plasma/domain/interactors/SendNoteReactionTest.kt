@@ -1,11 +1,14 @@
 package social.plasma.domain.interactors
 
+import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKeyGenerator
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Before
@@ -18,9 +21,6 @@ import social.plasma.models.Event
 import social.plasma.models.NoteId
 import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
-import app.cash.nostrino.crypto.PubKey
-import app.cash.nostrino.crypto.SecKeyGenerator
-import okio.ByteString.Companion.decodeHex
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
@@ -37,7 +37,7 @@ class SendNoteReactionTest {
         secretKey = mySecretKey,
         publicKey = myPubKey,
     )
-    private val relay = FakeRelay()
+    private val relay = FakeRelayManager()
 
     private val TestScope.sendReaction: SendNoteReaction
         get() {
@@ -45,7 +45,7 @@ class SendNoteReactionTest {
                 ioDispatcher = coroutineContext,
                 accountStateRepository = accountStateRepository,
                 noteRepository = noteRepository,
-                relay = relay,
+                relayManager = relay,
             )
         }
 
@@ -115,7 +115,6 @@ class SendNoteReactionTest {
 
         relay.sendEventTurbine.expectNoEvents()
     }
-
 
 
     @Test

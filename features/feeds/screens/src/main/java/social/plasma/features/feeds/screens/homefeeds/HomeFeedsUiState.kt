@@ -5,5 +5,6 @@ import com.slack.circuit.CircuitUiState
 data class HomeFeedsUiState(
     val title: String,
     val toolbarAvatar: String?,
+    val relayConnectionRatio: String?,
     val onEvent: (HomeFeedsUiEvent) -> Unit,
 ) : CircuitUiState

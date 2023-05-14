@@ -6,6 +6,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,7 +57,15 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                 title = state.title,
                 avatarUrl = state.toolbarAvatar,
                 onAvatarClick = { onEvent(HomeFeedsUiEvent.OnToolbarAvatarTapped) },
+                actions = {
+                    state.relayConnectionRatio?.let {
+                        TextButton(onClick = {}) {
+                            Text(text = it)
+                        }
+                    }
+                }
             )
+
             PlasmaTabRow(
                 selectedTabIndex = selectedTab,
             ) {

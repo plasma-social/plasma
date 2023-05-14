@@ -11,6 +11,7 @@ import social.plasma.data.daos.EventsDao
 import social.plasma.data.daos.HashtagDao
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.data.daos.NotesDao
+import social.plasma.data.daos.RelayInfoDao
 import social.plasma.data.daos.UserMetadataDao
 import social.plasma.db.MIGRATION_5_6
 import social.plasma.db.Migration_6_7
@@ -60,5 +61,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providesHashTagDao(db: PlasmaDb): HashtagDao = db.hashtagDao()
+
+    @Provides
+    @Singleton
+    fun providesRelayInfoDao(db: PlasmaDb): RelayInfoDao = db.relayInfoDao()
 }
 

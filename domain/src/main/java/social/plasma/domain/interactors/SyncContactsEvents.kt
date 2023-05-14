@@ -3,30 +3,25 @@ package social.plasma.domain.interactors
 import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import social.plasma.domain.InvokeStatus
+import okio.ByteString.Companion.toByteString
 import social.plasma.domain.SubjectInteractor
 import social.plasma.domain.observers.ObserveContacts
-import okio.ByteString.Companion.toByteString
-import social.plasma.nostr.relay.Relay
-import social.plasma.nostr.relay.message.ClientMessage
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
-import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
+import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.shared.repositories.api.AccountStateRepository
 import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SyncContactsEvents @Inject constructor(
-    private val relay: Relay,
+    private val relay: RelayManager,
     private val accountStateRepository: AccountStateRepository,
     private val storeEvents: StoreEvents,
     private val observeContacts: ObserveContacts,
@@ -39,16 +34,21 @@ class SyncContactsEvents @Inject constructor(
             observeContacts(ObserveContacts.Params(pubKey))
         }.filter { it.isNotEmpty() }.flatMapLatest { contactList ->
             val contacts = contactList.map { it.pubKey }.toSet()
-            storeEvents(
-                relay.subscribe(
-                    SubscribeMessage(
-                        filter = Filter.userNotes(
-                            pubKeys = contacts
-                        )
+            val unsubscribeMessage = relay.subscribe(
+                SubscribeMessage(
+                    filter = Filter.userNotes(
+                        pubKeys = contacts
                     )
-                ).map { it.event }
+                )
             )
-            storeEvents.flow
+            storeEvents(
+                relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+                    .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
+                    .map { it.event }
+            )
+            storeEvents.flow.onCompletion {
+                relay.unsubscribe(unsubscribeMessage)
+            }
         }
     }
 }

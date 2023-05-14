@@ -22,6 +22,8 @@ interface EventRefiner {
 
     fun toRelayDetailList(message: EventRelayMessage): TypedEvent<Map<String, RelayDetails>>?
 
+    fun toRelayDetailList(event: Event): TypedEvent<Map<String, RelayDetails>>?
+
     fun toReaction(relayMessage: EventRelayMessage): TypedEvent<Reaction>?
 }
 
@@ -50,8 +52,13 @@ internal class RealEventRefiner @Inject constructor(
             ?.let { it.typed(it.typed("").contacts()) }
 
     override fun toRelayDetailList(message: EventRelayMessage): TypedEvent<Map<String, RelayDetails>>? =
-        message.event.takeIf { it.kind == Event.Kind.ContactList && it.content.isNotEmpty() }
+        toRelayDetailList(message.event)
+
+
+    override fun toRelayDetailList(event: Event): TypedEvent<Map<String, RelayDetails>>? =
+        event.takeIf { it.kind == Event.Kind.ContactList && it.content.isNotEmpty() }
             ?.let { it.typed(relayDetailsAdapter.fromJson(it.content)!!) }
+
 
     override fun toReaction(relayMessage: EventRelayMessage): TypedEvent<Reaction>? =
         relayMessage.event.takeIf { it.kind == Event.Kind.Reaction }

@@ -2,21 +2,28 @@ package social.plasma.nostr.relay
 
 import app.cash.nostrino.crypto.SecKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
+import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
-import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 
 interface Relay {
-    val connectionStatus: Flow<RelayStatus>
+    val canRead: Boolean
+    val canWrite: Boolean
+    val url: String
+
+    val connectionStatus: StateFlow<RelayStatus>
 
     val relayMessages: Flow<RelayMessage>
 
-    suspend fun connect()
+    fun connect()
 
     fun disconnect()
 
-    fun subscribe(subscribeMessage: SubscribeMessage): Flow<EventRelayMessage>
+    fun subscribe(subscribeMessage: SubscribeMessage)
+
+    fun unsubscribe(unsubscribeMessage: UnsubscribeMessage)
 
     suspend fun send(event: EventMessage)
     suspend fun sendNote(
@@ -31,6 +38,8 @@ interface Relay {
     )
 
     sealed interface Status {
+        object Initial : Status
+
         object Connected : Status
 
         data class ConnectionClosing(val shutdownReason: ShutdownReason) : Status

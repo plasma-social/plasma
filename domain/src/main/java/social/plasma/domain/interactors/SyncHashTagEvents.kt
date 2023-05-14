@@ -1,24 +1,27 @@
 package social.plasma.domain.interactors
 
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.domain.Interactor
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.Request
-import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.Filter
+import social.plasma.nostr.relay.message.RelayMessage
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 class SyncHashTagEvents @Inject constructor(
-    private val relay: Relay,
+    private val relay: RelayManager,
     private val storeEvents: StoreEvents,
     private val lastRequestDao: LastRequestDao,
     @Named("io") private val ioDispatcher: CoroutineContext,
@@ -35,10 +38,13 @@ class SyncHashTagEvents @Inject constructor(
             Filter(hashTags = setOf(hashTagWithoutSign), since = lastRequest, limit = 250),
         )
 
-        val subscription =
-            relay.subscribe(subscribeMessage).distinctUntilChanged().map { it.event }
+        val unsubscribeMessage = relay.subscribe(subscribeMessage)
+        val subscriptionEvents =
+            relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+                .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
+                .map { it.event }
 
-        storeEvents(subscription)
+        storeEvents(subscriptionEvents)
         storeEvents.flow.onStart {
             lastRequestDao.upsert(
                 LastRequestEntity(
@@ -46,6 +52,8 @@ class SyncHashTagEvents @Inject constructor(
                     resourceId = hashTagWithoutSign
                 )
             )
+        }.onCompletion {
+            relay.unsubscribe(unsubscribeMessage)
         }.collect()
     }
 

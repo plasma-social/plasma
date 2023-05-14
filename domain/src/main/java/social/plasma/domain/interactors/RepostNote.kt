@@ -9,7 +9,7 @@ import social.plasma.domain.Interactor
 import social.plasma.models.Event
 import social.plasma.models.NoteId
 import social.plasma.models.events.EventEntity
-import social.plasma.nostr.relay.Relay
+import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.shared.repositories.api.AccountStateRepository
 import java.time.Instant
@@ -21,7 +21,7 @@ class RepostNote @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
     private val moshi: Moshi,
     private val accountStateRepository: AccountStateRepository,
-    private val relays: Relay,
+    private val relayManager: RelayManager,
     private val eventsDao: EventsDao,
 ) : Interactor<RepostNote.Params>() {
     data class Params(
@@ -57,7 +57,7 @@ class RepostNote @Inject constructor(
                 content = noteJson,
             )
 
-            relays.send(ClientMessage.EventMessage(event = event))
+            relayManager.send(ClientMessage.EventMessage(event = event))
         }
     }
 

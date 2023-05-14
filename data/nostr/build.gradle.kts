@@ -44,6 +44,7 @@ android {
 
 dependencies {
     implementation(projects.data.models)
+    implementation(projects.data.daos)
     implementation(libs.androidx.core.ktx)
     implementation(libs.coroutines.android)
 
