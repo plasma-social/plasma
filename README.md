@@ -9,15 +9,11 @@ the [nostr](https://github.com/nostr-protocol/nostr) protocol.
 <img src="./screengrabs/profile.png" width="245" />
 <img src="./screengrabs/timeline.png" width="245" />
 <img src="./screengrabs/thread.png" width="245" />
-</div>
-<div>
-<img src="./screengrabs/compose-hashtags.png" width="490">
-<img src="./screengrabs/compose-profile.png" width="490">
-</div>
-<div>
-<img src="./screengrabs/search-suggestions.png" width="325">
-<img src="./screengrabs/search-hashtags.png" width="325">
-<img src="./screengrabs/search-profile.png" width="325">
+<img src="./screengrabs/compose-hashtags.png" width="245">
+<img src="./screengrabs/compose-profile.png" width="245">
+<img src="./screengrabs/search-suggestions.png" width="245">
+<img src="./screengrabs/search-hashtags.png" width="245">
+<img src="./screengrabs/search-profile.png" width="245">
 </div>
 
 ## NIPS Implemented
