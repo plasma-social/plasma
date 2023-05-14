@@ -1,11 +1,23 @@
 ![build status](https://github.com/plasma-social/plasma/actions/workflows/android.yml/badge.svg?branch=main)
+
 # plasma
-An offline-first social media app for Android, built on the [nostr](https://github.com/nostr-protocol/nostr) protocol.
+
+An offline-first social media app for Android, built on
+the [nostr](https://github.com/nostr-protocol/nostr) protocol.
 <div>
 <img src="./screengrabs/login.png" width="245" />
 <img src="./screengrabs/profile.png" width="245" />
 <img src="./screengrabs/timeline.png" width="245" />
 <img src="./screengrabs/thread.png" width="245" />
+</div>
+<div>
+<img src="./screengrabs/compose-hashtags.png" width="490">
+<img src="./screengrabs/compose-profile.png" width="490">
+</div>
+<div>
+<img src="./screengrabs/search-suggestions.png" width="325">
+<img src="./screengrabs/search-hashtags.png" width="325">
+<img src="./screengrabs/search-profile.png" width="325">
 </div>
 
 ## NIPS Implemented
