@@ -56,6 +56,7 @@ dependencies {
     implementation(projects.common.utils.api)
     implementation(projects.domain)
     implementation(projects.data.models)
+    implementation(projects.data.nostr)
 
     implementation(libs.circuit.core)
     implementation(libs.circuit.retained)
