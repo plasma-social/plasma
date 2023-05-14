@@ -59,7 +59,7 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                 onAvatarClick = { onEvent(HomeFeedsUiEvent.OnToolbarAvatarTapped) },
                 actions = {
                     state.relayConnectionRatio?.let {
-                        TextButton(onClick = {}) {
+                        TextButton(onClick = { onEvent(HomeFeedsUiEvent.OnRelayInfoTapped) }) {
                             Text(text = it)
                         }
                     }

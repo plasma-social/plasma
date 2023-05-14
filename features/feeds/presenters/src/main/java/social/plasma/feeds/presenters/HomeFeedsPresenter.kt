@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.observers.ObserveCurrentUserMetadata
+import social.plasma.features.discovery.screens.relaylist.RelayListScreen
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiState
@@ -56,6 +57,10 @@ class HomeFeedsPresenter @AssistedInject constructor(
                     currentUserMetadata?.pubkey?.let {
                         navigator.goTo(ProfileScreen(it))
                     }
+                }
+
+                is HomeFeedsUiEvent.OnRelayInfoTapped -> {
+                    navigator.goTo(RelayListScreen)
                 }
 
                 is HomeFeedsUiEvent.ChildNav -> {

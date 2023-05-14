@@ -55,6 +55,7 @@ dependencies {
     implementation(projects.data.models)
     implementation(projects.data.nostr)
     implementation(projects.domain)
+    implementation(projects.features.discovery.screens)
     implementation(projects.features.feeds.screens)
     implementation(projects.features.posting.screens)
     implementation(projects.features.profile.screens)
