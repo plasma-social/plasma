@@ -140,7 +140,6 @@ class RelayImpl(
     }
 
     override fun connect() {
-        consumeRelayMessages()
         consumeRelayStatus()
         connectionLoop =
             _connectionStatus.onEach { handleConnectionStatusChange(it) }
@@ -175,6 +174,7 @@ class RelayImpl(
 
     private fun handleConnectedStatus(status: Relay.RelayStatus) {
         logger.d("connection opened: %s", status)
+        consumeRelayMessages()
         publishPendingEvents()
         reSubscribeAll()
     }

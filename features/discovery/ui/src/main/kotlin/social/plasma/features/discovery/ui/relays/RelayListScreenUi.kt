@@ -46,7 +46,7 @@ class RelayListScreenUi : Ui<RelayListUiState> {
                         ), leadingContent = {
                         when (item.status) {
                             RelayStatus.CONNECTED -> Badge(containerColor = Color.Green)
-                            RelayStatus.CONNECTING -> Badge(containerColor = Color.Yellow)
+                            RelayStatus.CONNECTING -> Badge(containerColor = Color(0xFFFFA500))
                             RelayStatus.DISCONNECTED -> Badge(containerColor = Color.Red)
                         }
                     }, headlineContent = { Text(item.name) }, supportingContent = {
