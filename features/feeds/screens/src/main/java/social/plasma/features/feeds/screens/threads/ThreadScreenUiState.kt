@@ -2,7 +2,7 @@ package social.plasma.features.feeds.screens.threads
 
 import androidx.paging.PagingData
 import app.cash.nostrino.crypto.PubKey
-import com.slack.circuit.CircuitUiState
+import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.opengraph.OpenGraphMetadata

@@ -1,6 +1,6 @@
 package social.plasma.features.posting.screens
 
-import com.slack.circuit.Screen
+import com.slack.circuit.runtime.Screen
 import kotlinx.parcelize.Parcelize
 import social.plasma.models.NoteId
 

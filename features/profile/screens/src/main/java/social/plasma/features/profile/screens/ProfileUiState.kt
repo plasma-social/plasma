@@ -1,8 +1,8 @@
 package social.plasma.features.profile.screens
 
-import com.slack.circuit.CircuitUiState
-import social.plasma.features.feeds.screens.feed.FeedUiState
 import app.cash.nostrino.crypto.PubKey
+import com.slack.circuit.runtime.CircuitUiState
+import social.plasma.features.feeds.screens.feed.FeedUiState
 
 sealed interface ProfileUiState : CircuitUiState {
     object Loading : ProfileUiState

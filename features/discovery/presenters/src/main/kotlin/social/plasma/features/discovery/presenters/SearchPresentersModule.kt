@@ -1,6 +1,6 @@
 package social.plasma.features.discovery.presenters
 
-import com.slack.circuit.Presenter
+import com.slack.circuit.runtime.presenter.Presenter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

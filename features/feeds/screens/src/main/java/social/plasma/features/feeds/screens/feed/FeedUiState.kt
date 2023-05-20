@@ -2,11 +2,11 @@ package social.plasma.features.feeds.screens.feed
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.paging.PagingData
-import com.slack.circuit.CircuitUiState
+import app.cash.nostrino.crypto.PubKey
+import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
 import social.plasma.models.Mention
 import social.plasma.opengraph.OpenGraphMetadata
-import app.cash.nostrino.crypto.PubKey
 
 data class FeedUiState(
     val pagingFlow: Flow<PagingData<FeedItem>>,

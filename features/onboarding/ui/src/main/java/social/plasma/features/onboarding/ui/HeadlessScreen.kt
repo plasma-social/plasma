@@ -2,10 +2,11 @@ package social.plasma.features.onboarding.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.slack.circuit.CircuitUiState
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.ui.Ui
 
-class HeadlessScreen: Ui<CircuitUiState> {
+class HeadlessScreen : Ui<CircuitUiState> {
     @Composable
-    override fun Content(state: CircuitUiState, modifier: Modifier) {}
+    override fun Content(state: CircuitUiState, modifier: Modifier) {
+    }
 }

@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.discovery.screens.relaylist.RelayListUiEvent
 import social.plasma.features.discovery.screens.relaylist.RelayListUiState
 import social.plasma.features.discovery.screens.relaylist.RelayStatus

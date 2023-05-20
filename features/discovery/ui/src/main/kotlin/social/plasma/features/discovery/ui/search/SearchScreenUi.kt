@@ -50,7 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem
 import social.plasma.features.discovery.screens.search.HashTagSearchSuggestionItem.SuggestionIcon
 import social.plasma.features.discovery.screens.search.SearchBarUiState

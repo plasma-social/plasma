@@ -35,7 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.CreatePostUiEvent
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnHashTagSuggestionTapped

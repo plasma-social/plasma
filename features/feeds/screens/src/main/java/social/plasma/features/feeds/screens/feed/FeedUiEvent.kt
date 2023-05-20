@@ -1,7 +1,7 @@
 package social.plasma.features.feeds.screens.feed
 
 import app.cash.nostrino.crypto.PubKey
-import com.slack.circuit.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiEvent
 import social.plasma.models.NoteId
 
 sealed interface FeedUiEvent : CircuitUiEvent {

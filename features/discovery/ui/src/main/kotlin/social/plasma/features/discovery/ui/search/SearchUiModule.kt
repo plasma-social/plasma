@@ -1,6 +1,6 @@
 package social.plasma.features.discovery.ui.search
 
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

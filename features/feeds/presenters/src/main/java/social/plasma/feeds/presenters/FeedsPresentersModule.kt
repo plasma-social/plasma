@@ -1,6 +1,6 @@
 package social.plasma.feeds.presenters
 
-import com.slack.circuit.Presenter
+import com.slack.circuit.runtime.presenter.Presenter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,6 +12,6 @@ import dagger.multibindings.IntoSet
 abstract class FeedsPresentersModule {
     @Binds
     @IntoSet
-    abstract fun bindsFeedsPresenterFactory(factory: FeedsPresentersFactory) : Presenter.Factory
+    abstract fun bindsFeedsPresenterFactory(factory: FeedsPresentersFactory): Presenter.Factory
 }
 

@@ -1,7 +1,7 @@
 package social.plasma.features.feeds.screens.hashtags
 
 import androidx.paging.PagingData
-import com.slack.circuit.CircuitUiState
+import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiState
