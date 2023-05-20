@@ -44,6 +44,7 @@ import social.plasma.features.posting.screens.CreatePostUiState
 import social.plasma.ui.R
 import social.plasma.ui.components.Avatar
 import social.plasma.ui.components.Nip5Badge
+import social.plasma.ui.components.withHapticFeedBack
 import javax.inject.Inject
 
 class CreatePostScreenUi @Inject constructor() : Ui<CreatePostUiState> {
@@ -84,7 +85,7 @@ class CreatePostScreenUi @Inject constructor() : Ui<CreatePostUiState> {
                 }, actions = {
                     Button(
                         modifier = Modifier.padding(end = 16.dp),
-                        onClick = { onEvent(CreatePostUiEvent.OnSubmitPost) },
+                        onClick = withHapticFeedBack { onEvent(CreatePostUiEvent.OnSubmitPost) },
                         enabled = state.postButtonEnabled
                     ) {
                         Text(state.postButtonLabel)

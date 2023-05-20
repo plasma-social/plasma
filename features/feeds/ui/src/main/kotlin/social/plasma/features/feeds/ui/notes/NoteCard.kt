@@ -53,6 +53,7 @@ import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.OpenGraphPreviewCard
 import social.plasma.ui.components.ZoomableImage
 import social.plasma.ui.components.richtext.RichText
+import social.plasma.ui.components.withHapticFeedBack
 import social.plasma.ui.theme.PlasmaTheme
 
 
@@ -282,7 +283,6 @@ private fun NoteCardActionsRow(
     val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
     var showRepostAlert by remember { mutableStateOf(false) }
     val iconSize = remember { 20.dp }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -326,7 +326,7 @@ private fun NoteCardActionsRow(
             )
         }
         TextButton(
-            onClick = {
+            onClick = withHapticFeedBack {
                 optimisticLikeState.value = true
                 optimisticLikeCount.value += 1
                 onLikeClick()
@@ -356,7 +356,7 @@ private fun NoteCardActionsRow(
             subtitle = stringResource(R.string.repost_notes_to_share_them_with_your_network),
             icon = painterResource(id = R.drawable.ic_plasma_rocket_outline),
             confirmLabel = stringResource(R.string.repost),
-            onConfirm = {
+            onConfirm = withHapticFeedBack {
                 showRepostAlert = false
                 onRepostClick()
             },
