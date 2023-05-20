@@ -55,6 +55,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
 import com.slack.circuit.Ui
 import kotlinx.coroutines.flow.emptyFlow
@@ -65,7 +66,6 @@ import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
 import social.plasma.features.profile.screens.ProfileUiState.Loading
-import app.cash.nostrino.crypto.PubKey
 import social.plasma.ui.R
 import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
@@ -73,9 +73,9 @@ import social.plasma.ui.components.OverlayIconButton
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
+import social.plasma.ui.components.withHapticFeedBack
 import social.plasma.ui.theme.PlasmaTheme
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 
 class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
@@ -220,7 +220,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         val clipboardManager = LocalClipboardManager.current
 
         OverlayIconButton(
-            onClick = {
+            onClick = withHapticFeedBack {
                 clipboardManager.setText(AnnotatedString(pubKey.encoded()))
             }
         ) {
