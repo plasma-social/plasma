@@ -89,7 +89,6 @@ dependencies {
     implementation(projects.common.ui)
 
     implementation(libs.accompanist.flowlayout)
-    implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.android.material)
     implementation(libs.androidx.activity.compose)

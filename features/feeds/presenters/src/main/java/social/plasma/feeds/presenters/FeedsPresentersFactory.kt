@@ -3,10 +3,10 @@ package social.plasma.feeds.presenters
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.slack.circuit.CircuitContext
-import com.slack.circuit.Navigator
-import com.slack.circuit.Presenter
-import com.slack.circuit.Screen
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.Screen
+import com.slack.circuit.runtime.presenter.Presenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import social.plasma.features.feeds.screens.feed.FeedScreen

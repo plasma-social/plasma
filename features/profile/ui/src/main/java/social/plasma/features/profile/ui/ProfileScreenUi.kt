@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedUiState

@@ -1,6 +1,6 @@
 package social.plasma.features.onboarding.ui
 
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,5 +12,5 @@ import dagger.multibindings.IntoSet
 abstract class OnboardingUiModule {
     @Binds
     @IntoSet
-    abstract fun bindsUiFactory(impl: OnboardingUiFactory) : Ui.Factory
+    abstract fun bindsUiFactory(impl: OnboardingUiFactory): Ui.Factory
 }

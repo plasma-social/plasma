@@ -33,7 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick

@@ -37,7 +37,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.onboarding.screens.login.LoginUiEvent.OnClearInput
 import social.plasma.features.onboarding.screens.login.LoginUiEvent.OnInputChange
 import social.plasma.features.onboarding.screens.login.LoginUiEvent.OnLogin

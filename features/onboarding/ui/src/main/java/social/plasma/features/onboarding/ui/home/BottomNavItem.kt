@@ -3,7 +3,7 @@ package social.plasma.features.onboarding.ui.home
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.slack.circuit.Screen
+import com.slack.circuit.runtime.Screen
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

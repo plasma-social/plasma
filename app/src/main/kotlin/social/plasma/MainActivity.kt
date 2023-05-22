@@ -3,7 +3,6 @@ package social.plasma
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,16 +11,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import com.slack.circuit.CircuitCompositionLocals
-import com.slack.circuit.CircuitConfig
-import com.slack.circuit.NavigableCircuitContent
-import com.slack.circuit.Screen
 import com.slack.circuit.backstack.rememberSaveableBackStack
+import com.slack.circuit.foundation.CircuitCompositionLocals
+import com.slack.circuit.foundation.CircuitConfig
+import com.slack.circuit.foundation.NavigableCircuitContent
+import com.slack.circuit.foundation.push
+import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuit.overlay.ContentWithOverlays
-import com.slack.circuit.push
-import com.slack.circuit.rememberCircuitNavigator
 import com.slack.circuit.retained.LocalRetainedStateRegistry
 import com.slack.circuit.retained.continuityRetainedStateRegistry
+import com.slack.circuit.runtime.Screen
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
@@ -66,7 +65,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                BackHandler(enabled = backstack.size > 1, onBack = circuitNavigator::pop)
                 Surface(color = MaterialTheme.colorScheme.background) {
                     CompositionLocalProvider(LocalRetainedStateRegistry provides continuityRetainedStateRegistry()) {
                         CircuitCompositionLocals(circuitConfig) {

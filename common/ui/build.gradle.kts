@@ -50,7 +50,6 @@ dependencies {
     implementation(projects.common.utils.real)
 
     implementation(libs.accompanist.flowlayout)
-    implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.paging.compose)

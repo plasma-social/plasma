@@ -1,6 +1,6 @@
 package social.plasma.features.onboarding.screens.login
 
-import com.slack.circuit.CircuitUiState
+import com.slack.circuit.runtime.CircuitUiState
 
 data class LoginUiState(
     val keyInput: String,

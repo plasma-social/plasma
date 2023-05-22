@@ -2,15 +2,15 @@ package social.plasma.onboarding.presenters
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.slack.circuit.CircuitUiState
-import com.slack.circuit.Navigator
-import com.slack.circuit.Presenter
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import social.plasma.domain.executeSync
 import social.plasma.domain.interactors.AuthStatus
 import social.plasma.domain.interactors.GetAuthStatus
-import social.plasma.domain.executeSync
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.onboarding.screens.home.HomeScreen
 import social.plasma.features.onboarding.screens.login.LoginScreen

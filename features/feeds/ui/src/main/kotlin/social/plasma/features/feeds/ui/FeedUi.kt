@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange

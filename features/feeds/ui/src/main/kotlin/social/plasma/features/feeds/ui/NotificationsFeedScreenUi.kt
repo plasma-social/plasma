@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.slack.circuit.CircuitContent
-import com.slack.circuit.Ui
+import com.slack.circuit.foundation.CircuitContent
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
-import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent
-import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiEvent
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiEvent.ChildNav
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiEvent.OnToolbarAvatarTapped
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiState

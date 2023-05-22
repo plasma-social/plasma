@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.Ui
+import com.slack.circuit.runtime.ui.Ui
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiState
 import social.plasma.ui.R

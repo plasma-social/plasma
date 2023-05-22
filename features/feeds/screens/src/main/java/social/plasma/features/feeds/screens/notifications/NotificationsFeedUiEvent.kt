@@ -1,7 +1,7 @@
 package social.plasma.features.feeds.screens.notifications
 
-import com.slack.circuit.CircuitUiEvent
-import com.slack.circuit.NavEvent
+import com.slack.circuit.foundation.NavEvent
+import com.slack.circuit.runtime.CircuitUiEvent
 
 sealed interface NotificationsFeedUiEvent : CircuitUiEvent {
     object OnToolbarAvatarTapped : NotificationsFeedUiEvent

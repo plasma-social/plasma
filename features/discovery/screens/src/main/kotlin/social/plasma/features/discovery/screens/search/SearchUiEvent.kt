@@ -1,6 +1,6 @@
 package social.plasma.features.discovery.screens.search
 
-import com.slack.circuit.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiEvent
 
 sealed interface SearchUiEvent : CircuitUiEvent {
     object OnSearch : SearchUiEvent

@@ -1,9 +1,9 @@
 package social.plasma.features.discovery.presenters
 
-import com.slack.circuit.CircuitContext
-import com.slack.circuit.Navigator
-import com.slack.circuit.Presenter
-import com.slack.circuit.Screen
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.Screen
+import com.slack.circuit.runtime.presenter.Presenter
 import social.plasma.features.discovery.screens.relaylist.RelayListScreen
 import social.plasma.features.discovery.screens.search.SearchScreen
 import javax.inject.Inject

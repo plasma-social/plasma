@@ -1,7 +1,7 @@
 package social.plasma.features.posting.screens
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.slack.circuit.CircuitUiState
+import com.slack.circuit.runtime.CircuitUiState
 import social.plasma.models.ProfileMention
 import social.plasma.models.TagSuggestion
 

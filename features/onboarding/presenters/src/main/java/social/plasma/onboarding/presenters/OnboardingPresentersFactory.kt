@@ -1,9 +1,9 @@
 package social.plasma.onboarding.presenters
 
-import com.slack.circuit.CircuitContext
-import com.slack.circuit.Navigator
-import com.slack.circuit.Presenter
-import com.slack.circuit.Screen
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.Screen
+import com.slack.circuit.runtime.presenter.Presenter
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.onboarding.screens.home.HomeScreen
 import social.plasma.features.onboarding.screens.login.LoginScreen
