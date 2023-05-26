@@ -37,4 +37,5 @@ android {
 dependencies {
     api(projects.data.daos)
     api(libs.androidx.paging.common)
+    implementation(libs.turbine)
 }

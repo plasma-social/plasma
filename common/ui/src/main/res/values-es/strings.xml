@@ -19,4 +19,5 @@
     <string name="wallet_required">Cartera Requerida</string>
     <string name="install_a_lightning_wallet_and_fund_it_with_bitcoin_before_zapping_users">Instale una cartera lightning y finánciela con bitcoin antes de zappiar usuarios</string>
     <string name="okay">Okay</string>
+    <string name="unfollow">Dejar de seguir</string>
 </resources>

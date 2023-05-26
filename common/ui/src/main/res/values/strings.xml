@@ -4,6 +4,7 @@
     <string name="login">Let\'s go</string>
     <string name="back">Back</string>
     <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
     <string name="following">Following</string>
     <string name="verified">verified</string>
     <string name="copy_public_key_to_clipboard">Copy public key to clipboard</string>

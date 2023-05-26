@@ -36,7 +36,7 @@ internal class ProfileScreenUiTest(
     fun default() {
         paparazzi.snapshot(uiState)
     }
-
+    
     private fun Paparazzi.snapshot(uiState: ProfileUiState) {
         snapshot {
             PlasmaTheme(

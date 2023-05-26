@@ -4,7 +4,6 @@ import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.decodeHex
@@ -22,7 +21,6 @@ import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class SendNoteTest {
     private val noteRepository = FakeNoteRepository()
 

@@ -1,6 +1,5 @@
 package social.plasma.domain.interactors
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -28,49 +27,30 @@ class StoreContactList @Inject constructor(
 
     override fun createObservable(params: Flow<Event>): Flow<Any> {
         val contactListEvent = params.filter { it.kind == Event.Kind.ContactList }
+            .filter { newEvent ->
+                val dbNewestEvent = contactListDao.getNewestEvent(newEvent.pubKey.hex())
+                dbNewestEvent == null || dbNewestEvent.createdAt <= newEvent.createdAt.epochSecond
+            }
+            .distinctUntilChanged()
 
         val relayDataFlow = contactListEvent.map {
             eventRefiner.toRelayDetailList(it)
         }
             .filterNotNull()
-            .filter { newEvent ->
-                val dbNewestEvent = contactListDao.getNewestEvent(newEvent.pubKey.hex())
-                val result = if (dbNewestEvent == null) {
-                    true
-                } else {
-                    dbNewestEvent.createdAt <= newEvent.createdAt.epochSecond
-                }
-                result
-            }
-            .distinctUntilChanged()
             .map {
                 it.pubKey to it.content
             }.onEach { (pubkey, relays) ->
-                relayInfoDao.deleteAll()
-                relayInfoDao.insert(relays.map { it.toRelayEntity(pubkey.hex()) })
+                relayInfoDao.replace(relays.map { it.toRelayEntity(pubkey.hex()) })
             }
 
         val contactsFlow = contactListEvent
             .map { it.typed(it.typed("").contacts()) }
             .filterNotNull()
-            .distinctUntilChanged()
-            .filter { newEvent ->
-                val dbNewestEvent = contactListDao.getNewestEvent(newEvent.pubKey.hex())
-                val result = if (dbNewestEvent == null) {
-                    true
-                } else {
-                    dbNewestEvent.createdAt <= newEvent.createdAt.epochSecond
-                }
-
-                Log.d("@@@", "Store Relays Filter: $result")
-                result
-            }
             .map {
                 it.pubKey.hex() to it.contacts()
             }
             .onEach { (owner, contacts) ->
-                Log.d("@@@", "StoreContactList: ${contacts.size}")
-                contactListDao.insert(contacts.map { it.toContactEntity(owner) })
+                contactListDao.replace(contacts.map { it.toContactEntity(owner) })
             }
 
         return merge(contactsFlow, relayDataFlow)

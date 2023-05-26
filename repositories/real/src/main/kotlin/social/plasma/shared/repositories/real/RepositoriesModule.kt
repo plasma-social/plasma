@@ -6,28 +6,36 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.shared.repositories.api.AccountStateRepository
+import social.plasma.shared.repositories.api.ContactsRepository
 import social.plasma.shared.repositories.api.Nip5Validator
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.repositories.api.UserMetadataRepository
 import social.plasma.shared.utils.api.Preference
-import social.plasma.shared.utils.real.prefs.ByteArrayPreference
 import social.plasma.shared.utils.real.prefs.ByteArrayPreference.ByteArrayPreferenceFactory
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoriesModule {
-    @Binds @Singleton
-    internal abstract fun bindProvides(impl: RealNoteRepository) : NoteRepository
+    @Binds
+    @Singleton
+    internal abstract fun bindProvides(impl: RealNoteRepository): NoteRepository
 
-    @Binds @Singleton
-    internal abstract fun bindsMetadataRepository(impl: RealUserMetadataRepository) : UserMetadataRepository
+    @Binds
+    @Singleton
+    internal abstract fun bindsMetadataRepository(impl: RealUserMetadataRepository): UserMetadataRepository
 
-    @Binds @Singleton
-    internal abstract fun bindsRealNip5Validator(impl: RealNip5Validator) : Nip5Validator
+    @Binds
+    @Singleton
+    internal abstract fun bindsRealNip5Validator(impl: RealNip5Validator): Nip5Validator
 
-    @Binds @Singleton
-    internal abstract fun providesAccountStateRepo(impl: RealAccountRepository) : AccountStateRepository
+    @Binds
+    @Singleton
+    internal abstract fun providesAccountStateRepo(impl: RealAccountRepository): AccountStateRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindsContactRepository(impl: RealContactsRepository): ContactsRepository
 
     companion object {
         @Provides

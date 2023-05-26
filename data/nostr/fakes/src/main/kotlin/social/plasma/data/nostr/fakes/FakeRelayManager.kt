@@ -1,4 +1,4 @@
-package social.plasma.domain.interactors
+package social.plasma.data.nostr.fakes
 
 import app.cash.nostrino.crypto.SecKey
 import app.cash.turbine.Turbine
@@ -10,8 +10,7 @@ import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.RelayMessage
 
 // TODO move to a common module
-class FakeRelayManager(
-) : RelayManager {
+class FakeRelayManager : RelayManager {
     val sendNoteTurbine = Turbine<SendNote>()
     val sendEventTurbine = Turbine<ClientMessage.EventMessage>()
 
