@@ -4,8 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.paging.PagingConfig
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.Navigator
@@ -18,9 +21,11 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import shortBech32
+import social.plasma.domain.interactors.FollowPubkey
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.Nip5Status
 import social.plasma.domain.interactors.SyncProfileData
+import social.plasma.domain.interactors.UnfollowPubkey
 import social.plasma.domain.observers.ObserveFollowingCount
 import social.plasma.domain.observers.ObservePagedProfileFeed
 import social.plasma.domain.observers.ObserveUserIsInContacts
@@ -42,6 +47,8 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val notePagingFlowMapper: NotePagingFlowMapper,
     private val observeUserIsInContacts: ObserveUserIsInContacts,
     private val getNip5Status: GetNip5Status,
+    private val followPubkey: FollowPubkey,
+    private val unFollowPubkey: UnfollowPubkey,
     accountStateRepository: AccountStateRepository,
     feedPresenterFactory: FeedPresenter.Factory,
     @Assisted private val args: ProfileScreen,
@@ -100,7 +107,14 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
         val metadata by remember { observeUserMetadata.flow }.collectAsState(initial = null)
         val followingCount by contactsCount.collectAsState(initial = 0)
-        val isProfileFollowedByMe by userIsInMyContacts.collectAsState(initial = null)
+        val isProfileInMyContacts by userIsInMyContacts.collectAsState(initial = null)
+
+        var optimisticFollowState by remember { mutableStateOf<Boolean?>(null) }
+
+        val isProfileFollowedByMe = remember(isProfileInMyContacts, optimisticFollowState) {
+            optimisticFollowState ?: isProfileInMyContacts
+        }
+
         val isNip5Valid by produceState(initialValue = false, metadata) {
             val status = getNip5Status.executeSync(
                 GetNip5Status.Params(
@@ -143,6 +157,9 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 }
             )
         }
+
+        val coroutineScope = rememberCoroutineScope()
+
         return ProfileUiState.Loaded(
             feedState = profileFeedState,
             statCards = listOf(
@@ -165,6 +182,19 @@ class ProfileScreenPresenter @AssistedInject constructor(
         ) { event ->
             when (event) {
                 ProfileUiEvent.OnNavigateBack -> navigator.pop()
+                ProfileUiEvent.OnFollowButtonClicked -> {
+                    if (isProfileFollowedByMe == true) {
+                        optimisticFollowState = false
+                        coroutineScope.launch {
+                            unFollowPubkey.executeSync(UnfollowPubkey.Params(args.pubKeyHex))
+                        }
+                    } else {
+                        optimisticFollowState = true
+                        coroutineScope.launch {
+                            followPubkey.executeSync(FollowPubkey.Params(args.pubKeyHex))
+                        }
+                    }
+                }
             }
         }
     }

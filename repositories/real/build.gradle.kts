@@ -24,6 +24,8 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -50,7 +52,13 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
+    testImplementation(projects.data.nostr.fakes)
+    testImplementation(projects.data.daos.fakes)
+    testImplementation(projects.repositories.fakes)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.truth)
+    testImplementation(libs.turbine)
+
+    coreLibraryDesugaring(libs.android.desugaring)
 }

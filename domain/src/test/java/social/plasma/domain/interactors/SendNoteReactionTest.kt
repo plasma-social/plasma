@@ -5,7 +5,6 @@ import app.cash.nostrino.crypto.SecKeyGenerator
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.decodeHex
@@ -13,6 +12,7 @@ import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import social.plasma.data.nostr.fakes.FakeRelayManager
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStarted
 import social.plasma.domain.InvokeStatus
@@ -26,7 +26,6 @@ import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class SendNoteReactionTest {
     private val sec = SecKeyGenerator().generate()
     private val mySecretKey = sec.key.toByteArray()

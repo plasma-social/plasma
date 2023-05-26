@@ -3,6 +3,7 @@ package social.plasma.features.profile.ui
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -38,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,9 +58,9 @@ import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.FeedUiContent
+import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
@@ -93,7 +92,6 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         modifier: Modifier = Modifier,
     ) {
         val onEvent = uiState.onEvent
-        val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
 
         Scaffold(
@@ -120,13 +118,8 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
                     ProfileBio(userData = uiState.userData,
                         isNip5Valid = uiState.isNip5Valid,
                         following = uiState.following,
-                        onFollowClick = {
-                            scope.launch {
-                                // TODO implement following/unfollowing
-                                snackbarHostState.showSnackbar(
-                                    "Coming Soon", duration = SnackbarDuration.Short
-                                )
-                            }
+                        onFollowClick = withHapticFeedBack {
+                            onEvent(ProfileUiEvent.OnFollowButtonClicked)
                         })
                     Spacer(modifier = Modifier.height(32.dp))
                 }
@@ -307,10 +300,12 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
                         )
                     )
                 ) {
-                    Icon(painterResource(R.drawable.ic_plasma_follow), null)
-                    Spacer(modifier = Modifier.width(4.dp))
+                    AnimatedVisibility(visible = following == true) {
+                        Icon(painterResource(R.drawable.ic_plasma_follow), null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     Text(
-                        if (following == true) stringResource(id = R.string.following) else stringResource(
+                        if (following == true) stringResource(id = R.string.unfollow) else stringResource(
                             R.string.follow
                         )
                     )
