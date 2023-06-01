@@ -9,7 +9,7 @@ class FollowPubkey @Inject constructor(
 ) : ResultInteractor<FollowPubkey.Params, FollowPubkey.FollowResult>() {
     override suspend fun doWork(params: Params): FollowResult {
         return try {
-            contactsRepository.follow(params.pubKeyHex)
+            contactsRepository.followPubkey(params.pubKeyHex)
             FollowResult.Success
         } catch (e: Exception) {
             FollowResult.Error

@@ -4,6 +4,7 @@ import app.cash.nostrino.crypto.SecKey
 import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.nostr.relay.Relay
 import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage
@@ -17,15 +18,15 @@ class FakeRelayManager : RelayManager {
     override val relayList: StateFlow<List<Relay>>
         get() = TODO("Not yet implemented")
     override val relayMessages: Flow<RelayMessage>
-        get() = TODO("Not yet implemented")
+        get() = emptyFlow()
 
 
     override fun subscribe(subscribeMessage: ClientMessage.SubscribeMessage): ClientMessage.UnsubscribeMessage {
-        TODO("Not yet implemented")
+        return ClientMessage.UnsubscribeMessage("")
     }
 
     override fun unsubscribe(unsubscribeMessage: ClientMessage.UnsubscribeMessage) {
-        TODO("Not yet implemented")
+        
     }
 
     override suspend fun send(event: ClientMessage.EventMessage) {

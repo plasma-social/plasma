@@ -28,7 +28,7 @@ class RealContactsRepositoryTest {
     fun `follow should send a contact list event with the new contact`() = runTest {
         contactsDao.getContactListEventResponses.add(createContactEventEntity())
 
-        createRepository().follow("pubkey2")
+        createRepository().followPubkey("pubkey2")
 
         with(relayManager.sendEventTurbine.awaitItem().event) {
             assertThat(kind).isEqualTo(Event.Kind.ContactList)
@@ -52,7 +52,7 @@ class RealContactsRepositoryTest {
             )
         )
 
-        createRepository().unfollow("pubkey")
+        createRepository().unfollowPubkey("pubkey")
 
         with(relayManager.sendEventTurbine.awaitItem().event) {
             assertThat(kind).isEqualTo(Event.Kind.ContactList)
@@ -74,7 +74,62 @@ class RealContactsRepositoryTest {
             )
         )
 
-        createRepository().unfollow("pubkey")
+        createRepository().unfollowPubkey("pubkey")
+
+        relayManager.sendEventTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `following a hashtag should send a contact list event with the new hashtag`() = runTest {
+        contactsDao.getContactListEventResponses.add(createContactEventEntity())
+
+        createRepository().followHashTag("hashtag")
+
+        with(relayManager.sendEventTurbine.awaitItem().event) {
+            assertThat(kind).isEqualTo(Event.Kind.ContactList)
+            assertThat(tags).containsExactly(listOf("p", "pubkey"), listOf("t", "hashtag"))
+            assertThat(pubKey).isEqualTo(secKey.pubKey.key)
+            assertThat(content).isEqualTo("test")
+        }
+
+        assertThat(contactsDao.getContactListEventRequests.awaitItem()).isEqualTo(myPubkeyHex)
+    }
+
+    @Test
+    fun `unfollowing a hashtag should send a contact list event excluding the unfollowed hashtag`() =
+        runTest {
+            contactsDao.getContactListEventResponses.add(
+                createContactEventEntity(
+                    tags = listOf(
+                        listOf("p", "pubkey"),
+                        listOf("t", "hashtag")
+                    )
+                )
+            )
+
+            createRepository().unfollowHashTag("hashtag")
+
+            with(relayManager.sendEventTurbine.awaitItem().event) {
+                assertThat(kind).isEqualTo(Event.Kind.ContactList)
+                assertThat(tags).containsExactly(listOf("p", "pubkey"))
+                assertThat(pubKey).isEqualTo(secKey.pubKey.key)
+                assertThat(content).isEqualTo("test")
+            }
+
+            assertThat(contactsDao.getContactListEventRequests.awaitItem()).isEqualTo(myPubkeyHex)
+        }
+
+    @Test
+    fun `unfollowing a hashtag not in the contact list`() = runTest {
+        contactsDao.getContactListEventResponses.add(
+            createContactEventEntity(
+                tags = listOf(
+                    listOf("p", "pubkey")
+                )
+            )
+        )
+
+        createRepository().unfollowHashTag("hashtag")
 
         relayManager.sendEventTurbine.expectNoEvents()
     }

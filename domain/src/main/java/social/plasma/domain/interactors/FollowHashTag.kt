@@ -4,12 +4,13 @@ import social.plasma.domain.ResultInteractor
 import social.plasma.shared.repositories.api.ContactsRepository
 import javax.inject.Inject
 
-class UnfollowPubkey @Inject constructor(
+class FollowHashTag @Inject constructor(
     private val contactsRepository: ContactsRepository,
-) : ResultInteractor<UnfollowPubkey.Params, UnfollowPubkey.FollowResult>() {
+) : ResultInteractor<FollowHashTag.Params, FollowHashTag.FollowResult>() {
     override suspend fun doWork(params: Params): FollowResult {
+        val hashtag = if (params.hashtag.startsWith("#")) params.hashtag.drop(1) else params.hashtag
         return try {
-            contactsRepository.unfollowPubkey(params.pubKeyHex)
+            contactsRepository.followHashTag(hashtag)
             FollowResult.Success
         } catch (e: Exception) {
             FollowResult.Error
@@ -17,7 +18,7 @@ class UnfollowPubkey @Inject constructor(
     }
 
     data class Params(
-        val pubKeyHex: String,
+        val hashtag: String,
     )
 
     sealed interface FollowResult {

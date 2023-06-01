@@ -11,11 +11,13 @@ import androidx.compose.ui.unit.dp
 fun PrimaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 ) {
     Button(
         modifier = modifier.heightIn(min = 44.dp),
         onClick = onClick,
+        enabled = enabled,
         content = content,
     )
 }

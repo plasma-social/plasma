@@ -69,10 +69,10 @@ abstract class EventsDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    internal abstract fun insertHashTags(tags: List<HashTagEntity>)
+    protected abstract fun insertHashTags(tags: List<HashTagEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    internal abstract fun insertHashTagReferences(references: List<HashTagReferenceEntity>)
+    protected abstract fun insertHashTagReferences(references: List<HashTagReferenceEntity>)
 
     private fun String?.toMarkerOrNull(): EventReferenceEntity.EventMarker? = when (this) {
         "reply" -> EventReferenceEntity.EventMarker.Reply
@@ -82,13 +82,13 @@ abstract class EventsDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    internal abstract suspend fun insertInternal(events: Iterable<EventEntity>)
+    protected abstract suspend fun insertInternal(events: Iterable<EventEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    internal abstract suspend fun insertEventReferences(references: Iterable<EventReferenceEntity>)
+    protected abstract suspend fun insertEventReferences(references: Iterable<EventReferenceEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    internal abstract suspend fun insertPubkeyReferences(references: Iterable<PubkeyReferenceEntity>)
+    protected abstract suspend fun insertPubkeyReferences(references: Iterable<PubkeyReferenceEntity>)
 
     @Query("SELECT * FROM events WHERE id = :id")
     abstract suspend fun getById(id: String): EventEntity?

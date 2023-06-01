@@ -23,7 +23,6 @@ import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiEvent
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiState
 import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
 import social.plasma.shared.utils.api.StringManager
@@ -35,7 +34,6 @@ class ThreadScreenPresenter @AssistedInject constructor(
     feedPresenterFactory: FeedPresenter.Factory,
     private val observePagedThreadFeed: ObservePagedThreadFeed,
     private val syncThreadEvents: SyncThreadEvents,
-    feedMapper: NotePagingFlowMapper,
     private val stringManager: StringManager,
     private val openGraphParser: OpenGraphParser,
     @Assisted private val args: ThreadScreen,
@@ -52,7 +50,7 @@ class ThreadScreenPresenter @AssistedInject constructor(
         )
     }
 
-    private val feedPresenter = feedPresenterFactory.create(navigator, feedMapper.map(pagingFlow))
+    private val feedPresenter = feedPresenterFactory.create(navigator, pagingFlow)
     private val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata? =
         {
             try {

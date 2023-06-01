@@ -1,8 +1,13 @@
-package social.plasma.feeds.presenters.thread
+package social.plasma.feeds.presenters.hashtag
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.paging.PagingConfig
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
@@ -10,28 +15,29 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import social.plasma.domain.interactors.FollowHashTag
 import social.plasma.domain.interactors.SyncHashTagEvents
+import social.plasma.domain.interactors.UnfollowHashTag
+import social.plasma.domain.observers.ObserveHashTagFollowState
 import social.plasma.domain.observers.ObservePagedHashTagFeed
+import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
+import social.plasma.features.feeds.screens.hashtags.ButtonUiState
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
-import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
-import social.plasma.opengraph.OpenGraphMetadata
-import social.plasma.opengraph.OpenGraphParser
+import social.plasma.feeds.presenters.feed.FeedUiProducer
 import social.plasma.shared.utils.api.StringManager
-import timber.log.Timber
-import java.net.MalformedURLException
-import java.net.URL
 
 class HashTagScreenPresenter @AssistedInject constructor(
-    feedPresenterFactory: FeedPresenter.Factory,
+    private val feedUiProducer: FeedUiProducer,
     observePagedHashTagFeed: ObservePagedHashTagFeed,
+    observeHashTagFollowState: ObserveHashTagFollowState,
+    private val followHashTag: FollowHashTag,
+    private val unfollowHashTag: UnfollowHashTag,
     private val syncHashTagEvents: SyncHashTagEvents,
-    notePagingFlowMapper: NotePagingFlowMapper,
     private val stringManager: StringManager,
-    private val openGraphParser: OpenGraphParser,
     @Assisted private val args: HashTagFeedScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<HashTagScreenUiState> {
@@ -46,17 +52,10 @@ class HashTagScreenPresenter @AssistedInject constructor(
         )
     }
 
-    private val feedPresenter =
-        feedPresenterFactory.create(navigator, notePagingFlowMapper.map(pagingFlow))
-    private val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata? =
-        {
-            try {
-                openGraphParser.parse(URL(it))
-            } catch (e: MalformedURLException) {
-                Timber.w(e)
-                null
-            }
-        }
+    private val hashtagFollowState = observeHashTagFollowState.flow.onStart {
+        val params = if (args.hashTag.startsWith("#")) args.hashTag.substring(1) else args.hashTag
+        observeHashTagFollowState(params)
+    }
 
     @Composable
     override fun present(): HashTagScreenUiState {
@@ -64,7 +63,13 @@ class HashTagScreenPresenter @AssistedInject constructor(
             syncHashTagEvents.executeSync(SyncHashTagEvents.Params(args.hashTag))
         }
 
-        val feedState = feedPresenter.present()
+        val feedState = feedUiProducer(navigator, pagingFlow)
+
+        var optimisticFollowState: Boolean? by remember { mutableStateOf(null) }
+
+        val currentFollowState by remember { hashtagFollowState }.collectAsState(initial = false)
+
+        val followingHashTag= optimisticFollowState ?: currentFollowState
 
         val hashTagScreenFeedState = remember(feedState) {
             val onFeedEvent = feedState.onEvent
@@ -84,14 +89,34 @@ class HashTagScreenPresenter @AssistedInject constructor(
             )
         }
 
+        var followButtonEnabled by remember { mutableStateOf(true) }
+
+        val followButtonUiState = ButtonUiState(
+            enabled = followButtonEnabled,
+            style = if (followingHashTag) ButtonUiState.Style.PrimaryOutline else ButtonUiState.Style.Primary,
+            label = if (followingHashTag) stringManager[R.string.leave] else stringManager[R.string.join],
+        )
+
+        val coroutineScope = rememberCoroutineScope()
         return HashTagScreenUiState(
             title = args.hashTag,
-            pagingFlow = feedState.pagingFlow,
-            getOpenGraphMetadata = getOpenGraphMetadata,
             feedState = hashTagScreenFeedState,
+            followButtonUiState = followButtonUiState,
         ) { event ->
             when (event) {
                 HashTagScreenUiEvent.OnNavigateBack -> navigator.pop()
+                HashTagScreenUiEvent.OnFollowButtonClick -> {
+                    coroutineScope.launch {
+                        followButtonEnabled = false
+                        optimisticFollowState = !followingHashTag
+                        if (followingHashTag) {
+                            unfollowHashTag.executeSync(UnfollowHashTag.Params(args.hashTag))
+                        } else {
+                            followHashTag.executeSync(FollowHashTag.Params(args.hashTag))
+                        }
+                        followButtonEnabled = true
+                    }
+                }
             }
         }
     }
