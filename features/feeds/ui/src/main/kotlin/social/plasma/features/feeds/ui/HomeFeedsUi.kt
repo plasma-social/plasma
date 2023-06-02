@@ -16,6 +16,7 @@ import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.runtime.Screen
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.launch
+import social.plasma.features.discovery.screens.communities.CommunityListScreen
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeedsUiEvent
@@ -44,6 +45,11 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                     title = R.string.replies,
                     icon = social.plasma.ui.R.drawable.ic_plasma_replies
                 ),
+                ScreenTab(
+                    screen = CommunityListScreen,
+                    title = R.string.communities,
+                    icon = social.plasma.ui.R.drawable.ic_plasma_global_outline
+                )
             )
         }
 
@@ -78,6 +84,7 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } })
                 }
             }
+
             HorizontalSeparator()
 
             HorizontalPager(pageCount = tabs.size, state = pagerState) {
@@ -90,4 +97,9 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
     }
 }
 
-data class ScreenTab(val screen: Screen, @StringRes val title: Int, @DrawableRes val icon: Int)
+data class ScreenTab(
+    val screen: Screen,
+    @StringRes
+    val title: Int,
+    @DrawableRes val icon: Int,
+)
