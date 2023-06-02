@@ -9,9 +9,9 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-abstract class SearchPresentersModule {
+abstract class DiscoveryPresentersModule {
     @Binds
     @IntoSet
-    abstract fun bindsSearchPresenterFactory(factory: DiscoveryPresentersFactory): Presenter.Factory
+    abstract fun bindsDiscoveryPresenterFactory(factory: DiscoveryPresentersFactory): Presenter.Factory
 }
 

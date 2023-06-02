@@ -2,4 +2,5 @@
 <resources>
     <string name="replies">Replies</string>
     <string name="following">Following</string>
+    <string name="communities">Communities</string>
 </resources>

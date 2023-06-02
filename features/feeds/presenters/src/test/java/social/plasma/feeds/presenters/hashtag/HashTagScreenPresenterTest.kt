@@ -12,7 +12,7 @@ import social.plasma.domain.interactors.FollowHashTag
 import social.plasma.domain.interactors.StoreEvents
 import social.plasma.domain.interactors.SyncHashTagEvents
 import social.plasma.domain.interactors.UnfollowHashTag
-import social.plasma.domain.observers.ObserveHashTagFollowState
+import social.plasma.domain.observers.ObserveFollowedHashTags
 import social.plasma.domain.observers.ObservePagedHashTagFeed
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedUiState
@@ -96,7 +96,7 @@ class HashTagScreenPresenterTest {
         return HashTagScreenPresenter(
             feedUiProducer = { _, _ -> FeedUiState.Empty },
             observePagedHashTagFeed = ObservePagedHashTagFeed(noteRepository),
-            observeHashTagFollowState = ObserveHashTagFollowState(
+            observeFollowedHashTags = ObserveFollowedHashTags(
                 contactsRepository,
                 FakeAccountStateRepository()
             ),

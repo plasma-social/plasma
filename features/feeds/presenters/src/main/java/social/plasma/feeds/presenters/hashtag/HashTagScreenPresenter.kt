@@ -14,12 +14,13 @@ import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import social.plasma.domain.interactors.FollowHashTag
 import social.plasma.domain.interactors.SyncHashTagEvents
 import social.plasma.domain.interactors.UnfollowHashTag
-import social.plasma.domain.observers.ObserveHashTagFollowState
+import social.plasma.domain.observers.ObserveFollowedHashTags
 import social.plasma.domain.observers.ObservePagedHashTagFeed
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
@@ -33,7 +34,7 @@ import social.plasma.shared.utils.api.StringManager
 class HashTagScreenPresenter @AssistedInject constructor(
     private val feedUiProducer: FeedUiProducer,
     observePagedHashTagFeed: ObservePagedHashTagFeed,
-    observeHashTagFollowState: ObserveHashTagFollowState,
+    observeFollowedHashTags: ObserveFollowedHashTags,
     private val followHashTag: FollowHashTag,
     private val unfollowHashTag: UnfollowHashTag,
     private val syncHashTagEvents: SyncHashTagEvents,
@@ -52,9 +53,11 @@ class HashTagScreenPresenter @AssistedInject constructor(
         )
     }
 
-    private val hashtagFollowState = observeHashTagFollowState.flow.onStart {
-        val params = if (args.hashTag.startsWith("#")) args.hashTag.substring(1) else args.hashTag
-        observeHashTagFollowState(params)
+    private val hashtagFollowState = observeFollowedHashTags.flow.map { followedHashTags ->
+        val hashtag = if (args.hashTag.startsWith("#")) args.hashTag.substring(1) else args.hashTag
+        followedHashTags.contains(hashtag)
+    }.onStart {
+        observeFollowedHashTags(Unit)
     }
 
     @Composable
@@ -69,7 +72,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
 
         val currentFollowState by remember { hashtagFollowState }.collectAsState(initial = false)
 
-        val followingHashTag= optimisticFollowState ?: currentFollowState
+        val followingHashTag = optimisticFollowState ?: currentFollowState
 
         val hashTagScreenFeedState = remember(feedState) {
             val onFeedEvent = feedState.onEvent
