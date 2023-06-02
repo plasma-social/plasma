@@ -44,7 +44,6 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val observeUserMetadata: ObserveUserMetadata,
     private val observePagedProfileFeed: ObservePagedProfileFeed,
     private val syncProfileData: SyncProfileData,
-    private val notePagingFlowMapper: NotePagingFlowMapper,
     private val observeUserIsInContacts: ObserveUserIsInContacts,
     private val getNip5Status: GetNip5Status,
     private val followPubkey: FollowPubkey,
@@ -73,7 +72,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val feedsPresenter =
         feedPresenterFactory.create(
             navigator,
-            notePagingFlowMapper.map(observePagedProfileFeed.flow).onStart {
+            observePagedProfileFeed.flow.onStart {
                 observePagedProfileFeed(
                     ObservePagedProfileFeed.Params(
                         pubKey = pubKey,

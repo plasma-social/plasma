@@ -22,13 +22,13 @@ import social.plasma.domain.interactors.RepostNote
 import social.plasma.domain.interactors.SendNoteReaction
 import social.plasma.domain.interactors.SyncMetadata
 import social.plasma.features.feeds.presenters.R
-import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
 import social.plasma.shared.utils.api.StringManager
@@ -43,7 +43,8 @@ class FeedPresenter @AssistedInject constructor(
     private val syncMetadata: SyncMetadata,
     private val stringManager: StringManager,
     private val openGraphParser: OpenGraphParser,
-    @Assisted private val pagingFlow: Flow<PagingData<FeedItem>>,
+    private val notePagingFlowMapper: NotePagingFlowMapper,
+    @Assisted private val pagingFlow: Flow<PagingData<NoteWithUser>>,
     @Assisted private val navigator: Navigator,
 ) : Presenter<FeedUiState> {
 
@@ -101,8 +102,12 @@ class FeedPresenter @AssistedInject constructor(
             }
         }
 
+        val transformedPagingFlow = remember(pagingFlow) {
+            notePagingFlowMapper.map(pagingFlow)
+        }
+
         return FeedUiState(
-            pagingFlow = pagingFlow,
+            pagingFlow = transformedPagingFlow,
             refreshText = refreshText,
             displayRefreshButton = unseenItemCount > 0,
             listState = listState,
@@ -152,7 +157,7 @@ class FeedPresenter @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(navigator: Navigator, pagingFlow: Flow<PagingData<FeedItem>>): FeedPresenter
+        fun create(navigator: Navigator, pagingFlow: Flow<PagingData<NoteWithUser>>): FeedPresenter
     }
 
     companion object {

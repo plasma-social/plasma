@@ -5,6 +5,7 @@ import androidx.paging.PagingData
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.models.Mention
 import social.plasma.opengraph.OpenGraphMetadata
 
@@ -15,7 +16,16 @@ data class FeedUiState(
     val listState: LazyListState,
     val displayRefreshButton: Boolean = false,
     val onEvent: (FeedUiEvent) -> Unit,
-) : CircuitUiState
+) : CircuitUiState {
+    companion object {
+        val Empty = FeedUiState(
+            pagingFlow = emptyFlow(),
+            getOpenGraphMetadata = { null },
+            listState = LazyListState(),
+            onEvent = {},
+        )
+    }
+}
 
 sealed interface FeedItem {
     val key: String

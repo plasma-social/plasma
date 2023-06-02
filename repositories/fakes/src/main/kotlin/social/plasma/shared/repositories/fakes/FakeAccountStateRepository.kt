@@ -1,11 +1,12 @@
 package social.plasma.shared.repositories.fakes
 
+import app.cash.nostrino.crypto.SecKeyGenerator
 import kotlinx.coroutines.flow.Flow
 import social.plasma.shared.repositories.api.AccountStateRepository
 
 class FakeAccountStateRepository(
     private var secretKey: ByteArray? = null,
-    private var publicKey: ByteArray? = null,
+    private var publicKey: ByteArray? = SecKeyGenerator().generate().pubKey.key.toByteArray(),
 ) : AccountStateRepository {
 
     override val isLoggedIn: Flow<Boolean>

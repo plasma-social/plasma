@@ -16,8 +16,7 @@ import social.plasma.features.feeds.screens.notifications.NotificationsFeedScree
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
-import social.plasma.feeds.presenters.thread.HashTagScreenPresenter
+import social.plasma.feeds.presenters.hashtag.HashTagScreenPresenter
 import social.plasma.feeds.presenters.thread.ThreadScreenPresenter
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
@@ -29,7 +28,6 @@ class FeedsPresentersFactory @Inject constructor(
     private val notificationScreenPresenter: NotificationsFeedPresenter.Factory,
     private val noteRepository: NoteRepository,
     private val feedPresenter: FeedPresenter.Factory,
-    notesMapper: NotePagingFlowMapper,
     scope: CoroutineScope,
 ) : Presenter.Factory {
 
@@ -40,27 +38,20 @@ class FeedsPresentersFactory @Inject constructor(
         prefetchDistance = 5,
     )
 
-    private val followingFlow =
-        notesMapper.map(
-            Pager(
-                config = config,
-                pagingSourceFactory = noteRepository::observePagedContactsNotes,
-            ).flow.distinctUntilChanged()
-        ).cachedIn(scope)
+    private val followingFlow = Pager(
+        config = config,
+        pagingSourceFactory = noteRepository::observePagedContactsNotes,
+    ).flow.distinctUntilChanged().cachedIn(scope)
 
-    private val repliesFeed = notesMapper.map(
-        Pager(
-            config = config,
-            pagingSourceFactory = noteRepository::observePagedContactsReplies,
-        ).flow.distinctUntilChanged()
-    ).cachedIn(scope)
+    private val repliesFeed = Pager(
+        config = config,
+        pagingSourceFactory = noteRepository::observePagedContactsReplies,
+    ).flow.distinctUntilChanged().cachedIn(scope)
 
-    private val notificationsFeed = notesMapper.map(
-        Pager(
-            config = config,
-            pagingSourceFactory = noteRepository::observePagedNotifications,
-        ).flow.distinctUntilChanged()
-    ).cachedIn(scope)
+    private val notificationsFeed = Pager(
+        config = config,
+        pagingSourceFactory = noteRepository::observePagedNotifications,
+    ).flow.distinctUntilChanged().cachedIn(scope)
 
     override fun create(
         screen: Screen,

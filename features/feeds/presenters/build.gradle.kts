@@ -72,6 +72,8 @@ dependencies {
     implementation(libs.moshi.core)
 
     testImplementation(projects.repositories.fakes)
+    testImplementation(projects.data.daos.fakes)
+    testImplementation(projects.data.nostr.fakes)
     testImplementation(projects.common.utils.fakes)
     testImplementation(projects.data.nostr)
     testImplementation(libs.moshi.kotlin)

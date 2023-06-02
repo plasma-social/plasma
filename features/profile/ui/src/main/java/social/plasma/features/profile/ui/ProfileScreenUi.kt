@@ -3,7 +3,8 @@ package social.plasma.features.profile.ui
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +24,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -42,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -68,7 +66,9 @@ import social.plasma.features.profile.screens.ProfileUiState.Loading
 import social.plasma.ui.R
 import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
+import social.plasma.ui.components.OutlinedPrimaryButton
 import social.plasma.ui.components.OverlayIconButton
+import social.plasma.ui.components.PrimaryButton
 import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
@@ -261,6 +261,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         }
     }
 
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     private fun ProfileBio(
         userData: Loaded.UserData,
@@ -291,25 +292,24 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                OutlinedButton(
-                    onClick = onFollowClick,
-                    enabled = following != null,
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = SolidColor(
-                            MaterialTheme.colorScheme.primary
-                        )
-                    )
-                ) {
-                    AnimatedVisibility(visible = following == true) {
-                        Icon(painterResource(R.drawable.ic_plasma_follow), null)
-                        Spacer(modifier = Modifier.width(4.dp))
+                AnimatedContent(targetState = following, label = "") { isFollowing ->
+                    when (isFollowing) {
+                        true -> {
+                            OutlinedPrimaryButton(onClick = onFollowClick) {
+                                Icon(painterResource(R.drawable.ic_plasma_follow), null)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(stringResource(id = R.string.unfollow))
+                            }
+                        }
+
+                        false, null -> {
+                            PrimaryButton(onClick = onFollowClick, enabled = following != null) {
+                                Text(text = stringResource(id = R.string.follow))
+                            }
+                        }
                     }
-                    Text(
-                        if (following == true) stringResource(id = R.string.unfollow) else stringResource(
-                            R.string.follow
-                        )
-                    )
                 }
+
             }
 
             if (isNip5Valid) {

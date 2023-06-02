@@ -1,6 +1,7 @@
 package social.plasma.shared.repositories.real
 
 import app.cash.nostrino.crypto.SecKey
+import kotlinx.coroutines.flow.Flow
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.ContactsDao
 import social.plasma.models.Event
@@ -17,7 +18,7 @@ class RealContactsRepository @Inject constructor(
     private val relayManager: RelayManager,
     private val accountStateRepository: AccountStateRepository,
 ) : ContactsRepository {
-    override suspend fun follow(pubKeyHex: String) {
+    override suspend fun followPubkey(pubKeyHex: String) {
         val currentContactList = getCurrentContactList()
         requireNotNull(currentContactList)
 
@@ -26,7 +27,7 @@ class RealContactsRepository @Inject constructor(
         updateContactListTags(tags, currentContactList)
     }
 
-    override suspend fun unfollow(pubKeyHex: String) {
+    override suspend fun unfollowPubkey(pubKeyHex: String) {
         val currentContactList = getCurrentContactList()
         requireNotNull(currentContactList)
 
@@ -35,6 +36,30 @@ class RealContactsRepository @Inject constructor(
         if (tags != currentContactList.tags) {
             updateContactListTags(tags, currentContactList)
         }
+    }
+
+    override suspend fun followHashTag(hashTag: String) {
+        val currentContactList = getCurrentContactList()
+        requireNotNull(currentContactList)
+
+        val tags = currentContactList.tags + setOf(listOf("t", hashTag))
+
+        updateContactListTags(tags, currentContactList)
+    }
+
+    override suspend fun unfollowHashTag(hashTag: String) {
+        val currentContactList = getCurrentContactList()
+        requireNotNull(currentContactList)
+
+        val tags = currentContactList.tags - setOf(listOf("t", hashTag))
+
+        if (tags != currentContactList.tags) {
+            updateContactListTags(tags, currentContactList)
+        }
+    }
+
+    override fun observeContactListEvent(pubKeyHex: String): Flow<EventEntity?> {
+        return contactsDao.observeContactListEvent(pubKeyHex)
     }
 
     private suspend fun getCurrentContactList(): EventEntity? {
