@@ -11,6 +11,7 @@ import social.plasma.nostr.relay.message.RelayMessage
 interface Relay {
     val canRead: Boolean
     val canWrite: Boolean
+    val supportedNips: List<Nip>
     val url: String
 
     val connectionStatus: StateFlow<RelayStatus>
@@ -31,6 +32,8 @@ interface Relay {
         secKey: SecKey,
         tags: Set<List<String>> = emptySet(),
     )
+
+    fun requestCount(subscribeMessage: SubscribeMessage)
 
     data class RelayStatus(
         val url: String,

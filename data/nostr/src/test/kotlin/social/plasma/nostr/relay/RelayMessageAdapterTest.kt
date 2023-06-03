@@ -10,6 +10,7 @@ import io.kotest.property.arbitrary.bind
 import io.kotest.property.arbitrary.choice
 import io.kotest.property.arbitrary.map
 import io.kotest.property.checkAll
+import social.plasma.nostr.models.EventCountSerdeTest.Companion.arbCountEvent
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbEvent
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbVanillaString
 import social.plasma.nostr.relay.message.NostrMessageAdapter
@@ -45,6 +46,14 @@ class RelayMessageAdapterTest : StringSpec({
             EventRelayMessage(subscriptionId, event)
         }
 
-        val arbRelayMessage = Arb.choice(arbNoticeRelayMessage, arbEventRelayMessage)
+        private val arbCountRelayMessage = Arb.bind(
+            arbitrary { UUID.randomUUID().toString() },
+            arbCountEvent
+        ) { subscriptionId, event ->
+            RelayMessage.CountRelayMessage(subscriptionId, event)
+        }
+
+        val arbRelayMessage =
+            Arb.choice(arbNoticeRelayMessage, arbEventRelayMessage, arbCountRelayMessage)
     }
 }

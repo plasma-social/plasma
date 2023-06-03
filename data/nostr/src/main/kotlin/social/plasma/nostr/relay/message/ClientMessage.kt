@@ -10,7 +10,7 @@ sealed class ClientMessage {
         val subscriptionId: String,
         val filter: Filter,
         val additionalFilters: List<Filter>,
-    ): ClientMessage() {
+    ) : ClientMessage() {
 
         constructor(filter: Filter, vararg additionalFilters: Filter) : this(
             subscriptionId = "plasma-request-${UUID.randomUUID()}",
@@ -21,8 +21,9 @@ sealed class ClientMessage {
         val filters = listOf(filter).plus(additionalFilters)
     }
 
+    data class RequestCountMessage(val subscribeMessage: SubscribeMessage) : ClientMessage()
 
-    data class UnsubscribeMessage(val subscriptionId: String): ClientMessage()
+    data class UnsubscribeMessage(val subscriptionId: String) : ClientMessage()
 
     data class EventMessage(
         val event: Event,
