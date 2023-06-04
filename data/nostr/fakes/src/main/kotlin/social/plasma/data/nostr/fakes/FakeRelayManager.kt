@@ -19,6 +19,8 @@ class FakeRelayManager : RelayManager {
         get() = TODO("Not yet implemented")
     override val relayMessages: Flow<RelayMessage>
         get() = emptyFlow()
+    override val countMessages: Flow<RelayMessage.CountRelayMessage>
+        get() = TODO("Not yet implemented")
 
 
     override fun subscribe(subscribeMessage: ClientMessage.SubscribeMessage): ClientMessage.UnsubscribeMessage {
@@ -26,7 +28,11 @@ class FakeRelayManager : RelayManager {
     }
 
     override fun unsubscribe(unsubscribeMessage: ClientMessage.UnsubscribeMessage) {
-        
+
+    }
+
+    override fun sendCountRequest(subscribeMessage: ClientMessage.SubscribeMessage) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun send(event: ClientMessage.EventMessage) {

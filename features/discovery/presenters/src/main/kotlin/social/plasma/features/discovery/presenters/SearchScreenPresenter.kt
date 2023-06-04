@@ -32,6 +32,7 @@ import social.plasma.features.discovery.screens.search.SearchUiState
 import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.HashTag
 
 class SearchScreenPresenter @AssistedInject constructor(
     private val getPopularHashTags: GetPopularHashTags,
@@ -183,7 +184,10 @@ class SearchScreenPresenter @AssistedInject constructor(
                 }
 
                 is SearchUiEvent.OnSearchSuggestionTapped -> when (val item = event.item) {
-                    is HashTagSearchSuggestionItem -> navigator.goTo(HashTagFeedScreen(item.content))
+                    is HashTagSearchSuggestionItem -> navigator.goTo(
+                        HashTagFeedScreen(HashTag.parse(item.content))
+                    )
+
                     is UserSearchItem -> navigator.goTo(ProfileScreen(item.pubKeyHex))
                 }
             }

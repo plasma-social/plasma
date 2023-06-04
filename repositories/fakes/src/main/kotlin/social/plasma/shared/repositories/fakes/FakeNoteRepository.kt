@@ -3,12 +3,15 @@ package social.plasma.shared.repositories.fakes
 import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.Turbine
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.Tag
 import social.plasma.shared.repositories.api.NoteRepository
+import java.time.Instant
 
 class FakeNoteRepository : NoteRepository {
     val noteByIdResponse = MutableStateFlow<NoteWithUser?>(null)
@@ -49,11 +52,15 @@ class FakeNoteRepository : NoteRepository {
         return false
     }
 
-    override fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser> {
+    override fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
         TODO("Not yet implemented")
     }
 
-    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
+    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
+        TODO("Not yet implemented")
+    }
+
+    override fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long> {
         TODO("Not yet implemented")
     }
 }

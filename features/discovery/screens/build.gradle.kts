@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.data.models)
     implementation(libs.circuit.core)
     implementation(libs.nostrino)
     implementation(libs.compose.runtime)

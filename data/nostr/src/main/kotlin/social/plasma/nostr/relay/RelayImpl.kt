@@ -33,7 +33,7 @@ class RelayImpl(
     private val scope: CoroutineScope,
     override val canRead: Boolean = true,
     override val canWrite: Boolean = true,
-    override val supportedNips: List<Nip> = emptyList(),
+    override val supportedNips: Set<Nip> = emptySet(),
 ) : Relay {
 
     private val logger
@@ -103,9 +103,14 @@ class RelayImpl(
         tags: Set<List<String>>,
     ) = send(createEventMessage(text, secKey, tags))
 
-    override fun requestCount(subscribeMessage: SubscribeMessage) {
+    override fun sendCountRequest(subscribeMessage: SubscribeMessage) {
         if (supportedNips.contains(Nip.EventCount)) {
-            service.sendCountSubscribe(RequestCountMessage(subscribeMessage))
+            if (_connectionStatus.value.status == Relay.Status.Connected) {
+                logger.d("requesting count for %s", subscribeMessage)
+                service.sendCountSubscribe(RequestCountMessage(subscribeMessage))
+            } else {
+                pendingSendEvents.updateAndGet { it + RequestCountMessage(subscribeMessage) }
+            }
         } else {
             throw UnsupportedOperationException("This relay does not support Event Counts. https://nips.be/${Nip.EventCount}")
         }
@@ -141,6 +146,7 @@ class RelayImpl(
 
     private fun publishPendingEvents() {
         pendingSendEvents.getAndSet(emptyList()).forEach {
+            logger.d("publishing pending event %s", it)
             when (it) {
                 is EventMessage -> service.sendEvent(it)
                 is SubscribeMessage -> service.sendSubscribe(it)

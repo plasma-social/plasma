@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
@@ -89,6 +90,7 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
 
             HorizontalPager(pageCount = tabs.size, state = pagerState) {
                 CircuitContent(
+                    modifier = Modifier.fillMaxSize(),
                     screen = tabs[it].screen,
                     onNavEvent = { navEvent -> onEvent(ChildNav(navEvent)) },
                 )

@@ -28,6 +28,7 @@ import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.HashTag
 import social.plasma.models.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
 import social.plasma.opengraph.OpenGraphParser
@@ -149,7 +150,7 @@ class FeedPresenter @AssistedInject constructor(
                 }
 
                 is FeedUiEvent.OnHashTagClick -> {
-                    navigator.goTo(HashTagFeedScreen(event.hashTag))
+                    navigator.goTo(HashTagFeedScreen(HashTag.parse(event.hashTag)))
                 }
             }
         }

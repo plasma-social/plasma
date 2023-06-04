@@ -53,13 +53,13 @@ class PlasmaAndroidApplication : Application(), ImageLoaderFactory, Configuratio
 
         workManager.enqueueUniquePeriodicWork(
             "sync-contactlist-feed",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             refreshContactListRequest
         )
 
         workManager.enqueueUniquePeriodicWork(
             "purge-db",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             purgeDbRequest
         )
     }

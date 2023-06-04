@@ -19,6 +19,7 @@ import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.screens.hashtags.ButtonUiState
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
+import social.plasma.models.HashTag
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeContactsRepository
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
@@ -38,7 +39,7 @@ class HashTagScreenPresenterTest {
     fun `hashtag is not followed`() = runTest {
         makePresenter().test {
             with(awaitItem()) {
-                assertThat(title).isEqualTo("test")
+                assertThat(title).isEqualTo("#test")
                 assertThat(followButtonUiState).isEqualTo(
                     ButtonUiState(
                         label = stringManager[R.string.join],
@@ -49,7 +50,7 @@ class HashTagScreenPresenterTest {
             }
 
             with(awaitItem()) {
-                assertThat(title).isEqualTo("test")
+                assertThat(title).isEqualTo("#test")
                 assertThat(followButtonUiState).isEqualTo(
                     ButtonUiState(
                         label = stringManager[R.string.leave],
@@ -62,13 +63,13 @@ class HashTagScreenPresenterTest {
 
     @Test
     fun `hashtag is followed`() = runTest {
-        contactsRepository.followHashTag("test")
+        contactsRepository.followHashTag(HashTag.parse("test"))
 
         makePresenter().test {
             awaitItem()
 
             with(awaitItem()) {
-                assertThat(title).isEqualTo("test")
+                assertThat(title).isEqualTo("#test")
                 assertThat(followButtonUiState).isEqualTo(
                     ButtonUiState(
                         label = stringManager[R.string.leave],
@@ -79,7 +80,7 @@ class HashTagScreenPresenterTest {
             }
 
             with(awaitItem()) {
-                assertThat(title).isEqualTo("test")
+                assertThat(title).isEqualTo("#test")
                 assertThat(followButtonUiState).isEqualTo(
                     ButtonUiState(
                         label = stringManager[R.string.join],
@@ -91,11 +92,11 @@ class HashTagScreenPresenterTest {
     }
 
     private fun makePresenter(
-        args: HashTagFeedScreen = HashTagFeedScreen(hashTag = "test"),
+        args: HashTagFeedScreen = HashTagFeedScreen(hashTag = HashTag.parse("test")),
     ): HashTagScreenPresenter {
         return HashTagScreenPresenter(
             feedUiProducer = { _, _ -> FeedUiState.Empty },
-            observePagedHashTagFeed = ObservePagedHashTagFeed(noteRepository),
+            observePagedHashTagFeed = ObservePagedHashTagFeed(noteRepository, FakeLastRequestDao()),
             observeFollowedHashTags = ObserveFollowedHashTags(
                 contactsRepository,
                 FakeAccountStateRepository()

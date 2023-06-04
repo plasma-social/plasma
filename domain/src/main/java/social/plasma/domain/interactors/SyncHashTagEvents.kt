@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import social.plasma.data.daos.LastRequestDao
 import social.plasma.domain.Interactor
+import social.plasma.models.HashTag
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.Request
 import social.plasma.nostr.relay.RelayManager
@@ -27,37 +28,38 @@ class SyncHashTagEvents @Inject constructor(
     @Named("io") private val ioDispatcher: CoroutineContext,
 ) : Interactor<SyncHashTagEvents.Params>() {
 
-    override suspend fun doWork(params: Params) = withContext(ioDispatcher) {
-        val hashTagWithoutSign = params.hashtag.removePrefix("#").lowercase()
+    override suspend fun doWork(params: Params) {
+        val hashtagName = params.hashtag.name
+        withContext(ioDispatcher) {
+            val lastRequest =
+                lastRequestDao.lastRequest(Request.SYNC_HASHTAG, hashtagName)?.timestamp
+                    ?: Instant.EPOCH
 
-        val lastRequest =
-            lastRequestDao.lastRequest(Request.SYNC_HASHTAG, hashTagWithoutSign)?.timestamp
-                ?: Instant.EPOCH
-
-        val subscribeMessage = SubscribeMessage(
-            Filter(hashTags = setOf(hashTagWithoutSign), since = lastRequest, limit = 250),
-        )
-
-        val unsubscribeMessage = relay.subscribe(subscribeMessage)
-        val subscriptionEvents =
-            relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
-                .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
-                .map { it.event }
-
-        storeEvents(subscriptionEvents)
-        storeEvents.flow.onStart {
-            lastRequestDao.upsert(
-                LastRequestEntity(
-                    request = Request.SYNC_HASHTAG,
-                    resourceId = hashTagWithoutSign
-                )
+            val subscribeMessage = SubscribeMessage(
+                Filter(hashTags = setOf(hashtagName), since = lastRequest, limit = 250),
             )
-        }.onCompletion {
-            relay.unsubscribe(unsubscribeMessage)
-        }.collect()
+
+            val unsubscribeMessage = relay.subscribe(subscribeMessage)
+            val subscriptionEvents =
+                relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+                    .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
+                    .map { it.event }
+
+            storeEvents(subscriptionEvents)
+            storeEvents.flow.onStart {
+                lastRequestDao.upsert(
+                    LastRequestEntity(
+                        request = Request.SYNC_HASHTAG,
+                        resourceId = hashtagName
+                    )
+                )
+            }.onCompletion {
+                relay.unsubscribe(unsubscribeMessage)
+            }.collect()
+        }
     }
 
     data class Params(
-        val hashtag: String,
+        val hashtag: HashTag,
     )
 }

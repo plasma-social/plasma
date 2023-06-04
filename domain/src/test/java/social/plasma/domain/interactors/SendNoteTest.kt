@@ -189,8 +189,8 @@ class SendNoteTest {
             with(noteRepository.sendNoteEvents.awaitItem()) {
                 assertThat(tags).containsExactly(
                     EventTag(NOTE_ID),
-                    HashTag("foodstr"),
-                    HashTag("bitcoin"),
+                    HashTag.parse("#foodstr"),
+                    HashTag.parse("#bitcoin"),
                 )
                 assertThat(content)
                     .isEqualTo("Thanks to #[0], for being #[0] #foodstr #bitcoin")

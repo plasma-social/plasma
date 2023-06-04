@@ -59,7 +59,7 @@ class SendNote @Inject constructor(
     }
 
     private fun getContentHashTags(content: String): Set<Tag> = hashTagRegex.findAll(content)
-        .map { HashTag(it.value.substring(1)) }
+        .map { HashTag.parse(it.value) }
         .toSet()
 
     private fun replaceContentWithPlaceholders(
