@@ -1,6 +1,8 @@
 package social.plasma.features.discovery.ui.community
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -26,7 +28,10 @@ import social.plasma.ui.components.Avatar
 import social.plasma.ui.theme.PlasmaTheme
 
 class CommunityListItemUi : Ui<CommunityListItemUiState> {
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(
+        ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+        ExperimentalAnimationApi::class
+    )
     @Composable
     override fun Content(state: CommunityListItemUiState, modifier: Modifier) {
         val onEvent = state.onEvent
@@ -62,15 +67,20 @@ class CommunityListItemUi : Ui<CommunityListItemUiState> {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy((-12).dp),
-                ) {
-                    state.avatarList.forEach {
-                        Avatar(
-                            imageUrl = it,
-                            contentDescription = null
-                        )
+                Crossfade(
+                    targetState = state.avatarList,
+                    label = "Crossfade",
+                ) { avatarList ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy((-12).dp),
+                        modifier = Modifier.padding(top = 24.dp)
+                    ) {
+                        avatarList.forEach {
+                            Avatar(
+                                imageUrl = it,
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             }

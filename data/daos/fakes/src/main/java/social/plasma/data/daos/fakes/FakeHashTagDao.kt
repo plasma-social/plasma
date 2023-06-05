@@ -15,4 +15,7 @@ class FakeHashTagDao : HashtagDao {
         return popularHashTags.value
     }
 
+    override suspend fun getCommunityLatestPubkeys(hashTag: String, limit: Int): List<String> {
+        TODO("Not yet implemented")
+    }
 }
