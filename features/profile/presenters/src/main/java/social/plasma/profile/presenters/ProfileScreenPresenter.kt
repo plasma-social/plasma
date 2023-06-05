@@ -21,8 +21,10 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import shortBech32
+import social.plasma.domain.interactors.EventCountInteractor
 import social.plasma.domain.interactors.FollowPubkey
 import social.plasma.domain.interactors.GetNip5Status
+import social.plasma.domain.interactors.GetPubkeyFollowerCount
 import social.plasma.domain.interactors.Nip5Status
 import social.plasma.domain.interactors.SyncProfileData
 import social.plasma.domain.interactors.UnfollowPubkey
@@ -36,8 +38,8 @@ import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
 import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.feeds.presenters.feed.NotePagingFlowMapper
 import social.plasma.shared.repositories.api.AccountStateRepository
+import social.plasma.shared.utils.api.NumberFormatter
 
 class ProfileScreenPresenter @AssistedInject constructor(
     private val observeFollowingCount: ObserveFollowingCount,
@@ -45,9 +47,11 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val observePagedProfileFeed: ObservePagedProfileFeed,
     private val syncProfileData: SyncProfileData,
     private val observeUserIsInContacts: ObserveUserIsInContacts,
+    private val getPubkeyFollowerCount: GetPubkeyFollowerCount,
     private val getNip5Status: GetNip5Status,
     private val followPubkey: FollowPubkey,
     private val unFollowPubkey: UnfollowPubkey,
+    private val numberFormatter: NumberFormatter,
     accountStateRepository: AccountStateRepository,
     feedPresenterFactory: FeedPresenter.Factory,
     @Assisted private val args: ProfileScreen,
@@ -106,6 +110,19 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
         val metadata by remember { observeUserMetadata.flow }.collectAsState(initial = null)
         val followingCount by contactsCount.collectAsState(initial = 0)
+        val formattedFollowingCount = remember(followingCount) {
+            numberFormatter.format(followingCount)
+        }
+        val followerCount by produceState(initialValue = "\uD83E\uDD37") {
+            val countResult = getPubkeyFollowerCount.executeSync(
+                GetPubkeyFollowerCount.Params(pubKey)
+            )
+            value = when (countResult) {
+                EventCountInteractor.Result.Failure -> value
+                is EventCountInteractor.Result.Success -> numberFormatter.format(countResult.count)
+            }
+        }
+
         val isProfileInMyContacts by userIsInMyContacts.collectAsState(initial = null)
 
         var optimisticFollowState by remember { mutableStateOf<Boolean?>(null) }
@@ -164,11 +181,11 @@ class ProfileScreenPresenter @AssistedInject constructor(
             statCards = listOf(
                 ProfileStat(
                     label = "Following",
-                    value = "$followingCount"
+                    value = formattedFollowingCount,
                 ),
                 ProfileStat(
                     label = "Followers",
-                    value = "💜"
+                    value = followerCount,
                 ),
                 ProfileStat(
                     label = "Relays",
