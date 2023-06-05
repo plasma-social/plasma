@@ -29,6 +29,7 @@ import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.feeds.presenters.feed.FeedUiProducer
+import social.plasma.models.HashTag
 import social.plasma.shared.utils.api.StringManager
 
 class HashTagScreenPresenter @AssistedInject constructor(
@@ -54,8 +55,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
     }
 
     private val hashtagFollowState = observeFollowedHashTags.flow.map { followedHashTags ->
-        val hashtag = if (args.hashTag.startsWith("#")) args.hashTag.substring(1) else args.hashTag
-        followedHashTags.contains(hashtag)
+        followedHashTags.contains(args.hashTag)
     }.onStart {
         observeFollowedHashTags(Unit)
     }
@@ -81,7 +81,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
                     when (event) {
                         // Prevents navigating to the same hashtag screen
                         is FeedUiEvent.OnHashTagClick -> {
-                            if (event.hashTag.lowercase() != args.hashTag.lowercase()) {
+                            if (HashTag.parse(event.hashTag).name != args.hashTag.name) {
                                 onFeedEvent(event)
                             }
                         }
@@ -102,7 +102,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
 
         val coroutineScope = rememberCoroutineScope()
         return HashTagScreenUiState(
-            title = args.hashTag,
+            title = args.hashTag.displayName,
             feedState = hashTagScreenFeedState,
             followButtonUiState = followButtonUiState,
         ) { event ->

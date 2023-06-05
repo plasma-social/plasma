@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.ContactsDao
 import social.plasma.models.Event
+import social.plasma.models.HashTag
 import social.plasma.models.events.EventEntity
 import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.ClientMessage
@@ -38,20 +39,20 @@ class RealContactsRepository @Inject constructor(
         }
     }
 
-    override suspend fun followHashTag(hashTag: String) {
+    override suspend fun followHashTag(hashTag: HashTag) {
         val currentContactList = getCurrentContactList()
         requireNotNull(currentContactList)
 
-        val tags = currentContactList.tags + setOf(listOf("t", hashTag))
+        val tags = currentContactList.tags + setOf(listOf("t", hashTag.name))
 
         updateContactListTags(tags, currentContactList)
     }
 
-    override suspend fun unfollowHashTag(hashTag: String) {
+    override suspend fun unfollowHashTag(hashTag: HashTag) {
         val currentContactList = getCurrentContactList()
         requireNotNull(currentContactList)
 
-        val tags = currentContactList.tags - setOf(listOf("t", hashTag))
+        val tags = currentContactList.tags - setOf(listOf("t", hashTag.name))
 
         if (tags != currentContactList.tags) {
             updateContactListTags(tags, currentContactList)

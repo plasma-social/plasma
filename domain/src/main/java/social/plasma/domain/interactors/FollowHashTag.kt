@@ -1,6 +1,7 @@
 package social.plasma.domain.interactors
 
 import social.plasma.domain.ResultInteractor
+import social.plasma.models.HashTag
 import social.plasma.shared.repositories.api.ContactsRepository
 import javax.inject.Inject
 
@@ -8,9 +9,8 @@ class FollowHashTag @Inject constructor(
     private val contactsRepository: ContactsRepository,
 ) : ResultInteractor<FollowHashTag.Params, FollowHashTag.FollowResult>() {
     override suspend fun doWork(params: Params): FollowResult {
-        val hashtag = if (params.hashtag.startsWith("#")) params.hashtag.drop(1) else params.hashtag
         return try {
-            contactsRepository.followHashTag(hashtag)
+            contactsRepository.followHashTag(params.hashtag)
             FollowResult.Success
         } catch (e: Exception) {
             FollowResult.Error
@@ -18,7 +18,7 @@ class FollowHashTag @Inject constructor(
     }
 
     data class Params(
-        val hashtag: String,
+        val hashtag: HashTag,
     )
 
     sealed interface FollowResult {

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
@@ -23,6 +24,7 @@ import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
+import social.plasma.nostr.relay.message.RelayMessage.CountRelayMessage
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
@@ -32,6 +34,7 @@ import javax.inject.Singleton
 interface RelayManager {
     val relayList: StateFlow<List<Relay>>
     val relayMessages: Flow<RelayMessage>
+    val countMessages: Flow<CountRelayMessage>
 
     suspend fun sendNote(
         text: String,
@@ -44,6 +47,8 @@ interface RelayManager {
     fun subscribe(subscribeMessage: SubscribeMessage): UnsubscribeMessage
 
     fun unsubscribe(unsubscribeMessage: UnsubscribeMessage)
+
+    fun sendCountRequest(subscribeMessage: SubscribeMessage)
 }
 
 @Singleton
@@ -59,6 +64,12 @@ class RealRelayManager @Inject constructor(
         AtomicReference(emptyMap())
 
     private val relays: MutableStateFlow<Map<String, Relay>> = MutableStateFlow(emptyMap())
+    private val countRelay = createRelay(
+        "wss://relay.nostr.band",
+        write = false,
+        read = true,
+        supportedNips = setOf(Nip.EventCount)
+    )
 
     override val relayList: StateFlow<List<Relay>>
         get() = relays.mapLatest { it.values.toList() }
@@ -67,6 +78,9 @@ class RealRelayManager @Inject constructor(
     override val relayMessages: Flow<RelayMessage> = relayList.flatMapLatest { relayList ->
         relayList.map { relay -> relay.relayMessages }.merge()
     }
+
+    override val countMessages: Flow<CountRelayMessage> =
+        countRelay.relayMessages.filterIsInstance()
 
     init {
         scope.launch {
@@ -79,13 +93,9 @@ class RealRelayManager @Inject constructor(
                 resubscribeAll()
             }
         }
-    }
 
-    private fun connectAll() {
-        relays.value.values.forEach { relay ->
-            scope.launch {
-                relay.connect()
-            }
+        scope.launch {
+            countRelay.connect()
         }
     }
 
@@ -95,14 +105,6 @@ class RealRelayManager @Inject constructor(
                 scope.launch {
                     relay.subscribe(subscribeMessage)
                 }
-            }
-        }
-    }
-
-    fun disconnect() {
-        relays.value.values.forEach { relay ->
-            scope.launch {
-                relay.disconnect()
             }
         }
     }
@@ -117,6 +119,10 @@ class RealRelayManager @Inject constructor(
     override fun unsubscribe(unsubscribeMessage: UnsubscribeMessage) {
         activeSubscriptions.getAndUpdate { it - unsubscribeMessage.subscriptionId }
         relays.value.values.forEach { it.unsubscribe(unsubscribeMessage) }
+    }
+
+    override fun sendCountRequest(subscribeMessage: SubscribeMessage) {
+        countRelay.sendCountRequest(subscribeMessage)
     }
 
     override suspend fun send(event: EventMessage) {
@@ -151,6 +157,7 @@ class RealRelayManager @Inject constructor(
         url: String,
         read: Boolean = true,
         write: Boolean = true,
+        supportedNips: Set<Nip> = emptySet(),
     ): RelayImpl =
         RelayImpl(
             url = url,
@@ -159,6 +166,7 @@ class RealRelayManager @Inject constructor(
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             canRead = read,
             canWrite = write,
+            supportedNips = supportedNips,
         )
 
     private fun replaceRelayList(entities: List<RelayInfo>) {

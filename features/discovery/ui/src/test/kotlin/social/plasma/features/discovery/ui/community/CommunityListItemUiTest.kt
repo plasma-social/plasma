@@ -32,7 +32,13 @@ class CommunityListItemUiTest constructor(
 
     @Test
     fun test() {
-        snapshot(CommunityListItemUiState(name = "#aVeryLongHashtag") {})
+        snapshot(
+            CommunityListItemUiState(
+                name = "#aVeryLongHashtag",
+                trailingText = "38,789 members",
+                captionText = "4,590 new notes",
+                avatarList = (1..6).map { "avatarUrl" },
+            ) {})
     }
 
     private fun snapshot(uiState: CommunityListItemUiState) {

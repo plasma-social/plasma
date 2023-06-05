@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 import social.plasma.models.LastRequestEntity
 import social.plasma.models.Request
 
@@ -12,6 +13,9 @@ import social.plasma.models.Request
 abstract class LastRequestDao {
     @Query("SELECT * FROM last_requests WHERE request = :request AND resource_id = :resourceId")
     abstract suspend fun lastRequest(request: Request, resourceId: String): LastRequestEntity?
+
+    @Query("SELECT * FROM last_requests WHERE request = :request AND resource_id = :resourceId")
+    abstract fun observeLastRequest(request: Request, resourceId: String): Flow<LastRequestEntity?>
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)

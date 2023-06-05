@@ -3,7 +3,6 @@ package social.plasma.discovery.presenters
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import social.plasma.data.daos.fakes.FakeHashTagDao
@@ -27,6 +26,7 @@ import social.plasma.features.discovery.screens.search.SearchUiEvent.OnSearchSug
 import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.HashTag
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
@@ -34,7 +34,6 @@ import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class SearchScreenPresenterTest {
     private val navigator = FakeNavigator()
     private val hashtagsDao = FakeHashTagDao()
@@ -269,7 +268,7 @@ class SearchScreenPresenterTest {
                 )
             )
 
-            assertThat(navigator.awaitNextScreen()).isEqualTo(HashTagFeedScreen("test"))
+            assertThat(navigator.awaitNextScreen()).isEqualTo(HashTagFeedScreen(HashTag.parse("test")))
         }
     }
 

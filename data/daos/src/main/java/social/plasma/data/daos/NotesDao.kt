@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 import social.plasma.models.Event
 import social.plasma.models.NoteWithUser
 
@@ -80,4 +81,15 @@ interface NotesDao {
     """
     )
     fun observePagedNotesWithHashtag(hashtagName: String): PagingSource<Int, NoteWithUser>
+
+    @Query(
+        """
+        SELECT COUNT(id) FROM events
+        INNER JOIN hashtag_ref
+        ON events.id = hashtag_ref.source_event
+        WHERE hashtag_ref.hashtag = :hashtag
+        AND events.created_at > :since
+    """
+    )
+    fun observeHashTagNoteCount(hashtag: String, since: Long): Flow<Long>
 }

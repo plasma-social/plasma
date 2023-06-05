@@ -51,14 +51,14 @@ class CommunityListItemUi : Ui<CommunityListItemUiState> {
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "38,789 members",
+                        text = state.trailingText,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "4,590 new notes",
+                    state.captionText,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -66,10 +66,9 @@ class CommunityListItemUi : Ui<CommunityListItemUiState> {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy((-12).dp),
                 ) {
-                    repeat(6) {
-                        val randomSeed = (0..100).random()
+                    state.avatarList.forEach {
                         Avatar(
-                            imageUrl = "https://api.dicebear.com/6.x/avataaars/png?backgroundColor=b6e3f4,c0aede,d1d4f9&seed=$randomSeed",
+                            imageUrl = it,
                             contentDescription = null
                         )
                     }
@@ -88,6 +87,11 @@ private fun PreviewCommunityListItem() {
         CommunityListItemUi().Content(
             state = CommunityListItemUiState(
                 name = "#foodchain",
+                trailingText = "38,789 members",
+                captionText = "4,590 new notes",
+                avatarList = (1..6).map {
+                    "https://api.dicebear.com/6.x/avataaars/png?backgroundColor=b6e3f4,c0aede,d1d4f9&seed=$it"
+                },
                 onEvent = {},
             ),
             modifier = Modifier.fillMaxWidth(),

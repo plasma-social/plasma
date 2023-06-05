@@ -8,6 +8,7 @@ import org.junit.Test
 import social.plasma.data.daos.fakes.FakeContactsDao
 import social.plasma.data.nostr.fakes.FakeRelayManager
 import social.plasma.models.Event
+import social.plasma.models.HashTag
 import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 
@@ -83,7 +84,7 @@ class RealContactsRepositoryTest {
     fun `following a hashtag should send a contact list event with the new hashtag`() = runTest {
         contactsDao.getContactListEventResponses.add(createContactEventEntity())
 
-        createRepository().followHashTag("hashtag")
+        createRepository().followHashTag(HashTag.parse("hashtag"))
 
         with(relayManager.sendEventTurbine.awaitItem().event) {
             assertThat(kind).isEqualTo(Event.Kind.ContactList)
@@ -107,7 +108,7 @@ class RealContactsRepositoryTest {
                 )
             )
 
-            createRepository().unfollowHashTag("hashtag")
+            createRepository().unfollowHashTag(HashTag.parse("hashtag"))
 
             with(relayManager.sendEventTurbine.awaitItem().event) {
                 assertThat(kind).isEqualTo(Event.Kind.ContactList)
@@ -129,7 +130,7 @@ class RealContactsRepositoryTest {
             )
         )
 
-        createRepository().unfollowHashTag("hashtag")
+        createRepository().unfollowHashTag(HashTag.parse("hashtag"))
 
         relayManager.sendEventTurbine.expectNoEvents()
     }

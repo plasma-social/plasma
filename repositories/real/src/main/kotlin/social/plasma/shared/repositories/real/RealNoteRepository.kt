@@ -3,6 +3,7 @@ package social.plasma.shared.repositories.real
 import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
 import app.cash.nostrino.crypto.SecKey
+import kotlinx.coroutines.flow.Flow
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.NotesDao
 import social.plasma.models.EventTag
@@ -14,6 +15,7 @@ import social.plasma.models.Tag
 import social.plasma.nostr.relay.RelayManager
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
+import java.time.Instant
 import javax.inject.Inject
 
 internal class RealNoteRepository @Inject constructor(
@@ -30,7 +32,7 @@ internal class RealNoteRepository @Inject constructor(
             when (tag) {
                 is EventTag -> listOf("e", tag.noteId.hex)
                 is PubKeyTag -> listOf("p", tag.pubKey.key.hex())
-                is HashTag -> listOf("t", tag.tag)
+                is HashTag -> listOf("t", tag.name)
             }
         }.toSet()
 
@@ -81,15 +83,15 @@ internal class RealNoteRepository @Inject constructor(
         return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
     }
 
-    override fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser> {
-        return notesDao.observePagedNotesWithContent("%$hashtag%")
+    override fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
+        return notesDao.observePagedNotesWithContent("%${hashtag.displayName}%")
     }
 
-    override fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser> {
-        val hashtagName = if (hashtag.startsWith("#")) hashtag.substring(
-            1
-        ) else hashtag
+    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
+        return notesDao.observePagedNotesWithHashtag(hashtag.name)
+    }
 
-        return notesDao.observePagedNotesWithHashtag(hashtagName.lowercase())
+    override fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long> {
+        return notesDao.observeHashTagNoteCount(hashtag.name, since?.epochSecond ?: 0)
     }
 }

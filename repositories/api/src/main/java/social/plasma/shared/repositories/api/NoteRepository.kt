@@ -2,9 +2,12 @@ package social.plasma.shared.repositories.api
 
 import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
+import kotlinx.coroutines.flow.Flow
+import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.Tag
+import java.time.Instant
 
 interface NoteRepository {
     suspend fun getById(noteId: NoteId): NoteWithUser?
@@ -23,7 +26,8 @@ interface NoteRepository {
 
     suspend fun refreshContactsNotes(): List<NoteWithUser>
     suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean
-    fun observePagedNotesWithContent(hashtag: String): PagingSource<Int, NoteWithUser>
-    
-    fun observePagedHashTagNotes(hashtag: String): PagingSource<Int, NoteWithUser>
+    fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser>
+
+    fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser>
+    fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long>
 }

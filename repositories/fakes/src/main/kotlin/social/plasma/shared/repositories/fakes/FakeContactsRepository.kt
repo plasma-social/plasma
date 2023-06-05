@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import social.plasma.models.Event
+import social.plasma.models.HashTag
 import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.api.ContactsRepository
 
@@ -37,18 +38,18 @@ class FakeContactsRepository : ContactsRepository {
         }
     }
 
-    override suspend fun followHashTag(hashTag: String) {
+    override suspend fun followHashTag(hashTag: HashTag) {
         observeContactListEventResponse.update {
             it.copy(
-                tags = it.tags + setOf(listOf("t", hashTag))
+                tags = it.tags + setOf(listOf("t", hashTag.name))
             )
         }
     }
 
-    override suspend fun unfollowHashTag(hashTag: String) {
+    override suspend fun unfollowHashTag(hashTag: HashTag) {
         observeContactListEventResponse.update {
             it.copy(
-                tags = it.tags - setOf(listOf("t", hashTag))
+                tags = it.tags - setOf(listOf("t", hashTag.name))
             )
         }
     }
