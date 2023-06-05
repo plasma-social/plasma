@@ -4,6 +4,7 @@ import com.tinder.scarlet.WebSocket
 import com.tinder.scarlet.ws.Receive
 import com.tinder.scarlet.ws.Send
 import kotlinx.coroutines.channels.ReceiveChannel
+import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
@@ -26,4 +27,6 @@ interface RelayService {
     @Receive
     fun webSocketEventChannel(): ReceiveChannel<WebSocket.Event>
 
+    @Send
+    fun sendCountSubscribe(msg: ClientMessage.RequestCountMessage)
 }

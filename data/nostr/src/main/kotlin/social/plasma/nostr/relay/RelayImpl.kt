@@ -19,6 +19,7 @@ import kotlinx.coroutines.plus
 import social.plasma.models.Event
 import social.plasma.nostr.relay.message.ClientMessage
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
+import social.plasma.nostr.relay.message.ClientMessage.RequestCountMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
 import social.plasma.nostr.relay.message.RelayMessage
@@ -32,6 +33,7 @@ class RelayImpl(
     private val scope: CoroutineScope,
     override val canRead: Boolean = true,
     override val canWrite: Boolean = true,
+    override val supportedNips: List<Nip> = emptyList(),
 ) : Relay {
 
     private val logger
@@ -101,6 +103,14 @@ class RelayImpl(
         tags: Set<List<String>>,
     ) = send(createEventMessage(text, secKey, tags))
 
+    override fun requestCount(subscribeMessage: SubscribeMessage) {
+        if (supportedNips.contains(Nip.EventCount)) {
+            service.sendCountSubscribe(RequestCountMessage(subscribeMessage))
+        } else {
+            throw UnsupportedOperationException("This relay does not support Event Counts. https://nips.be/${Nip.EventCount}")
+        }
+    }
+
     private fun createEventMessage(
         text: String,
         secKey: SecKey,
@@ -135,6 +145,7 @@ class RelayImpl(
                 is EventMessage -> service.sendEvent(it)
                 is SubscribeMessage -> service.sendSubscribe(it)
                 is UnsubscribeMessage -> service.sendUnsubscribe(it)
+                is RequestCountMessage -> service.sendCountSubscribe(it)
             }
         }
     }

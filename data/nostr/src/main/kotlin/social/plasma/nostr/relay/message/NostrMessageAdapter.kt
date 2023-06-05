@@ -8,9 +8,12 @@ import com.squareup.moshi.ToJson
 import okio.ByteString
 import okio.ByteString.Companion.decodeHex
 import social.plasma.models.Event
+import social.plasma.models.EventCount
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
+import social.plasma.nostr.relay.message.ClientMessage.RequestCountMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
+import social.plasma.nostr.relay.message.RelayMessage.CountRelayMessage
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
 import social.plasma.nostr.relay.message.RelayMessage.NoticeRelayMessage
 import java.time.Instant
@@ -21,6 +24,7 @@ class NostrMessageAdapter {
     fun clientMessageFromJson(
         reader: JsonReader,
         subscribeDelegate: JsonAdapter<SubscribeMessage>,
+        countDelegate: JsonAdapter<RequestCountMessage>,
         unsubscribeDelegate: JsonAdapter<UnsubscribeMessage>,
         eventDelegate: JsonAdapter<EventMessage>,
     ): ClientMessage {
@@ -28,6 +32,7 @@ class NostrMessageAdapter {
         peekyReader.beginArray()
         return when (val messageType = peekyReader.nextString()) {
             "REQ" -> subscribeDelegate.fromJson(reader)!!
+            "COUNT" -> countDelegate.fromJson(reader)!!
             "CLOSE" -> unsubscribeDelegate.fromJson(reader)!!
             "EVENT" -> eventDelegate.fromJson(reader)!!
             else -> error("Unsupported message type: $messageType")
@@ -36,12 +41,17 @@ class NostrMessageAdapter {
 
     @ToJson
     fun clientMessageToJson(message: ClientMessage): List<Any> {
-        return when(message) {
+        return when (message) {
             is SubscribeMessage -> requestMessageToJson(message)
+            is RequestCountMessage -> countMessageToJson(message)
             is UnsubscribeMessage -> closeMessageToJson(message)
             is EventMessage -> eventMessageToJson(message)
         }
     }
+
+    @ToJson
+    private fun countMessageToJson(message: RequestCountMessage) =
+        listOf("COUNT", message.subscribeMessage.subscriptionId) + message.subscribeMessage.filters
 
     // SubscribeMessage
     @FromJson
@@ -58,6 +68,28 @@ class NostrMessageAdapter {
         }
         reader.endArray()
         return SubscribeMessage(subscriptionId, filters.first(), filters.drop(1))
+    }
+
+    @FromJson
+    fun requestCountMessageFromJson(
+        reader: JsonReader,
+        filterDelegate: JsonAdapter<Filter>,
+    ): RequestCountMessage {
+        reader.beginArray()
+        reader.nextString()
+        val subscriptionId = reader.nextString()
+        val filters = mutableListOf<Filter>()
+        while (reader.hasNext()) {
+            filters.add(filterDelegate.fromJson(reader)!!)
+        }
+        reader.endArray()
+        return RequestCountMessage(
+            SubscribeMessage(
+                subscriptionId,
+                filters.first(),
+                filters.drop(1)
+            )
+        )
     }
 
     @ToJson
@@ -86,12 +118,21 @@ class NostrMessageAdapter {
 
     // RelayMessage
     @FromJson
-    fun relayMessageFromJson(reader: JsonReader, eventDelegate: JsonAdapter<Event>): RelayMessage {
+    fun relayMessageFromJson(
+        reader: JsonReader,
+        eventDelegate: JsonAdapter<Event>,
+        countDelegate: JsonAdapter<EventCount>,
+    ): RelayMessage {
         reader.beginArray()
         val message = when (reader.nextString()) {
             "EVENT" -> EventRelayMessage(
                 subscriptionId = reader.nextString(),
                 event = eventDelegate.fromJson(reader)!!
+            )
+
+            "COUNT" -> CountRelayMessage(
+                subscriptionId = reader.nextString(),
+                count = countDelegate.fromJson(reader)!!
             )
 
             "NOTICE" -> NoticeRelayMessage(reader.nextString())
@@ -107,6 +148,7 @@ class NostrMessageAdapter {
         writer: JsonWriter,
         message: RelayMessage,
         eventDelegate: JsonAdapter<Event>,
+        countDelegate: JsonAdapter<EventCount>,
     ) {
         when (message) {
             is NoticeRelayMessage -> {
@@ -127,6 +169,14 @@ class NostrMessageAdapter {
             RelayMessage.EOSEMessage -> writer.beginArray()
                 .value("EOSE")
                 .endArray()
+
+            is CountRelayMessage -> {
+                writer.beginArray()
+                    .value("COUNT")
+                    .value(message.subscriptionId)
+                countDelegate.toJson(writer, message.count)
+                writer.endArray()
+            }
         }
     }
 
