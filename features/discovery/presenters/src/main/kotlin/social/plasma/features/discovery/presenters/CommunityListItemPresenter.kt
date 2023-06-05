@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.interactors.EventCountInteractor
 import social.plasma.domain.interactors.GetHashTagFollowerCount
+import social.plasma.domain.observers.ObserveCommunityAvatars
 import social.plasma.domain.observers.ObserveHashTagNewNoteCount
 import social.plasma.features.discovery.screens.communities.CommunityListItemEvent
 import social.plasma.features.discovery.screens.communities.CommunityListItemScreen
@@ -25,6 +26,7 @@ import social.plasma.shared.utils.api.StringManager
 class CommunityListItemPresenter @AssistedInject constructor(
     private val getHashTagFollowerCount: GetHashTagFollowerCount,
     private val observeHashTagNewNoteCount: ObserveHashTagNewNoteCount,
+    private val observeCommunityAvatars: ObserveCommunityAvatars,
     private val numberFormatter: NumberFormatter,
     private val stringManager: StringManager,
     @Assisted private val args: CommunityListItemScreen,
@@ -40,6 +42,10 @@ class CommunityListItemPresenter @AssistedInject constructor(
                 "formattedCount" to numberFormatter.format(count),
             )
         )
+    }
+
+    private val avatarListFlow = observeCommunityAvatars.flow.onStart {
+        observeCommunityAvatars(ObserveCommunityAvatars.Params(limit = 6, args.hashtag))
     }
 
 
@@ -65,11 +71,7 @@ class CommunityListItemPresenter @AssistedInject constructor(
 
 
         val captionText by remember { captionTextFlow }.collectAsState(initial = "")
-
-//        val avatarList = remember {
-//            (1..6).map { "https://api.dicebear.com/6.x/avataaars/png?backgroundColor=b6e3f4,c0aede,d1d4f9&seed=$it" }
-//        }
-        val avatarList = emptyList<String>()
+        val avatarList by remember { avatarListFlow }.collectAsState(initial = emptyList())
 
         return CommunityListItemUiState(
             name = args.hashtag.displayName,

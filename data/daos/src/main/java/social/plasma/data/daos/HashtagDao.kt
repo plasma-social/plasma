@@ -28,4 +28,21 @@ interface HashtagDao {
     """
     )
     suspend fun getPopularHashTags(limit: Int = 10): List<String>
+
+    /**
+     * Returns the most recent pubkeys that have used the given hashtag
+     */
+    @Query(
+        """
+            SELECT events.pubkey FROM events
+            JOIN hashtag_ref
+            ON events.id = hashtag_ref.source_event
+            WHERE hashtag_ref.hashtag = :hashTag
+            AND events.kind = 1
+            GROUP BY events.pubkey
+            ORDER BY events.created_at DESC
+            LIMIT :limit
+        """
+    )
+    suspend fun getCommunityLatestPubkeys(hashTag: String, limit: Int = 5): List<String>
 }

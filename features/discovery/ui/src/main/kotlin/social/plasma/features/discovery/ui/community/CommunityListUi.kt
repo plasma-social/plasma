@@ -35,7 +35,7 @@ class CommunityListUi : Ui<CommunityListUiState> {
         ) {
 
             if (state.followedHashTags.isNotEmpty()) {
-                stickyHeader(key = "following") {
+                stickyHeader(key = "header-following") {
                     Text(
                         text = stringResource(R.string.following),
                         modifier = Modifier
@@ -53,7 +53,7 @@ class CommunityListUi : Ui<CommunityListUiState> {
             }
 
             if (state.recommendedHashTags.isNotEmpty()) {
-                stickyHeader(key = "recommended") {
+                stickyHeader(key = "header-recommended") {
                     Text(
                         text = stringResource(R.string.recommended),
                         modifier = Modifier
