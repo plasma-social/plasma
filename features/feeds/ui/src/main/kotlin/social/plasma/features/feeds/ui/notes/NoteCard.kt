@@ -1,9 +1,8 @@
 package social.plasma.features.feeds.ui.notes
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,10 +12,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,8 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.cash.nostrino.crypto.PubKey
+import com.slack.circuit.foundation.CircuitContent
+import com.slack.circuit.foundation.NavEvent
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
+import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
@@ -69,6 +73,7 @@ fun NoteElevatedCard(
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
+    onNestedNavEvent: (NavEvent) -> Unit = {},
 ) {
     Card(
         modifier = modifier,
@@ -86,14 +91,66 @@ fun NoteElevatedCard(
         )
         NoteContent(
             uiModel,
-            onLikeClick = onLikeClick,
-            onReplyClick = onReplyClick,
             onProfileClick = onProfileClick,
             onNoteClick = onNoteClick,
-            onRepostClick = onRepostClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
-            onHashTagClick = onHashTagClick
+            onHashTagClick = onHashTagClick,
+            onNestedNavEvent = onNestedNavEvent,
         )
+        NoteCardActionsRow(
+            likeCount = uiModel.likeCount,
+            shareCount = uiModel.shareCount,
+            replyCount = uiModel.replyCount,
+            isLiked = uiModel.isLiked,
+            onLikeClick = onLikeClick,
+            onReplyClick = onReplyClick,
+            onRepostClick = onRepostClick,
+        )
+    }
+}
+
+@Composable
+fun EmbeddedNoteCard(
+    uiModel: FeedItem.NoteCard?,
+    modifier: Modifier = Modifier,
+    onNoteClick: (NoteId) -> Unit,
+    onAvatarClick: (() -> Unit)?,
+) {
+    OutlinedCard(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        )
+    ) {
+        if (uiModel == null) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(54.dp)
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column {
+                NoteCardHeader(
+                    uiModel,
+                    onAvatarClick,
+                    onProfileClick = { },
+                    onNoteClick = onNoteClick,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    onHashTagClick = { },
+                )
+                NoteContent(
+                    uiModel,
+                    onProfileClick = { },
+                    onNoteClick = onNoteClick,
+                    getOpenGraphMetadata = { null },
+                    onHashTagClick = { },
+                )
+            }
+        }
+
     }
 }
 
@@ -109,6 +166,7 @@ fun NoteFlatCard(
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
+    onNestedNavEvent: (NavEvent) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -123,13 +181,20 @@ fun NoteFlatCard(
         )
         NoteContent(
             uiModel,
-            onLikeClick = onLikeClick,
-            onReplyClick = onReplyClick,
             onProfileClick = onProfileClick,
             onNoteClick = onNoteClick,
-            onRepostClick = onRepostClick,
             getOpenGraphMetadata = getOpenGraphMetadata,
-            onHashTagClick = onHashTagClick
+            onHashTagClick = onHashTagClick,
+            onNestedNavEvent = onNestedNavEvent,
+        )
+        NoteCardActionsRow(
+            likeCount = uiModel.likeCount,
+            shareCount = uiModel.shareCount,
+            replyCount = uiModel.replyCount,
+            isLiked = uiModel.isLiked,
+            onLikeClick = onLikeClick,
+            onReplyClick = onReplyClick,
+            onRepostClick = onRepostClick,
         )
     }
 }
@@ -147,6 +212,7 @@ fun ThreadNote(
     onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
+    onNestedNavEvent: (NavEvent) -> Unit = {},
 ) {
     Column(
         modifier = modifier,
@@ -181,29 +247,33 @@ fun ThreadNote(
         ) {
             NoteContent(
                 uiModel = uiModel,
-                onLikeClick = onLikeClick,
-                onReplyClick = onReplyClick,
                 onProfileClick = onProfileClick,
                 onNoteClick = onNoteClick,
-                onRepostClick = onRepostClick,
                 getOpenGraphMetadata = getOpenGraphMetadata,
                 onHashTagClick = onHashTagClick,
+                onNestedNavEvent = onNestedNavEvent,
+            )
+            NoteCardActionsRow(
+                likeCount = uiModel.likeCount,
+                shareCount = uiModel.shareCount,
+                replyCount = uiModel.replyCount,
+                isLiked = uiModel.isLiked,
+                onLikeClick = onLikeClick,
+                onReplyClick = onReplyClick,
+                onRepostClick = onRepostClick,
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun NoteContent(
     uiModel: FeedItem.NoteCard,
-    onLikeClick: () -> Unit,
-    onReplyClick: () -> Unit,
     onProfileClick: (PubKey) -> Unit,
     onNoteClick: (NoteId) -> Unit,
-    onRepostClick: () -> Unit,
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
+    onNestedNavEvent: (NavEvent) -> Unit = {},
 ) {
     uiModel.cardLabel?.let {
         Text(
@@ -213,14 +283,15 @@ private fun NoteContent(
         )
     }
 
-    FlowRow(
+    Column(
         modifier = Modifier.padding(16.dp),
-        horizontalArrangement = Arrangement.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         uiModel.content.forEach {
             when (it) {
                 is ContentBlock.Text -> {
                     RichText(
+                        modifier = Modifier.fillMaxWidth(),
                         plainText = it.content,
                         onHashTagClick = onHashTagClick,
                         onMentionClick = { mention ->
@@ -252,21 +323,17 @@ private fun NoteContent(
                 is ContentBlock.UrlPreview -> OpenGraphPreviewCard(
                     it.url,
                     getOpenGraphMetadata,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                is ContentBlock.NoteQuote -> CircuitContent(
+                    modifier = Modifier.fillMaxWidth(),
+                    screen = QuotedNoteScreen(it.noteId),
+                    onNavEvent = onNestedNavEvent
                 )
             }
         }
     }
-
-    NoteCardActionsRow(
-        likeCount = uiModel.likeCount,
-        shareCount = uiModel.shareCount,
-        replyCount = uiModel.replyCount,
-        isLiked = uiModel.isLiked,
-        onLikeClick = onLikeClick,
-        onReplyClick = onReplyClick,
-        onRepostClick = onRepostClick,
-    )
 }
 
 @Composable
@@ -472,6 +539,30 @@ private fun PreviewThreadCard() {
             onRepostClick = {},
             getOpenGraphMetadata = { null },
             onHashTagClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewEmbeddedCard() {
+    PlasmaTheme {
+        EmbeddedNoteCard(
+            uiModel = NoteCardFakes.fakeUiModel,
+            onAvatarClick = {},
+            onNoteClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewLoadingEmbeddedCard() {
+    PlasmaTheme {
+        EmbeddedNoteCard(
+            uiModel = null,
+            onNoteClick = {},
+            onAvatarClick = {},
         )
     }
 }

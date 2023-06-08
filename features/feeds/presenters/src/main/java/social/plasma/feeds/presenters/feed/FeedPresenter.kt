@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.paging.PagingData
+import com.slack.circuit.foundation.onNavEvent
 import com.slack.circuit.retained.produceRetainedState
 import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
@@ -151,6 +152,10 @@ class FeedPresenter @AssistedInject constructor(
 
                 is FeedUiEvent.OnHashTagClick -> {
                     navigator.goTo(HashTagFeedScreen(HashTag.parse(event.hashTag)))
+                }
+
+                is FeedUiEvent.OnNavEvent -> {
+                    navigator.onNavEvent(event.navEvent)
                 }
             }
         }
