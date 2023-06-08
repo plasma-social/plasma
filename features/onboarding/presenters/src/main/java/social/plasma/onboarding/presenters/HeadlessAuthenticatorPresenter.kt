@@ -8,6 +8,8 @@ import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.sentry.Sentry
+import io.sentry.protocol.User
 import social.plasma.domain.executeSync
 import social.plasma.domain.interactors.AuthStatus
 import social.plasma.domain.interactors.GetAuthStatus
@@ -23,10 +25,13 @@ class HeadlessAuthenticatorPresenter @AssistedInject constructor(
     @Composable
     override fun present(): CircuitUiState {
         LaunchedEffect(Unit) {
-            when (getAuthStatus.executeSync()) {
-                is AuthStatus.ReadOnly,
+            when (val status = getAuthStatus.executeSync()) {
                 is AuthStatus.Authenticated,
                 -> {
+                    // Used to debug crashes in production
+                    Sentry.setUser(User().apply {
+                        id = status.pubkey.npub
+                    })
                     navigator.resetRoot(HomeScreen)
                     args.exitScreen?.let(navigator::goTo)
                 }

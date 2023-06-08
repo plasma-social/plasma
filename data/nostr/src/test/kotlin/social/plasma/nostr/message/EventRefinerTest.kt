@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import okio.ByteString
-import social.plasma.nostr.BuildingBlocks.moshi
 import social.plasma.models.Event
+import social.plasma.models.TypedEvent
+import social.plasma.nostr.BuildingBlocks.moshi
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbEvent
 import social.plasma.nostr.models.EventSerdeTest.Companion.arbVanillaString
-import social.plasma.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.message.RealEventRefiner
 import social.plasma.nostr.relay.message.RelayMessage
@@ -51,6 +51,15 @@ class EventRefinerTest : StringSpec({
     "converts type 3 notes to null relay information list" {
         val message =
             createRelayMessage(content = "")
+
+        val typed = RealEventRefiner(moshi).toRelayDetailList(message)
+
+        typed shouldBe null
+    }
+
+    "converts type 3 notes with relay string to null relay information list" {
+        val message =
+            createRelayMessage(content = "{\"wss://nostr-pub.semisol.dev\": \"read\"}")
 
         val typed = RealEventRefiner(moshi).toRelayDetailList(message)
 

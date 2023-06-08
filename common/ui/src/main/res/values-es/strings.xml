@@ -10,7 +10,7 @@
     <string name="login_tagline">Un cliente de nostr</string>
     <string name="clear">Borrar</string>
     <string name="copy_public_key_to_clipboard">Copiar llave pública al portapapeles</string>
-    <string name="sign_in_with_a_public_or_secret_key">Inicie sesión con una clave pública o secreta</string>
+    <string name="sign_in_with_a_public_or_secret_key">Inicie sesión con una clave secreta</string>
     <string name="repost_this_note">Republicar Nota</string>
     <string name="repost_notes_to_share_them_with_your_network">Republique notas para compartirlas con su red</string>
     <string name="repost">Republicar</string>

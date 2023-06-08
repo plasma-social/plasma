@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.circuit.core)
     implementation(libs.nostrino)
     implementation(libs.timber)
+    implementation(libs.sentry)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

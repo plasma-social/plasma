@@ -1,9 +1,9 @@
 package social.plasma.onboarding.presenters
 
+import app.cash.nostrino.crypto.SecKeyGenerator
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -14,10 +14,8 @@ import social.plasma.features.onboarding.screens.home.HomeScreen
 import social.plasma.features.onboarding.screens.login.LoginScreen
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
-import java.util.UUID
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class HeadlessAuthenticatorPresenterTest {
     private val accountStateRepository: AccountStateRepository = FakeAccountStateRepository()
     private val navigator = FakeNavigator()
@@ -46,7 +44,7 @@ class HeadlessAuthenticatorPresenterTest {
 
     @Test
     fun `if user authenticated go home`() = runTest {
-        accountStateRepository.setSecretKey(UUID.randomUUID().toString().encodeToByteArray())
+        accountStateRepository.setSecretKey(secretKey)
 
         presenter.test {
             awaitItem()
@@ -57,7 +55,7 @@ class HeadlessAuthenticatorPresenterTest {
 
     @Test
     fun `if user logged in with pubkey go home`() = runTest {
-        accountStateRepository.setPublicKey(UUID.randomUUID().toString().encodeToByteArray())
+        accountStateRepository.setPublicKey(pubkey)
 
         presenter.test {
             awaitItem()
@@ -76,14 +74,22 @@ class HeadlessAuthenticatorPresenterTest {
     }
 
     @Test
-    fun `if args has exit screen go to exit screen`() = runTest {
-        accountStateRepository.setPublicKey(UUID.randomUUID().toString().encodeToByteArray())
-        val args = HeadlessAuthenticator(exitScreen = LoginScreen)
-        presenter(args).test {
-            awaitItem()
+    fun `if args has exit screen go to exit screen`() {
+        runTest {
+            accountStateRepository.setPublicKey(pubkey)
+            val args = HeadlessAuthenticator(exitScreen = LoginScreen)
+            presenter(args).test {
+                awaitItem()
 
-            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
-            assertThat(navigator.awaitNextScreen()).isEqualTo(LoginScreen)
+                assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
+                assertThat(navigator.awaitNextScreen()).isEqualTo(LoginScreen)
+            }
         }
     }
+
+    private fun generateKeyPair() = SecKeyGenerator().generate()
+
+    private val pubkey get() = generateKeyPair().pubKey.key.toByteArray()
+    private val secretKey get() = generateKeyPair().key.toByteArray()
+
 }
