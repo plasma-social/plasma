@@ -1,15 +1,17 @@
 package social.plasma.nostr.relay.message
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import social.plasma.models.Contact
 import social.plasma.models.Event
+import social.plasma.models.TypedEvent
 import social.plasma.nostr.models.Note
 import social.plasma.nostr.models.Reaction
 import social.plasma.nostr.models.RelayDetails
-import social.plasma.models.TypedEvent
 import social.plasma.nostr.models.UserMetaData
 import social.plasma.nostr.relay.message.RelayMessage.EventRelayMessage
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,9 +57,17 @@ internal class RealEventRefiner @Inject constructor(
         toRelayDetailList(message.event)
 
 
-    override fun toRelayDetailList(event: Event): TypedEvent<Map<String, RelayDetails>>? =
-        event.takeIf { it.kind == Event.Kind.ContactList && it.content.isNotEmpty() }
-            ?.let { it.typed(relayDetailsAdapter.fromJson(it.content)!!) }
+    override fun toRelayDetailList(event: Event): TypedEvent<Map<String, RelayDetails>>? {
+        return try {
+            event.takeIf { it.kind == Event.Kind.ContactList && it.content.isNotEmpty() }
+                ?.let {
+                    it.typed(relayDetailsAdapter.fromJson(it.content)!!)
+                }
+        } catch (e: JsonDataException) {
+            Timber.w(e, "Failed to parse relay info: %s", event.content)
+            null
+        }
+    }
 
 
     override fun toReaction(relayMessage: EventRelayMessage): TypedEvent<Reaction>? =

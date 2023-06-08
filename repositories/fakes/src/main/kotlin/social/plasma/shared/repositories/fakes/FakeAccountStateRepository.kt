@@ -2,6 +2,7 @@ package social.plasma.shared.repositories.fakes
 
 import app.cash.nostrino.crypto.SecKeyGenerator
 import kotlinx.coroutines.flow.Flow
+import social.plasma.models.crypto.Bech32
 import social.plasma.shared.repositories.api.AccountStateRepository
 
 class FakeAccountStateRepository(
@@ -14,6 +15,7 @@ class FakeAccountStateRepository(
 
     override fun setSecretKey(byteArray: ByteArray) {
         secretKey = byteArray
+        publicKey = Bech32.pubkeyCreate(byteArray)
     }
 
     override fun setPublicKey(byteArray: ByteArray) {

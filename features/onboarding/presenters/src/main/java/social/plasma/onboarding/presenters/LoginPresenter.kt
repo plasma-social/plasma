@@ -11,7 +11,7 @@ import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import social.plasma.features.onboarding.screens.home.HomeScreen
+import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.onboarding.screens.login.LoginUiEvent
 import social.plasma.features.onboarding.screens.login.LoginUiState
 import social.plasma.models.crypto.Bech32.bechToBytes
@@ -25,7 +25,7 @@ class LoginPresenter @AssistedInject constructor(
     override fun present(): LoginUiState {
         var inputText by rememberSaveable { mutableStateOf("") }
         val decodedKey by produceState<ByteArray?>(initialValue = null, inputText) {
-            value = if (inputText.startsWith(npubPrefix) || inputText.startsWith(nsecPrefix)) {
+            value = if (inputText.startsWith(nsecPrefix)) {
                 try {
                     inputText.bechToBytes()
                 } catch (e: IllegalArgumentException) {
@@ -44,19 +44,25 @@ class LoginPresenter @AssistedInject constructor(
             when (event) {
                 LoginUiEvent.OnClearInput -> inputText = ""
                 is LoginUiEvent.OnInputChange -> inputText = event.value
-                LoginUiEvent.OnLogin -> onLogin(inputText, decodedKey!!)
+                LoginUiEvent.OnLogin -> onLogin(inputText, decodedKey)
             }
         }
     }
 
-    private fun onLogin(keyInput: String, decodedKey: ByteArray) {
-        if (keyInput.startsWith(npubPrefix)) {
-            accountStateRepository.setPublicKey(decodedKey)
-        } else if (keyInput.startsWith(nsecPrefix)) {
-            accountStateRepository.setSecretKey(decodedKey)
+    private fun onLogin(keyInput: String, decodedKey: ByteArray?) {
+        val key = decodedKey ?: try {
+            keyInput.bechToBytes()
+        } catch (e: IllegalArgumentException) {
+            return
         }
 
-        navigator.resetRoot(HomeScreen)
+        if (keyInput.startsWith(npubPrefix)) {
+            accountStateRepository.setPublicKey(key)
+        } else if (keyInput.startsWith(nsecPrefix)) {
+            accountStateRepository.setSecretKey(key)
+        }
+
+        navigator.resetRoot(HeadlessAuthenticator())
     }
 
     @AssistedFactory

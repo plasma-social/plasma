@@ -3,9 +3,10 @@ package social.plasma.onboarding.presenters
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
+import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.onboarding.screens.home.HomeScreen
 import social.plasma.features.onboarding.screens.login.LoginUiEvent
 import social.plasma.features.onboarding.screens.login.LoginUiEvent.OnInputChange
@@ -13,7 +14,6 @@ import social.plasma.features.onboarding.screens.login.LoginUiEvent.OnLogin
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class LoginPresenterTest {
     private val navigator = FakeNavigator()
     private val accountStateRepository = FakeAccountStateRepository()
@@ -48,12 +48,11 @@ class LoginPresenterTest {
     }
 
     @Test
-    fun `when valid pubkey is entered, login button is visible`() = runTest {
+    fun `when valid pubkey is entered, login button is NOT visible`() = runTest {
         presenter.test {
             awaitItem().onEvent(OnInputChange(npub))
-            awaitItem()
             with(awaitItem()) {
-                assertThat(loginButtonVisible).isTrue()
+                assertThat(loginButtonVisible).isFalse()
                 assertThat(keyInput).isEqualTo(npub)
                 assertThat(clearInputButtonVisible).isTrue()
             }
@@ -77,7 +76,7 @@ class LoginPresenterTest {
     @Test
     fun `on input clear event, the input is cleared`() = runTest {
         presenter.test {
-            awaitItem().onEvent(OnInputChange(npub))
+            awaitItem().onEvent(OnInputChange(nsec))
             awaitItem().onEvent(LoginUiEvent.OnClearInput)
 
             awaitItem()
@@ -92,6 +91,7 @@ class LoginPresenterTest {
     }
 
     @Test
+    @Ignore("Disabling pubkey login until we have a more robust solution")
     fun `when login with npub, store the key and navigate home`() = runTest {
         presenter.test {
             awaitItem().onEvent(OnInputChange(npub))
@@ -112,7 +112,7 @@ class LoginPresenterTest {
 
             awaitItem().onEvent(OnLogin)
 
-            assertThat(navigator.awaitResetRoot()).isEqualTo(HomeScreen)
+            assertThat(navigator.awaitResetRoot()).isEqualTo(HeadlessAuthenticator())
             assertThat(accountStateRepository.getSecretKey()).isNotNull()
         }
     }
