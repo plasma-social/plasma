@@ -1,6 +1,7 @@
 package social.plasma.features.feeds.screens.feed
 
 import app.cash.nostrino.crypto.PubKey
+import com.slack.circuit.foundation.NavEvent
 import com.slack.circuit.runtime.CircuitUiEvent
 import social.plasma.models.NoteId
 
@@ -22,4 +23,5 @@ sealed interface FeedUiEvent : CircuitUiEvent {
     object OnRefreshButtonClick : FeedUiEvent
 
     data class OnHashTagClick(val hashTag: String) : FeedUiEvent
+    data class OnNavEvent(val navEvent: NavEvent) : FeedUiEvent
 }

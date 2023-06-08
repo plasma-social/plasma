@@ -37,6 +37,7 @@ import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNavEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteReaction
@@ -120,7 +121,8 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onNoteClick = { onFeedItemEvent(OnNoteClick(it)) },
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
-                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) }
+                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
+                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it))}
                                 )
                                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                                 Spacer(Modifier.height(32.dp))
@@ -164,7 +166,8 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onNoteClick = { onFeedItemEvent(OnNoteClick(it)) },
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
-                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) }
+                                    onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
+                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it))}
                                 )
                                 LaunchedEffect(Unit) {
                                     onFeedItemEvent(

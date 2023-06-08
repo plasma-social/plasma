@@ -7,6 +7,7 @@ import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.models.Mention
+import social.plasma.models.NoteId
 import social.plasma.opengraph.OpenGraphMetadata
 
 data class FeedUiState(
@@ -63,4 +64,5 @@ sealed interface ContentBlock {
     data class Text(val content: String, val mentions: Map<Int, Mention>) : ContentBlock
 
     data class UrlPreview(val url: String) : ContentBlock
+    data class NoteQuote(val noteId: NoteId) : ContentBlock
 }

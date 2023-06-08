@@ -2,6 +2,8 @@ package social.plasma.feeds.presenters.feed
 
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.models.Mention
+import social.plasma.models.NoteId
+import social.plasma.models.crypto.Bech32
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,6 +12,8 @@ class NoteContentParser @Inject constructor() {
     private val urlRegex = Regex("(https?://\\S+)")
     private val imageUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:jpg|gif|png|jpeg|svg|webp)")
     private val mediaUrlRegex = Regex("https?:/(/[^/]+)+\\.(?:mp4|mov|webm|mp3)")
+    private val noteQuoteRegex = Regex("(nostr:note)[\\da-z]{1,83}")
+
 
     fun parseNote(note: String, mentions: Map<Int, Mention>): List<ContentBlock> {
         // TODO parse these as part of the text parsing, so we can do a single pass on the note content
@@ -26,7 +30,12 @@ class NoteContentParser @Inject constructor() {
             ContentBlock.Video(videoUrl = it)
         }
 
-        val noteTextContent = note.replace(imageUrlRegex, "").replace(mediaUrlRegex, "")
+        val noteQuoteBlocks = note.parseNoteQuotes().map {
+            ContentBlock.NoteQuote(NoteId.of(Bech32.decodeBytes(it.removePrefix("nostr:")).second))
+        }
+
+        val noteTextContent =
+            note.replace(imageUrlRegex, "").replace(mediaUrlRegex, "").replace(noteQuoteRegex, "")
 
         val urlPreviewBlocks = noteTextContent.parseUrlPreviews().map {
             ContentBlock.UrlPreview(it)
@@ -37,7 +46,7 @@ class NoteContentParser @Inject constructor() {
                 noteTextContent,
                 mentions,
             )
-        ) + urlPreviewBlocks + imageContent + videoBlocks
+        ) + noteQuoteBlocks + urlPreviewBlocks + imageContent + videoBlocks
 
         return contentBlocks.filterNotNull()
     }
@@ -50,4 +59,7 @@ class NoteContentParser @Inject constructor() {
 
     private fun String.parseUrlPreviews(): Set<String> =
         urlRegex.findAll(this).map { it.value }.toSet()
+
+    private fun String.parseNoteQuotes(): Set<String> =
+        noteQuoteRegex.findAll(this).map { it.value }.toSet()
 }

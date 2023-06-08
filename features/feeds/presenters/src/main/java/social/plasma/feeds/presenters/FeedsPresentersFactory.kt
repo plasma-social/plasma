@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
 import social.plasma.features.feeds.screens.homefeeds.HomeFeeds
+import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedScreen
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.feeds.presenters.feed.FeedPresenter
 import social.plasma.feeds.presenters.hashtag.HashTagScreenPresenter
+import social.plasma.feeds.presenters.notes.QuotedNotePresenter
 import social.plasma.feeds.presenters.thread.ThreadScreenPresenter
 import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
@@ -26,6 +28,7 @@ class FeedsPresentersFactory @Inject constructor(
     private val threadScreenPresenter: ThreadScreenPresenter.Factory,
     private val hashTagScreenPresenter: HashTagScreenPresenter.Factory,
     private val notificationScreenPresenter: NotificationsFeedPresenter.Factory,
+    private val quotedNotePresenter: QuotedNotePresenter.Factory,
     private val noteRepository: NoteRepository,
     private val feedPresenter: FeedPresenter.Factory,
     scope: CoroutineScope,
@@ -62,6 +65,7 @@ class FeedsPresentersFactory @Inject constructor(
             is ThreadScreen -> threadScreenPresenter.create(screen, navigator)
             is HashTagFeedScreen -> hashTagScreenPresenter.create(screen, navigator)
             is NotificationsFeedScreen -> notificationScreenPresenter.create(navigator)
+            is QuotedNoteScreen -> quotedNotePresenter.create(screen, navigator)
             HomeFeeds -> homeFeedsPresenter.create(navigator)
             is FeedScreen -> when (screen.feedType) {
                 FeedType.Following -> feedPresenter.create(navigator, followingFlow)

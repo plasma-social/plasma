@@ -1,12 +1,15 @@
 package social.plasma.feeds.presenters
 
+import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKeyGenerator
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.decodeHex
 import org.junit.Test
+import shortBech32
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.ContentBlock
@@ -14,14 +17,12 @@ import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.feeds.presenters.feed.NoteCardMapper
 import social.plasma.feeds.presenters.feed.NoteContentParser
 import social.plasma.models.Event
+import social.plasma.models.NoteId
 import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
 import social.plasma.models.ProfileMention
-import app.cash.nostrino.crypto.PubKey
-import app.cash.nostrino.crypto.SecKeyGenerator
-import okio.ByteString.Companion.decodeHex
-import shortBech32
 import social.plasma.models.UserMetadataEntity
+import social.plasma.models.crypto.Bech32
 import social.plasma.nostr.relay.message.NostrMessageAdapter
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
@@ -30,7 +31,6 @@ import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import social.plasma.shared.utils.fakes.FakeInstantFormatter
 import java.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NoteCardMapperTest {
     private val instantFormatter = FakeInstantFormatter()
     private val stringManager = social.plasma.shared.utils.fakes.FakeStringManager(
@@ -248,6 +248,28 @@ class NoteCardMapperTest {
 
         with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
             assertThat(hidden).isTrue()
+        }
+    }
+
+    @Test
+    fun `Kind 1 with quoted note`() = runTest {
+        val noteWithUser = NoteWithUser(
+            noteEntity = createNoteView(
+                content = "Amazing:nostr:note149mprnkqdyjqvzave4m3y9lmea42pq4s6dz04rwtnkk35qs28m9qml92ex",
+            ),
+            userMetadataEntity = createUserMetadata(),
+        )
+
+        with(mapper.toFeedItem(noteWithUser) as FeedItem.NoteCard) {
+            assertThat(content).containsExactly(
+                ContentBlock.Text(
+                    "Amazing:",
+                    emptyMap()
+                ),
+                ContentBlock.NoteQuote(
+                    NoteId.of(Bech32.decodeBytes("note149mprnkqdyjqvzave4m3y9lmea42pq4s6dz04rwtnkk35qs28m9qml92ex").second),
+                )
+            )
         }
     }
 

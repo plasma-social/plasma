@@ -27,6 +27,7 @@ import androidx.paging.compose.items
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedItem
+import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
@@ -99,6 +100,7 @@ fun FeedUiContent(
                                 onRepostClick = { onEvent(OnNoteRepost(noteId)) },
                                 getOpenGraphMetadata = getOpenGraphMetadata,
                                 onHashTagClick = { onEvent(OnHashTagClick(it)) },
+                                onNestedNavEvent = { onEvent(FeedUiEvent.OnNavEvent(it)) }
                             )
                             LaunchedEffect(Unit) {
                                 onEvent(OnNoteDisplayed(noteId, item.userPubkey))

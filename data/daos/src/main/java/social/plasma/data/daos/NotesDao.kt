@@ -92,4 +92,9 @@ interface NotesDao {
     """
     )
     fun observeHashTagNoteCount(hashtag: String, since: Long): Flow<Long>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query("SELECT * FROM noteview WHERE id = :noteId")
+    fun observeById(noteId: String): Flow<NoteWithUser?>
 }

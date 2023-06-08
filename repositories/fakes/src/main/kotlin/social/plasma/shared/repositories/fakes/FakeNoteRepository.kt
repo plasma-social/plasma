@@ -20,6 +20,10 @@ class FakeNoteRepository : NoteRepository {
         return noteByIdResponse.getAndUpdate { null }
     }
 
+    override fun observeById(noteId: NoteId): Flow<NoteWithUser?> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun sendNote(content: String, tags: List<Tag>) {
         sendNoteEvents.add(SendNoteEvent(content, tags))
     }

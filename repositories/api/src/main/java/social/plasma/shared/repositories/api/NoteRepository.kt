@@ -12,6 +12,8 @@ import java.time.Instant
 interface NoteRepository {
     suspend fun getById(noteId: NoteId): NoteWithUser?
 
+    fun observeById(noteId: NoteId): Flow<NoteWithUser?>
+
     suspend fun sendNote(content: String, tags: List<Tag>)
 
     fun observePagedContactsNotes(): PagingSource<Int, NoteWithUser>

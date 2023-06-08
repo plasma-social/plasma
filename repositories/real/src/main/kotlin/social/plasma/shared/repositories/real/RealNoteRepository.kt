@@ -4,28 +4,76 @@ import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
 import app.cash.nostrino.crypto.SecKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import okio.ByteString.Companion.toByteString
+import social.plasma.data.daos.EventsDao
 import social.plasma.data.daos.NotesDao
+import social.plasma.models.Event
 import social.plasma.models.EventTag
 import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
 import social.plasma.models.Tag
+import social.plasma.models.events.EventEntity
 import social.plasma.nostr.relay.RelayManager
+import social.plasma.nostr.relay.message.ClientMessage
+import social.plasma.nostr.relay.message.Filter
+import social.plasma.nostr.relay.message.RelayMessage
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import java.time.Instant
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 internal class RealNoteRepository @Inject constructor(
     private val relay: RelayManager,
     private val accountStateRepository: AccountStateRepository,
     private val notesDao: NotesDao,
+    private val eventsDao: EventsDao,
+    @Named("io") private val ioDispatcher: CoroutineContext,
 ) : NoteRepository {
     override suspend fun getById(noteId: NoteId): NoteWithUser? {
         return notesDao.getById(noteId.hex)
     }
+
+    override fun observeById(noteId: NoteId): Flow<NoteWithUser?> {
+        return notesDao.observeById(noteId.hex).onEach {
+            if (it == null) {
+                refreshNoteById(noteId)
+            }
+        }
+    }
+
+    private suspend fun refreshNoteById(noteId: NoteId) {
+        val unsubscribeMessage =
+            relay.subscribe(ClientMessage.SubscribeMessage(Filter(ids = setOf(noteId.hex))))
+
+        relay.relayMessages.filterIsInstance<RelayMessage.EventRelayMessage>()
+            .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
+            .onEach { relayMessage ->
+                eventsDao.insert(listOf(relayMessage.event.toEventEntity()))
+            }
+            .onCompletion { relay.unsubscribe(unsubscribeMessage) }
+            .flowOn(ioDispatcher)
+            .first()
+    }
+
+    private fun Event.toEventEntity() = EventEntity(
+        id = id.hex(),
+        pubkey = pubKey.hex(),
+        createdAt = createdAt.epochSecond,
+        kind = kind,
+        tags = tags,
+        content = content,
+        sig = sig.hex(),
+    )
 
     override suspend fun sendNote(content: String, tags: List<Tag>) {
         val nostrTags = tags.map { tag ->
