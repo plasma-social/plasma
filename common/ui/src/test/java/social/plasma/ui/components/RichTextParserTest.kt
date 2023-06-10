@@ -3,17 +3,17 @@ package social.plasma.ui.components
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import app.cash.nostrino.crypto.PubKey
+import app.cash.nostrino.crypto.SecKeyGenerator
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import shortBech32
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
 import social.plasma.ui.components.richtext.RichTextParser
 import social.plasma.ui.components.richtext.RichTextTag
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class RichTextParserTest {
     private val parser = RichTextParser(linkColor = Color.Blue)
 
@@ -140,6 +140,111 @@ class RichTextParserTest {
                 start = 5,
                 end = 9,
                 tag = RichTextTag.HASHTAG
+            )
+        )
+    }
+
+    @Test
+    fun `note with nip-21 npub mention`() = runTest {
+        val pubkey = SecKeyGenerator().generate().pubKey
+        val plainText = "Hey, check out this thing:nostr:${pubkey.npub}, it's pretty cool!"
+        val humanReadableName = "@joe"
+        val mentions = mapOf(
+            0 to ProfileMention(
+                humanReadableName,
+                pubkey
+            ),
+        )
+
+        val result = parser.parse(plainText, mentions)
+
+        val expectedOutput = "Hey, check out this thing:$humanReadableName, it's pretty cool!"
+        assertThat(result.text).isEqualTo(expectedOutput)
+        assertThat(
+            result.getStringAnnotations(
+                RichTextTag.PROFILE,
+                0,
+                result.length
+            )
+        ).containsExactly(
+            AnnotatedString.Range(
+                item = pubkey.hex(),
+                start = expectedOutput.indexOf(humanReadableName),
+                end = expectedOutput.indexOf(humanReadableName) + humanReadableName.length,
+                tag = RichTextTag.PROFILE
+            )
+        )
+    }
+
+    @Test
+    fun `nip-21 mention without any mention tags`() = runTest {
+        val pubkey = SecKeyGenerator().generate().pubKey
+        val plainText = "Hey, check out this thing: nostr:${pubkey.npub}, it's pretty cool!"
+        val mentions = emptyMap<Int, ProfileMention>()
+
+        val result = parser.parse(plainText, mentions)
+
+        val expectedOutput = "Hey, check out this thing: ${pubkey.shortBech32()}, it's pretty cool!"
+        assertThat(result.text).isEqualTo(expectedOutput)
+    }
+
+    @Test
+    fun `note with invalid nip-21 npub mention`() = runTest {
+        val plainText =
+            "Hey, check out this thing: nostr:npub1mm910r3fkz436p4jgtkcqdy4uvelgx3xru6ej242ktx096flmmhjsfqrwg0, it's pretty cool!"
+        val mentions = mapOf(
+            0 to ProfileMention(
+                "@joe",
+                PubKey.parse("npub1mm90r3fkz436p4jgtkcqdy4uvelgx3xru6ej242ktx096flmmhjsfqrwg0")
+            ),
+        )
+
+        val result = parser.parse(plainText, mentions)
+
+        assertThat(result.text).isEqualTo(plainText)
+    }
+
+    @Test
+    fun `note with multiple nip-21 npub mentions in the same "word"`() = runTest {
+        val pubkey1 = SecKeyGenerator().generate().pubKey
+        val pubkey2 = SecKeyGenerator().generate().pubKey
+        val plainText =
+            "Hey, check out this thing:nostr:${pubkey1.npub},nostr:${pubkey2.npub}, it's pretty cool!"
+        val pubkey1HumanName = "@joe"
+        val pubkey2HumanName = "@will"
+        val mentions = mapOf(
+            0 to ProfileMention(
+                pubkey1HumanName,
+                pubkey1
+            ),
+            1 to ProfileMention(
+                pubkey2HumanName,
+                pubkey2
+            ),
+        )
+
+        val result = parser.parse(plainText, mentions)
+
+        val expectedOutput = "Hey, check out this thing:@joe,@will, it's pretty cool!"
+        assertThat(result.text).isEqualTo(expectedOutput)
+        assertThat(
+            result.getStringAnnotations(
+                RichTextTag.PROFILE,
+                0,
+                result.length
+            )
+        ).containsExactly(
+            AnnotatedString.Range(
+                item = pubkey1.hex(),
+                start = expectedOutput.indexOf(pubkey1HumanName),
+                end = expectedOutput.indexOf(pubkey1HumanName) + pubkey1HumanName.length,
+                tag = RichTextTag.PROFILE
+            ),
+            AnnotatedString.Range(
+                item = pubkey2.hex(),
+                start = expectedOutput.indexOf(pubkey2HumanName),
+                end = expectedOutput.indexOf(pubkey2HumanName) + pubkey2HumanName.length,
+                tag = RichTextTag.PROFILE
             )
         )
     }
