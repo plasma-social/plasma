@@ -21,6 +21,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
+import shortBech32
 import social.plasma.domain.InvokeError
 import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
@@ -31,6 +32,7 @@ import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.AutoCompleteSuggestion.UserSuggestion
 import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.features.posting.screens.ComposingScreen.NoteType
 import social.plasma.features.posting.screens.CreatePostUiEvent
 import social.plasma.features.posting.screens.CreatePostUiState
 import social.plasma.models.NoteWithUser
@@ -53,7 +55,10 @@ class CreatePostScreenPresenter @AssistedInject constructor(
 
     private val myPubKey = PubKey(accountStateRepository.getPublicKey()!!.toByteString())
     private val avatarUrlFlow = observeMyMetadata.flow.map { it?.picture }
-    private val isReply = args.parentNote != null
+    private val isReply = when (args.noteType) {
+        is NoteType.Reply, is NoteType.Repost -> true
+        else -> false
+    }
 
     init {
         observeMyMetadata(ObserveUserMetadata.Params(myPubKey))
@@ -75,8 +80,10 @@ class CreatePostScreenPresenter @AssistedInject constructor(
         val suggestedUsers by remember { getUserSuggestions.flow }.collectAsState(emptyList())
 
         val rootNote by produceState<NoteWithUser?>(initialValue = null) {
-            args.parentNote?.let { noteId ->
-                value = noteRepository.getById(noteId)
+            value = when (val noteType = args.noteType) {
+                is NoteType.Reply -> noteRepository.getById(noteType.originalNote)
+                is NoteType.Repost -> noteRepository.getById(noteType.originalNote)
+                else -> null
             }
         }
 
@@ -107,12 +114,15 @@ class CreatePostScreenPresenter @AssistedInject constructor(
         }
 
         val title by produceState(
-            initialValue = if (isReply) "Replying" else stringManager[R.string.new_note],
+            initialValue = if (isReply) stringManager[R.string.replying] else stringManager[R.string.new_note],
             rootNote
         ) {
             rootNote?.let { note ->
-                value =
-                    "Replying to ${note.userMetadataEntity?.userFacingName ?: note.noteEntity.pubkey.decodeHex()}"
+                value = stringManager.getFormattedString(
+                    R.string.replying_to,
+                    "op" to (note.userMetadataEntity?.userFacingName
+                        ?: PubKey(note.noteEntity.pubkey.decodeHex()).shortBech32()),
+                )
             }
         }
 
@@ -179,6 +189,11 @@ class CreatePostScreenPresenter @AssistedInject constructor(
             mentions = mentions,
             noteContent = noteContent,
             autoCompleteSuggestions = autoCompleteSuggestions,
+            replyingTo = when (val noteType = args.noteType) {
+                is NoteType.Reply -> noteType.originalNote
+                is NoteType.Repost -> noteType.originalNote
+                else -> null
+            },
         ) { event ->
             when (event) {
                 CreatePostUiEvent.OnBackClick -> navigator.pop()

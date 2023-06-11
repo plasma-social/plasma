@@ -6,7 +6,6 @@ import app.cash.nostrino.crypto.PubKey
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.decodeHex
@@ -18,10 +17,14 @@ import social.plasma.domain.interactors.GetUserSuggestions
 import social.plasma.domain.interactors.SendNote
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.features.posting.screens.ComposingScreen.NoteType.Reply
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnBackClick
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnSubmitPost
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnUserSuggestionTapped
+import social.plasma.models.NoteId
+import social.plasma.models.NoteView
+import social.plasma.models.NoteWithUser
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
@@ -29,14 +32,16 @@ import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import social.plasma.shared.utils.fakes.FakeStringManager
+import java.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CreatePostScreenPresenterTest {
     private val navigator = FakeNavigator()
     private val stringManager = FakeStringManager(
         R.string.post to "post",
         R.string.new_note to "new_note",
         R.string.your_message to "your_message",
+        R.string.replying to "replying",
+        R.string.replying_to to "replying to {op}",
     )
     private val noteRepository = FakeNoteRepository()
     private val userMetadataRepository = FakeUserMetadataRepository()
@@ -217,6 +222,36 @@ class CreatePostScreenPresenterTest {
                 assertThat(noteContent.selection).isEqualTo(TextRange(note.length))
             }
         }
+    }
+
+    @Test
+    fun `replying to another note `() = runTest {
+        val note = NoteWithUser(
+            userMetadataEntity = createUserMetadata(),
+            noteEntity = createNoteEntity()
+        )
+        noteRepository.noteByIdResponse.emit(note)
+
+        presenter(ComposingScreen(noteType = Reply(NoteId(note.noteEntity.id)))).test {
+            awaitItem()
+
+            with(awaitItem()) {
+                assertThat(title).isEqualTo("replying to ${note.userMetadataEntity?.userFacingName}")
+            }
+        }
+    }
+
+    private fun createNoteEntity(): NoteView {
+        return NoteView(
+            id = "test",
+            content = "test",
+            reactionCount = 0,
+            isReply = false,
+            createdAt = Instant.now().epochSecond,
+            kind = 1,
+            pubkey = pubKey.hex(),
+            tags = emptyList(),
+        )
     }
 
     private fun createUserMetadata(
