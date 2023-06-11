@@ -2,6 +2,7 @@ package social.plasma.features.posting.screens
 
 import androidx.compose.ui.text.input.TextFieldValue
 import com.slack.circuit.runtime.CircuitUiState
+import social.plasma.models.NoteId
 import social.plasma.models.ProfileMention
 import social.plasma.models.TagSuggestion
 
@@ -15,6 +16,7 @@ data class CreatePostUiState(
     val autoCompleteSuggestions: List<AutoCompleteSuggestion> = emptyList(),
     val noteContent: TextFieldValue,
     val mentions: Map<String, ProfileMention> = emptyMap(),
+    val replyingTo: NoteId? = null,
     val onEvent: (CreatePostUiEvent) -> Unit,
 ) : CircuitUiState
 

@@ -28,6 +28,7 @@ import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.posting.screens.ComposingScreen
+import social.plasma.features.posting.screens.ComposingScreen.NoteType.Reply
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.models.HashTag
 import social.plasma.models.NoteWithUser
@@ -117,7 +118,14 @@ class FeedPresenter @AssistedInject constructor(
         ) { event ->
             when (event) {
                 is FeedUiEvent.OnNoteClick -> navigator.goTo(ThreadScreen(event.noteId))
-                is FeedUiEvent.OnReplyClick -> navigator.goTo(ComposingScreen(parentNote = event.noteId))
+                is FeedUiEvent.OnReplyClick -> navigator.goTo(
+                    ComposingScreen(
+                        noteType = Reply(
+                            originalNote = event.noteId
+                        )
+                    )
+                )
+
                 is FeedUiEvent.OnNoteRepost -> {
                     coroutineScope.launch {
                         repostNote.executeSync(RepostNote.Params(noteId = event.noteId))
