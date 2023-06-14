@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="post">Publicar</string>
-    <string name="new_note">" Nueva nota"</string>
+    <string name="new_note">"Nueva nota"</string>
     <string name="your_message">Tu mensaje</string>
     <string name="replying">Respondiendo</string>
     <string name="replying_to">Respondiendo a <xliff:g id="op" example="joe">{op}</xliff:g></string>
