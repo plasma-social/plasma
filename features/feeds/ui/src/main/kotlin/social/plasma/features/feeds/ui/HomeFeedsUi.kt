@@ -88,7 +88,11 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
 
             HorizontalSeparator()
 
-            HorizontalPager(pageCount = tabs.size, state = pagerState) {
+            HorizontalPager(
+                pageCount = tabs.size,
+                state = pagerState,
+                beyondBoundsPageCount = 2
+            ) {
                 CircuitContent(
                     modifier = Modifier.fillMaxSize(),
                     screen = tabs[it].screen,
