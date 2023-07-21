@@ -12,6 +12,7 @@ sealed interface ProfileUiState : CircuitUiState {
         val userData: UserData,
         val following: Boolean? = false,
         val isNip5Valid: Boolean = false,
+        val showLightningIcon: Boolean = false,
         val onEvent: (ProfileUiEvent) -> Unit,
     ) : ProfileUiState {
         data class ProfileStat(
@@ -29,7 +30,6 @@ sealed interface ProfileUiState : CircuitUiState {
             val avatarUrl: String?,
             val nip5Identifier: String?,
             val nip5Domain: String? = null,
-            val lud: String?,
         )
     }
 }

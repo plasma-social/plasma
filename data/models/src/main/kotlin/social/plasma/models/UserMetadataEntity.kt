@@ -1,5 +1,6 @@
 package social.plasma.models
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -17,7 +18,9 @@ data class UserMetadataEntity(
     val displayName: String?,
     val banner: String?,
     val nip05: String?,
-    val lud: String?,
+    @ColumnInfo(name = "lud")
+    val lud06: String?,
+    val lud16: String?,
     val website: String?,
     val createdAt: Long?,
 ) {

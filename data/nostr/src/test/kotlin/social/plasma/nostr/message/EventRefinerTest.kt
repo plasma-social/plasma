@@ -80,8 +80,9 @@ class EventRefinerTest : StringSpec({
                 arbVanillaString.orNull(0.1),
                 arbVanillaString.orNull(0.1),
                 arbVanillaString.orNull(0.1),
-            ) { name, about, picture, banner, nip5, website, displayName, lud ->
-                UserMetaData(name, about, picture, banner, nip5, website, displayName, lud)
+                arbVanillaString.orNull(0.1),
+            ) { name, about, picture, banner, nip5, website, displayName, lud06, lud16 ->
+                UserMetaData(name, about, picture, banner, nip5, website, displayName, lud06, lud16)
             }
 
         private val arbUserMetadataTestData: Arb<Pair<RelayMessage.EventRelayMessage, UserMetaData>> =

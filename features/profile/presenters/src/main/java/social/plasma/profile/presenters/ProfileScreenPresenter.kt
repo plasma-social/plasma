@@ -21,8 +21,10 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
 import shortBech32
+import social.plasma.common.screens.AndroidScreens.ShareLightningInvoiceScreen
 import social.plasma.domain.interactors.EventCountInteractor
 import social.plasma.domain.interactors.FollowPubkey
+import social.plasma.domain.interactors.GetLightningInvoice
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetPubkeyFollowerCount
 import social.plasma.domain.interactors.Nip5Status
@@ -52,6 +54,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val followPubkey: FollowPubkey,
     private val unFollowPubkey: UnfollowPubkey,
     private val numberFormatter: NumberFormatter,
+    private val getLightningInvoice: GetLightningInvoice,
     accountStateRepository: AccountStateRepository,
     feedPresenterFactory: FeedPresenter.Factory,
     @Assisted private val args: ProfileScreen,
@@ -70,7 +73,6 @@ class ProfileScreenPresenter @AssistedInject constructor(
             publicKey = pubKey,
             website = null,
             banner = "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
-            lud = null,
         )
 
     private val feedsPresenter =
@@ -154,7 +156,6 @@ class ProfileScreenPresenter @AssistedInject constructor(
                     nip5Domain = metadata!!.nip05?.split("@")?.getOrNull(1),
                     avatarUrl = metadata!!.picture ?: "",
                     publicKey = pubKey,
-                    lud = metadata!!.lud,
                 )
             }
         }
@@ -195,6 +196,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
             following = isProfileFollowedByMe,
             isNip5Valid = isNip5Valid,
             userData = userData,
+            showLightningIcon = metadata?.lud06 != null || metadata?.lud16 != null
         ) { event ->
             when (event) {
                 ProfileUiEvent.OnNavigateBack -> navigator.pop()
@@ -208,6 +210,37 @@ class ProfileScreenPresenter @AssistedInject constructor(
                         optimisticFollowState = true
                         coroutineScope.launch {
                             followPubkey.executeSync(FollowPubkey.Params(args.pubKeyHex))
+                        }
+                    }
+                }
+
+                is ProfileUiEvent.OnZapProfile -> {
+                    coroutineScope.launch {
+                        val millisats = event.satsAmount * 1000L
+                        val lightningInvoiceParams = when {
+                            metadata?.lud16 != null -> GetLightningInvoice.Params.LightningAddress(
+                                metadata!!.lud16!!,
+                                amount = millisats
+                            )
+
+                            metadata?.lud06 != null -> GetLightningInvoice.Params.Lnurl(
+                                metadata!!.lud06!!,
+                                amount = millisats
+                            )
+
+                            else -> null
+                        }
+
+                        lightningInvoiceParams ?: return@launch // show error dialog
+
+                        val result = getLightningInvoice.executeSync(lightningInvoiceParams)
+
+                        result.onSuccess { response ->
+                            navigator.goTo(ShareLightningInvoiceScreen(response.invoice))
+                        }
+
+                        result.onFailure {
+                            // TODO show error dialog
                         }
                     }
                 }

@@ -13,6 +13,6 @@ data class UserMetaData(
     val website: String?,
     @Json(name = "display_name")
     val displayName: String?,
-    @Json(name = "lud06")
-    val lud: String?,
+    val lud06: String?,
+    val lud16: String?,
 )

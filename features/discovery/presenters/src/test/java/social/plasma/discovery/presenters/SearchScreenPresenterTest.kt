@@ -316,9 +316,10 @@ class SearchScreenPresenterTest {
             banner = null,
             displayName = null,
             nip05 = null,
-            lud = null,
+            lud06 = null,
+            lud16 = null,
             website = null,
-            createdAt = null
+            createdAt = null,
         )
     }
 }

@@ -123,8 +123,9 @@ class GetUserSuggestionsTest {
         banner = null,
         pubkey = "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
         website = null,
-        lud = null,
+        lud06 = null,
         nip05 = nip5Identifier,
+        lud16 = null,
         picture = null,
     )
 }
