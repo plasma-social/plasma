@@ -55,6 +55,7 @@ dependencies {
     implementation(projects.features.feeds.presenters)
     implementation(projects.features.feeds.screens)
     implementation(projects.repositories.api)
+    implementation(projects.common.screens)
     implementation(projects.common.utils.api)
     implementation(projects.domain)
     implementation(projects.data.models)

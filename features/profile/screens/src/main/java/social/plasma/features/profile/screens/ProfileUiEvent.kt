@@ -6,4 +6,6 @@ sealed interface ProfileUiEvent : CircuitUiEvent {
     object OnNavigateBack : ProfileUiEvent
 
     object OnFollowButtonClicked : ProfileUiEvent
+
+    data class OnZapProfile(val satsAmount: Long) : ProfileUiEvent
 }

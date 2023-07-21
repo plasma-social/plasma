@@ -1,13 +1,13 @@
 package social.plasma.features.profile.ui
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
+import android.icu.text.NumberFormat
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +22,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -43,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -54,12 +60,16 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
+import com.slack.circuit.overlay.LocalOverlayHost
+import com.slack.circuit.overlay.OverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.FeedUiContent
 import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
+import social.plasma.features.profile.screens.ProfileUiEvent.OnZapProfile
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
 import social.plasma.features.profile.screens.ProfileUiState.Loading
@@ -73,8 +83,9 @@ import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
 import social.plasma.ui.components.withHapticFeedBack
+import social.plasma.ui.overlays.BottomSheetOverlay
+import social.plasma.ui.rememberStableCoroutineScope
 import social.plasma.ui.theme.PlasmaTheme
-import timber.log.Timber
 import javax.inject.Inject
 
 class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
@@ -110,6 +121,8 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
                     ProfileAppBar(
                         onNavigateBack = { onEvent(OnNavigateBack) },
                         userData = uiState.userData,
+                        onZap = { sats -> onEvent(OnZapProfile(sats)) },
+                        showLightningIcon = uiState.showLightningIcon,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -137,7 +150,9 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
     @Composable
     fun ProfileAppBar(
         onNavigateBack: () -> Unit,
+        onZap: (Long) -> Unit,
         userData: Loaded.UserData,
+        showLightningIcon: Boolean,
     ) {
         ConstraintLayout {
             val (coverImage, avatar, topAppBar) = createRefs()
@@ -178,8 +193,8 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
                     }
                 },
                 actions = {
-                    userData.lud?.let {
-                        LightningButton(lud = it)
+                    if (showLightningIcon) {
+                        LightningButton(onZap = onZap)
                         Spacer(modifier = Modifier.width(12.dp))
                     }
                     SharePubkeyButton(pubKey = userData.publicKey)
@@ -225,20 +240,16 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
     }
 
     @Composable
-    private fun LightningButton(lud: String) {
+    private fun LightningButton(onZap: (Long) -> Unit) {
         var walletRequiredDialogVisible by remember { mutableStateOf(false) }
-        val currentContext = LocalContext.current
+
+        val coroutineScope = rememberStableCoroutineScope()
+        val overlayHost = LocalOverlayHost.current
 
         OverlayIconButton(onClick = {
-            try {
-                currentContext.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW, Uri.parse("lightning:$lud")
-                    )
-                )
-            } catch (e: ActivityNotFoundException) {
-                walletRequiredDialogVisible = true
-                Timber.w(e)
+            coroutineScope.launch {
+                val amount = overlayHost.getZapAmount()
+                onZap(amount)
             }
         }) {
             Icon(
@@ -261,7 +272,6 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         }
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     private fun ProfileBio(
         userData: Loaded.UserData,
@@ -273,7 +283,6 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -344,6 +353,100 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+private suspend fun OverlayHost.getZapAmount(): Long {
+    return show(
+        BottomSheetOverlay(
+            model = Unit,
+            onDismiss = { 0L },
+        ) { _, overlayNav ->
+            var enteredAmount by remember {
+                mutableStateOf(
+                    TextFieldValue("")
+                )
+            }
+
+            val amountBuckets = listOf(
+                21L,
+                99,
+                250,
+                500,
+                1000,
+                5000,
+                10000,
+            )
+            val numberFormatter = remember { NumberFormat.getNumberInstance() }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "Zap Amount",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    amountBuckets.forEach { bucket ->
+                        if ((enteredAmount.text.toLongOrNull() ?: 0L) == bucket) {
+                            PrimaryButton(onClick = {
+                                enteredAmount = TextFieldValue(
+                                    ""
+                                )
+                            }) {
+                                Text(numberFormatter.format(bucket))
+                            }
+                        } else {
+                            OutlinedPrimaryButton(onClick = {
+                                enteredAmount = TextFieldValue(
+                                    bucket.toString(),
+                                    selection = TextRange(bucket.toString().length)
+                                )
+                            }) {
+                                Text(numberFormatter.format(bucket))
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    label = { Text("Custom Amount") },
+                    value = enteredAmount,
+                    onValueChange = { enteredAmount = it },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            overlayNav.finish(enteredAmount.text.toLongOrNull() ?: 0L)
+                        }
+                    ),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = withHapticFeedBack {
+                        overlayNav.finish(enteredAmount.text.toLongOrNull() ?: 0L)
+                    },
+                    enabled = (enteredAmount.text.toLongOrNull() ?: 0) != 0L,
+                ) {
+                    Text(text = "Zap")
+                }
+            }
+
+        }
+    )
+}
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun PreviewProfile(
@@ -368,6 +471,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
         username: String? = "@satoshi",
     ): ProfileUiState =
         Loaded(
+            showLightningIcon = true,
             feedState = FeedUiState(
                 pagingFlow = emptyFlow(),
                 getOpenGraphMetadata = { null },
@@ -398,7 +502,6 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
                 about = "Developer @ a peer-to-peer electronic cash system",
                 avatarUrl = "https://api.dicebear.com/5.x/bottts/jpg",
                 website = "https://cash.app",
-                lud = "lnurl",
                 banner = "val nostrichImage =\n" +
                         "        \"https://s3-alpha-sig.figma.com/img/4a90/2d76/b5f9770952063fd97aa73441dbeef396?Expires=1675036800&Signature=isHUrgxr-OJjU4HHfA~wfa-GTLIq~FT83RxqEurf13bTXwLykd-aHhsMXuLhx2Zqs-g5hCj4jM3355ngZlcY9qcrcrTgwcAxZLbwAhpntHl499McE9BU7aO7jG7j~eMy0Z7a~p3lFCHuQsyO7ukKZsawWVkCNtPdl8E-IQ~yxMc~LAB6QSlQlEJV7hIwBAbWgOKDgQ6spq-UFeoOee5Po02JCGtZOEb9vlxzFrhBKdCxCh1PdrX0~9Qb8rEeLGzAFzhJeOKJ0RYwzHsiGYGWsc1Ad9nvgoCXY2FwwIrixsxh3Jy87BivV4XCibvTE7YHhXwTRY29D-0Yun95GsHWWw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4\""
             ),

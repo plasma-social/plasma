@@ -22,14 +22,13 @@ fun ImageCarousel(
     imageUrls: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState { imageUrls.size }
 
     Column(
         modifier = modifier
     ) {
         HorizontalPager(
             modifier = Modifier.clip(MaterialTheme.shapes.medium),
-            pageCount = imageUrls.size,
             state = pagerState,
         ) {
             ZoomableImage(

@@ -54,7 +54,7 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
             )
         }
 
-        val pagerState = rememberPagerState()
+        val pagerState = rememberPagerState { tabs.size }
 
         val selectedTab = pagerState.currentPage
         Column(
@@ -89,7 +89,6 @@ class HomeFeedsUi : Ui<HomeFeedsUiState> {
             HorizontalSeparator()
 
             HorizontalPager(
-                pageCount = tabs.size,
                 state = pagerState,
                 beyondBoundsPageCount = 2
             ) {

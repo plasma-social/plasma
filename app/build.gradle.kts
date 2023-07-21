@@ -68,6 +68,7 @@ dependencies {
     implementation(projects.data.daos)
     implementation(projects.domain)
     implementation(projects.repositories.real)
+    implementation(projects.common.screens)
     implementation(projects.common.utils.real)
     implementation(projects.features.feeds.screens)
     implementation(projects.features.feeds.presenters)

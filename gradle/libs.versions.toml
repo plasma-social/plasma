@@ -1,6 +1,6 @@
 [versions]
 compileSdk = "33"
-minSdk = "23"
+minSdk = "24"
 targetSdk = "31"
 agp = "7.4.2"
 
@@ -88,7 +88,7 @@ compose-ui-uitoolingpreview = { module = "androidx.compose.ui:ui-tooling-preview
 compose-ui-util = { module = "androidx.compose.ui:ui-util" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
-compose-material3 = { module = "androidx.compose.material3:material3", version = "1.1.0-rc01" }
+compose-material3 = { module = "androidx.compose.material3:material3", version = "1.2.0-alpha02" }
 compose-material-materialicons = { module = "androidx.compose.material:material-icons-extended" }
 compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "composeRuntime" }
 

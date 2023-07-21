@@ -50,6 +50,7 @@ internal fun UserMetaData.toMetadataEntity(
     nip05 = nip05,
     website = website,
     createdAt = createdAt.epochSecond,
-    lud = lud,
+    lud06 = lud06,
+    lud16 = lud16,
 )
 

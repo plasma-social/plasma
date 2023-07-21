@@ -264,7 +264,8 @@ class CreatePostScreenPresenterTest {
         banner = null,
         pubkey = "",
         website = null,
-        lud = null,
+        lud06 = null,
+        lud16 = null,
         nip05 = null,
         picture = picture,
     )

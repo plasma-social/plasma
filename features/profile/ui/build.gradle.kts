@@ -55,6 +55,7 @@ dependencies {
 
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.circuit.core)
+    implementation(libs.circuit.overlay)
     implementation(libs.coil.compose)
 
     implementation(platform(libs.compose.bom))
