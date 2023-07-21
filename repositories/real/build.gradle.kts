@@ -51,11 +51,13 @@ dependencies {
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.moshi.core)
 
     testImplementation(projects.data.nostr.fakes)
     testImplementation(projects.data.daos.fakes)
     testImplementation(projects.repositories.fakes)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.moshi.kotlin)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.truth)
     testImplementation(libs.turbine)
