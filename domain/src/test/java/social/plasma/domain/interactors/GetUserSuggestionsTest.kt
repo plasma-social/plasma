@@ -3,7 +3,7 @@ package social.plasma.domain.interactors
 import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.decodeHex
 import org.junit.Test
@@ -14,10 +14,10 @@ import social.plasma.shared.repositories.fakes.FakeUserMetadataRepository
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class GetUserSuggestionsTest {
     private val userMetadataRepository = FakeUserMetadataRepository()
     private val nip5Validator = FakeNip5Validator()
+
     private val getUserSuggestions = GetUserSuggestions(
         userMetadataRepository,
         GetNip5Status(
@@ -31,7 +31,7 @@ class GetUserSuggestionsTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
         val noteContent = "j"
-        getUserSuggestions.apply {
+        makeInteractor().apply {
             invoke(
                 GetUserSuggestions.Params(noteContent)
             )
@@ -53,7 +53,7 @@ class GetUserSuggestionsTest {
     fun `when first word starts with @, model contains tag suggestions`() = runTest {
         userMetadataRepository.searchUsersResult = listOf(createUserMetadata())
 
-        getUserSuggestions.apply {
+        makeInteractor().apply {
             invoke(GetUserSuggestions.Params("@j"))
             flow.test {
                 assertThat(awaitItem()).containsExactly(
@@ -71,7 +71,7 @@ class GetUserSuggestionsTest {
 
     @Test
     fun `when query is empty, model emits empty suggestions`() = runTest {
-        getUserSuggestions.apply {
+        makeInteractor().apply {
             invoke(GetUserSuggestions.Params(""))
             flow.test {
                 assertThat(awaitItem()).isEmpty()
@@ -85,7 +85,7 @@ class GetUserSuggestionsTest {
         userMetadataRepository.searchUsersResult = listOf(userMetadata)
         nip5Validator.isValidResult = true
 
-        getUserSuggestions.apply {
+        makeInteractor().apply {
             invoke(GetUserSuggestions.Params("test"))
 
             flow.test {
@@ -96,11 +96,21 @@ class GetUserSuggestionsTest {
                     nip5Identifier = userMetadata.nip05,
                     isNip5Valid = null,
                 )
-                
+
                 assertThat(awaitItem()).containsExactly(expectedTag)
                 assertThat(awaitItem()).containsExactly(expectedTag.copy(isNip5Valid = true))
             }
         }
+    }
+
+    private fun CoroutineScope.makeInteractor(): GetUserSuggestions {
+        return GetUserSuggestions(
+            userMetadataRepository,
+            GetNip5Status(
+                nip5Validator, coroutineContext
+            ),
+            coroutineContext,
+        )
     }
 
     private fun createUserMetadata(

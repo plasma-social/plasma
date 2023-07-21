@@ -41,5 +41,6 @@ dependencies {
     implementation(projects.data.models)
     api(libs.androidx.paging.common)
     implementation(libs.coroutines.android)
+    implementation(libs.moshi.core)
     implementation(libs.nostrino)
 }

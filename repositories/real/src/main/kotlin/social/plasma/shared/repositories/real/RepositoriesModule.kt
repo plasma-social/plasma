@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.ContactsRepository
+import social.plasma.shared.repositories.api.LightningAddressResolver
+import social.plasma.shared.repositories.api.LightningInvoiceFetcher
 import social.plasma.shared.repositories.api.Nip5Validator
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.repositories.api.UserMetadataRepository
@@ -36,6 +38,14 @@ abstract class RepositoriesModule {
     @Binds
     @Singleton
     internal abstract fun bindsContactRepository(impl: RealContactsRepository): ContactsRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindsLightningInvoiceFetcher(impl: RealLightningInvoiceFetcher): LightningInvoiceFetcher
+
+    @Binds
+    @Singleton
+    internal abstract fun bindsLightningAddressResolver(impl: RealLightningAddressResolver): LightningAddressResolver
 
     companion object {
         @Provides
