@@ -29,4 +29,13 @@ data class UserMetadataEntity(
         displayName?.takeIf { it.isNotBlank() } ?: name?.takeIf { it.isNotBlank() }
         ?: PubKey(pubkey.decodeHex()).shortBech32()
     }
+
+    @delegate:Ignore
+    val tipAddress: TipAddress? by lazy {
+        when {
+            lud16 != null -> TipAddress.LightningAddress(lud16)
+            lud06 != null -> TipAddress.Lnurl(lud06)
+            else -> null
+        }
+    }
 }

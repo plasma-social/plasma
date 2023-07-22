@@ -7,7 +7,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okio.ByteString.Companion.toByteString
 import org.junit.Test
 import social.plasma.domain.interactors.GetLightningInvoice.LightningInvoice
-import social.plasma.domain.interactors.GetLightningInvoice.Params.LightningAddress
+import social.plasma.models.BitcoinAmount
+import social.plasma.models.TipAddress
 import social.plasma.shared.repositories.api.LightningAddressResponse
 import social.plasma.shared.repositories.api.LightningInvoiceResponse
 import social.plasma.shared.repositories.fakes.FakeLightningAddressResolver
@@ -36,16 +37,16 @@ class GetLightningInvoiceTest {
 
             val result =
                 interactor.executeSync(
-                    LightningAddress(
-                        address = "test@plasma.social.com",
-                        amount = 1000L
+                    GetLightningInvoice.Params(
+                        tipAddress = TipAddress.LightningAddress("test@plasma.social.com"),
+                        amount = BitcoinAmount(1000L),
                     )
                 )
 
             assertThat(lightningAddressResolver.lightningAddressCalls.awaitItem())
                 .isEqualTo("https://plasma.social.com/.well-known/lnurlp/test".toHttpUrlOrNull())
             assertThat(lightningInvoiceFetcher.lightningInvoiceCalls.awaitItem())
-                .isEqualTo(TEST_LIGHTNING_URL to 1000L)
+                .isEqualTo(TEST_LIGHTNING_URL to 1000_000L)
             assertThat(result.getOrNull()).isEqualTo(LightningInvoice(TEST_LIGHTNING_INVOICE))
         }
     }
@@ -60,15 +61,15 @@ class GetLightningInvoiceTest {
         )
 
         val result = interactor.executeSync(
-            GetLightningInvoice.Params.Lnurl(
-                bech32 = TEST_LNURL,
-                amount = 1000L
+            GetLightningInvoice.Params(
+                TipAddress.Lnurl(bech32 = TEST_LNURL),
+                amount = BitcoinAmount(1000L)
             )
         )
 
         assertThat(result.getOrNull()).isEqualTo(LightningInvoice(TEST_LIGHTNING_INVOICE))
         assertThat(lightningInvoiceFetcher.lightningInvoiceCalls.awaitItem())
-            .isEqualTo(TEST_LIGHTNING_URL to 1000L)
+            .isEqualTo(TEST_LIGHTNING_URL to 1000_000L)
         assertThat(lightningAddressResolver.lightningAddressCalls.awaitItem())
             .isEqualTo(TEST_LIGHTNING_URL.toHttpUrlOrNull())
     }
@@ -76,9 +77,9 @@ class GetLightningInvoiceTest {
     @Test
     fun `invalid lnurl address returns a failure`() = runTest {
         val result = interactor.executeSync(
-            GetLightningInvoice.Params.Lnurl(
-                bech32 = "test",
-                amount = 1000L
+            GetLightningInvoice.Params(
+                TipAddress.Lnurl(bech32 = "test"),
+                amount = BitcoinAmount(1000L)
             )
         )
 

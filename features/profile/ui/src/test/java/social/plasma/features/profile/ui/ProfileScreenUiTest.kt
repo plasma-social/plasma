@@ -102,6 +102,7 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
                 isLiked = true,
                 isNip5Valid = { _, _ -> true },
                 nip5Domain = userData.nip5Domain,
+                zapsEnabled = true,
             )
         }))
 

@@ -74,6 +74,7 @@ fun NoteElevatedCard(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
     onNestedNavEvent: (NavEvent) -> Unit = {},
+    onZapClick: () -> Unit,
 ) {
     Card(
         modifier = modifier,
@@ -102,9 +103,11 @@ fun NoteElevatedCard(
             shareCount = uiModel.shareCount,
             replyCount = uiModel.replyCount,
             isLiked = uiModel.isLiked,
+            showZapButton = uiModel.zapsEnabled,
             onLikeClick = onLikeClick,
             onReplyClick = onReplyClick,
             onRepostClick = onRepostClick,
+            onZapClick = onZapClick,
         )
     }
 }
@@ -167,6 +170,7 @@ fun NoteFlatCard(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
     onNestedNavEvent: (NavEvent) -> Unit = {},
+    onZapClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -195,6 +199,8 @@ fun NoteFlatCard(
             onLikeClick = onLikeClick,
             onReplyClick = onReplyClick,
             onRepostClick = onRepostClick,
+            showZapButton = uiModel.zapsEnabled,
+            onZapClick = onZapClick
         )
     }
 }
@@ -213,6 +219,7 @@ fun ThreadNote(
     getOpenGraphMetadata: GetOpenGraphMetadata,
     onHashTagClick: (String) -> Unit,
     onNestedNavEvent: (NavEvent) -> Unit = {},
+    onZapClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -261,6 +268,8 @@ fun ThreadNote(
                 onLikeClick = onLikeClick,
                 onReplyClick = onReplyClick,
                 onRepostClick = onRepostClick,
+                showZapButton = uiModel.zapsEnabled,
+                onZapClick = onZapClick,
             )
         }
     }
@@ -342,9 +351,11 @@ private fun NoteCardActionsRow(
     shareCount: String,
     replyCount: String,
     isLiked: Boolean,
+    showZapButton: Boolean,
     onLikeClick: () -> Unit,
     onReplyClick: () -> Unit,
     onRepostClick: () -> Unit,
+    onZapClick: () -> Unit,
 ) {
     val optimisticLikeState = remember(isLiked) { mutableStateOf(isLiked) }
     val optimisticLikeCount = remember(likeCount) { mutableStateOf(likeCount) }
@@ -391,6 +402,16 @@ private fun NoteCardActionsRow(
                 text = shareCount,
                 style = MaterialTheme.typography.labelMedium
             )
+        }
+        if (showZapButton) {
+            TextButton(onClick = onZapClick, colors = colors) {
+                Icon(
+                    modifier = Modifier.size(iconSize),
+                    painter = painterResource(id = R.drawable.ic_plasma_lightning_bolt),
+                    contentDescription = null,
+                )
+                // TODO add zap count
+            }
         }
         TextButton(
             onClick = withHapticFeedBack {
@@ -520,6 +541,7 @@ private fun PreviewFeedCard() {
             onRepostClick = {},
             getOpenGraphMetadata = { null },
             onHashTagClick = {},
+            onZapClick = {},
         )
     }
 }
@@ -539,6 +561,7 @@ private fun PreviewThreadCard() {
             onRepostClick = {},
             getOpenGraphMetadata = { null },
             onHashTagClick = {},
+            onZapClick = {},
         )
     }
 }
@@ -585,7 +608,7 @@ object NoteCardFakes {
         replyCount = "352k",
         shareCount = "509k",
         likeCount = 290,
-        userPubkey = PubKey.parse("npub1jem3jmdve9h94snjkuf5egagk7uupgxtu0eru33mzyms8ctzlk9sjhk73a")
+        userPubkey = PubKey.parse("npub1jem3jmdve9h94snjkuf5egagk7uupgxtu0eru33mzyms8ctzlk9sjhk73a"),
     )
 }
 

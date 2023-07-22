@@ -43,7 +43,8 @@ internal class NoteCardTest(
                 onNoteClick = {},
                 onRepostClick = {},
                 getOpenGraphMetadata = { null },
-                onHashTagClick = {}
+                onHashTagClick = {},
+                onZapClick = {},
             )
         }
     }
@@ -74,17 +75,18 @@ internal class NoteCardTest(
 
     companion object {
         private val uiModel = FeedItem.NoteCard(
+            id = "",
+            name = "Jane",
+            displayName = "Jane",
             headerContent = ContentBlock.Text(
                 "Boosted by Iris",
                 emptyMap()
             ),
-            timePosted = "Just now",
-            cardLabel = "Replying to Mike",
-            name = "Jane",
-            displayName = "Jane",
-            id = "",
             content = listOf(ContentBlock.Text("PV", emptyMap())),
-            userPubkey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex())
+            cardLabel = "Replying to Mike",
+            timePosted = "Just now",
+            userPubkey = PubKey("9c9ecd7c8a8c3144ae48bf425b6592c8e53c385fd83376d4ffb7f6ac1a17bfab".decodeHex()),
+            zapsEnabled = true,
         )
 
     }

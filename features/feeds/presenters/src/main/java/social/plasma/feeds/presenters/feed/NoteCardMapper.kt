@@ -1,11 +1,21 @@
 package social.plasma.feeds.presenters.feed
 
+import app.cash.nostrino.crypto.PubKey
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.firstOrNull
+import okio.ByteString.Companion.decodeHex
+import okio.ByteString.Companion.toByteString
+import shortBech32
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
+import social.plasma.models.Event
+import social.plasma.models.Mention
+import social.plasma.models.NoteId
+import social.plasma.models.NoteMention
+import social.plasma.models.NoteWithUser
+import social.plasma.models.ProfileMention
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.repositories.api.UserMetadataRepository
@@ -14,11 +24,6 @@ import social.plasma.shared.utils.api.StringManager
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
-import app.cash.nostrino.crypto.PubKey
-import okio.ByteString.Companion.decodeHex
-import okio.ByteString.Companion.toByteString
-import shortBech32
-import social.plasma.models.*
 
 class NoteCardMapper @Inject constructor(
     private val noteContentParser: NoteContentParser,
@@ -41,24 +46,23 @@ class NoteCardMapper @Inject constructor(
     private suspend fun createNoteUiModel(noteWithUser: NoteWithUser): FeedItem {
         val note = noteWithUser.noteEntity
         val author = noteWithUser.userMetadataEntity
-        val authorPubKey = PubKey(note.pubkey.decodeHex()!!)
+        val authorPubKey = PubKey(note.pubkey.decodeHex())
         val shortBech32 by lazy { authorPubKey.shortBech32() }
 
         return FeedItem.NoteCard(
-            key = note.id,
             id = note.id,
+            key = note.id,
             name = author?.name ?: shortBech32,
-            content = noteContentParser.parseNote(note.content, note.tags.toIndexedMap()),
+            displayName = author?.userFacingName ?: shortBech32,
             avatarUrl = author?.picture,
+            nip5Identifier = author?.nip05,
+            content = noteContentParser.parseNote(note.content, note.tags.toIndexedMap()),
+            cardLabel = buildBannerLabel(note.tags),
             timePosted = Instant.ofEpochSecond(note.createdAt).relativeTime(),
             replyCount = "",
             shareCount = "",
             likeCount = note.reactionCount,
             userPubkey = authorPubKey,
-            nip5Identifier = author?.nip05,
-            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
-            displayName = author?.userFacingName ?: shortBech32,
-            cardLabel = buildBannerLabel(note.tags),
             isLiked = isLiked(note.id),
             isNip5Valid = { pubKey, identifier ->
                 getNip5Status.executeSync(
@@ -67,7 +71,10 @@ class NoteCardMapper @Inject constructor(
                         identifier = identifier
                     )
                 ).isValid()
-            }
+            },
+            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
+            zapsEnabled = author?.tipAddress != null,
+            tipAddress = author?.tipAddress,
         )
     }
 
@@ -86,31 +93,20 @@ class NoteCardMapper @Inject constructor(
         // The paging library doesn't allow mapping to nullables, so instead we'll return a "hidden" note
         repostedNote ?: return FeedItem.NoteCard(
             id = note.id,
+            userPubkey = PubKey(note.pubkey.decodeHex()),
             hidden = true,
-            userPubkey = PubKey(note.pubkey.decodeHex()!!)
         )
 
         val authorPubKey = PubKey(repostedNote.pubKey)
         val author = userMetaDataRepository.observeUserMetaData(authorPubKey).firstOrNull()
 
         return FeedItem.NoteCard(
-            key = note.id,
             id = repostedNote.id.hex(),
+            key = note.id,
             name = author?.name ?: authorPubKey.shortBech32(),
-            content = noteContentParser.parseNote(
-                repostedNote.content,
-                repostedNote.tags.toIndexedMap()
-            ),
-            avatarUrl = author?.picture,
-            timePosted = Instant.ofEpochSecond(repostedNote.createdAt.epochSecond)
-                .relativeTime(),
-            replyCount = "",
-            shareCount = "",
-            likeCount = 0,
-            userPubkey = authorPubKey,
-            nip5Identifier = author?.nip05,
-            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
             displayName = author?.userFacingName ?: authorPubKey.shortBech32(),
+            avatarUrl = author?.picture,
+            nip5Identifier = author?.nip05,
             headerContent = ContentBlock.Text(
                 "Boosted by #[0]",
                 mentions = mapOf(
@@ -121,7 +117,17 @@ class NoteCardMapper @Inject constructor(
                     )
                 )
             ),
+            content = noteContentParser.parseNote(
+                repostedNote.content,
+                repostedNote.tags.toIndexedMap()
+            ),
             cardLabel = buildBannerLabel(repostedNote.tags),
+            timePosted = Instant.ofEpochSecond(repostedNote.createdAt.epochSecond)
+                .relativeTime(),
+            replyCount = "",
+            shareCount = "",
+            likeCount = 0,
+            userPubkey = authorPubKey,
             isLiked = isLiked(note.id),
             isNip5Valid = { pubKey, identifier ->
                 getNip5Status.executeSync(
@@ -130,7 +136,10 @@ class NoteCardMapper @Inject constructor(
                         identifier = identifier
                     )
                 ).isValid()
-            }
+            },
+            nip5Domain = author?.nip05?.split("@")?.getOrNull(1),
+            zapsEnabled = author?.tipAddress != null,
+            tipAddress = author?.tipAddress,
         )
     }
 

@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.common.screens)
     implementation(projects.common.utils.api)
     implementation(projects.data.daos)
     implementation(projects.data.models)

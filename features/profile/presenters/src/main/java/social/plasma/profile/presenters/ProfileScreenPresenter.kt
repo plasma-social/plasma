@@ -40,6 +40,7 @@ import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
 import social.plasma.feeds.presenters.feed.FeedPresenter
+import social.plasma.models.BitcoinAmount
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.utils.api.NumberFormatter
 
@@ -216,24 +217,16 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
                 is ProfileUiEvent.OnZapProfile -> {
                     coroutineScope.launch {
-                        val millisats = event.satsAmount * 1000L
-                        val lightningInvoiceParams = when {
-                            metadata?.lud16 != null -> GetLightningInvoice.Params.LightningAddress(
-                                metadata!!.lud16!!,
-                                amount = millisats
+                        val tipAddress = metadata?.tipAddress
+
+                        tipAddress ?: return@launch // show error dialog
+
+                        val result = getLightningInvoice.executeSync(
+                            GetLightningInvoice.Params(
+                                tipAddress = tipAddress,
+                                amount = BitcoinAmount(sats = event.satsAmount),
                             )
-
-                            metadata?.lud06 != null -> GetLightningInvoice.Params.Lnurl(
-                                metadata!!.lud06!!,
-                                amount = millisats
-                            )
-
-                            else -> null
-                        }
-
-                        lightningInvoiceParams ?: return@launch // show error dialog
-
-                        val result = getLightningInvoice.executeSync(lightningInvoiceParams)
+                        )
 
                         result.onSuccess { response ->
                             navigator.goTo(ShareLightningInvoiceScreen(response.invoice))
