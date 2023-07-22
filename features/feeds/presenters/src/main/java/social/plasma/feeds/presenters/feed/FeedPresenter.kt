@@ -175,10 +175,12 @@ class FeedPresenter @AssistedInject constructor(
                         val tipAddress = event.tipAddress
                         tipAddress ?: return@launch
 
+                        if (event.satAmount <= 0) return@launch
+
                         getLightningInvoice.executeSync(
                             GetLightningInvoice.Params(
                                 tipAddress,
-                                amount = BitcoinAmount(sats = 500_000L) // TODO make this configurable
+                                amount = BitcoinAmount(sats = event.satAmount)
                             )
                         ).onSuccess { data ->
                             navigator.goTo(ShareLightningInvoiceScreen(data.invoice))

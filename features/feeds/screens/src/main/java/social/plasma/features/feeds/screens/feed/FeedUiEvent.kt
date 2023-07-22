@@ -17,7 +17,7 @@ sealed interface FeedUiEvent : CircuitUiEvent {
 
     data class OnReplyClick(val noteId: NoteId) : FeedUiEvent
 
-    data class OnZapClick(val tipAddress: TipAddress?) : FeedUiEvent
+    data class OnZapClick(val tipAddress: TipAddress?, val satAmount: Long) : FeedUiEvent
 
     data class OnNoteDisplayed(val noteId: NoteId, val pubKey: PubKey) : FeedUiEvent
 

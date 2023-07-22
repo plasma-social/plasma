@@ -1,13 +1,9 @@
 package social.plasma.features.profile.ui
 
-import android.icu.text.NumberFormat
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,15 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -50,9 +42,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -61,7 +50,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
 import com.slack.circuit.overlay.LocalOverlayHost
-import com.slack.circuit.overlay.OverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
@@ -83,7 +71,7 @@ import social.plasma.ui.components.ProgressIndicator
 import social.plasma.ui.components.StatCard
 import social.plasma.ui.components.ZoomableAvatar
 import social.plasma.ui.components.withHapticFeedBack
-import social.plasma.ui.overlays.BottomSheetOverlay
+import social.plasma.ui.overlays.getZapAmount
 import social.plasma.ui.rememberStableCoroutineScope
 import social.plasma.ui.theme.PlasmaTheme
 import javax.inject.Inject
@@ -248,8 +236,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
 
         OverlayIconButton(onClick = {
             coroutineScope.launch {
-                val amount = overlayHost.getZapAmount()
-                onZap(amount)
+                onZap(overlayHost.getZapAmount())
             }
         }) {
             Icon(
@@ -351,100 +338,6 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
         }
     }
 
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-private suspend fun OverlayHost.getZapAmount(): Long {
-    return show(
-        BottomSheetOverlay(
-            model = Unit,
-            onDismiss = { 0L },
-        ) { _, overlayNav ->
-            var enteredAmount by remember {
-                mutableStateOf(
-                    TextFieldValue("")
-                )
-            }
-
-            val amountBuckets = listOf(
-                21L,
-                99,
-                250,
-                500,
-                1000,
-                5000,
-                10000,
-            )
-            val numberFormatter = remember { NumberFormat.getNumberInstance() }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "Zap Amount",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    amountBuckets.forEach { bucket ->
-                        if ((enteredAmount.text.toLongOrNull() ?: 0L) == bucket) {
-                            PrimaryButton(onClick = {
-                                enteredAmount = TextFieldValue(
-                                    ""
-                                )
-                            }) {
-                                Text(numberFormatter.format(bucket))
-                            }
-                        } else {
-                            OutlinedPrimaryButton(onClick = {
-                                enteredAmount = TextFieldValue(
-                                    bucket.toString(),
-                                    selection = TextRange(bucket.toString().length)
-                                )
-                            }) {
-                                Text(numberFormatter.format(bucket))
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    label = { Text("Custom Amount") },
-                    value = enteredAmount,
-                    onValueChange = { enteredAmount = it },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = androidx.compose.ui.text.input.ImeAction.Done,
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            overlayNav.finish(enteredAmount.text.toLongOrNull() ?: 0L)
-                        }
-                    ),
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = withHapticFeedBack {
-                        overlayNav.finish(enteredAmount.text.toLongOrNull() ?: 0L)
-                    },
-                    enabled = (enteredAmount.text.toLongOrNull() ?: 0) != 0L,
-                ) {
-                    Text(text = "Zap")
-                }
-            }
-
-        }
-    )
 }
 
 @Preview(showSystemUi = true, showBackground = true)
