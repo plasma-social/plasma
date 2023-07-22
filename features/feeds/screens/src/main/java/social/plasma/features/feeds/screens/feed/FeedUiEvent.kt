@@ -4,6 +4,7 @@ import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.foundation.NavEvent
 import com.slack.circuit.runtime.CircuitUiEvent
 import social.plasma.models.NoteId
+import social.plasma.models.TipAddress
 
 sealed interface FeedUiEvent : CircuitUiEvent {
     data class OnNoteClick(val noteId: NoteId) : FeedUiEvent
@@ -15,6 +16,8 @@ sealed interface FeedUiEvent : CircuitUiEvent {
     data class OnNoteReaction(val noteId: NoteId) : FeedUiEvent
 
     data class OnReplyClick(val noteId: NoteId) : FeedUiEvent
+
+    data class OnZapClick(val tipAddress: TipAddress?) : FeedUiEvent
 
     data class OnNoteDisplayed(val noteId: NoteId, val pubKey: PubKey) : FeedUiEvent
 

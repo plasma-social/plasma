@@ -19,6 +19,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import social.plasma.common.screens.AndroidScreens.ShareLightningInvoiceScreen
+import social.plasma.domain.interactors.GetLightningInvoice
 import social.plasma.domain.interactors.RepostNote
 import social.plasma.domain.interactors.SendNoteReaction
 import social.plasma.domain.interactors.SyncMetadata
@@ -30,6 +32,7 @@ import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.features.posting.screens.ComposingScreen.NoteType.Reply
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.models.BitcoinAmount
 import social.plasma.models.HashTag
 import social.plasma.models.NoteWithUser
 import social.plasma.opengraph.OpenGraphMetadata
@@ -47,6 +50,7 @@ class FeedPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val openGraphParser: OpenGraphParser,
     private val notePagingFlowMapper: NotePagingFlowMapper,
+    private val getLightningInvoice: GetLightningInvoice,
     @Assisted private val pagingFlow: Flow<PagingData<NoteWithUser>>,
     @Assisted private val navigator: Navigator,
 ) : Presenter<FeedUiState> {
@@ -165,13 +169,35 @@ class FeedPresenter @AssistedInject constructor(
                 is FeedUiEvent.OnNavEvent -> {
                     navigator.onNavEvent(event.navEvent)
                 }
+
+                is FeedUiEvent.OnZapClick -> {
+                    coroutineScope.launch {
+                        val tipAddress = event.tipAddress
+                        tipAddress ?: return@launch
+
+                        getLightningInvoice.executeSync(
+                            GetLightningInvoice.Params(
+                                tipAddress,
+                                amount = BitcoinAmount(sats = 500_000L) // TODO make this configurable
+                            )
+                        ).onSuccess { data ->
+                            navigator.goTo(ShareLightningInvoiceScreen(data.invoice))
+                        }.onFailure {
+                            //TODO show error
+                            Timber.w(it)
+                        }
+                    }
+                }
             }
         }
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(navigator: Navigator, pagingFlow: Flow<PagingData<NoteWithUser>>): FeedPresenter
+        fun create(
+            navigator: Navigator,
+            pagingFlow: Flow<PagingData<NoteWithUser>>,
+        ): FeedPresenter
     }
 
     companion object {

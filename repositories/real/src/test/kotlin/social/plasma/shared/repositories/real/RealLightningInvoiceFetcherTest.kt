@@ -29,7 +29,7 @@ class RealLightningInvoiceFetcherTest {
 
         val result = lightningAddressFetcher.fetch(
             server.url("/").toString(),
-            amount = 1000,
+            millisats = 1000,
         )
 
         assertThat(result).isEqualTo(validInvoiceResponse)
@@ -42,7 +42,7 @@ class RealLightningInvoiceFetcherTest {
 
         lightningAddressFetcher.fetch(
             server.url("/").toString(),
-            amount = 1000,
+            millisats = 1000,
         )
     }
 
@@ -52,7 +52,7 @@ class RealLightningInvoiceFetcherTest {
 
         lightningAddressFetcher.fetch(
             server.url("/").toString(),
-            amount = 1000,
+            millisats = 1000,
         )
     }
 
@@ -62,7 +62,7 @@ class RealLightningInvoiceFetcherTest {
 
         lightningAddressFetcher.fetch(
             server.url("/").toString(),
-            amount = 1000,
+            millisats = 1000,
         )
     }
 

@@ -27,9 +27,9 @@ import androidx.paging.compose.items
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNavEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteDisplayed
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteReaction
@@ -37,6 +37,7 @@ import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteRepost
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnProfileClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnRefreshButtonClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnReplyClick
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnZapClick
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.notes.NoteElevatedCard
 import social.plasma.models.NoteId
@@ -100,7 +101,8 @@ fun FeedUiContent(
                                 onRepostClick = { onEvent(OnNoteRepost(noteId)) },
                                 getOpenGraphMetadata = getOpenGraphMetadata,
                                 onHashTagClick = { onEvent(OnHashTagClick(it)) },
-                                onNestedNavEvent = { onEvent(FeedUiEvent.OnNavEvent(it)) }
+                                onNestedNavEvent = { onEvent(OnNavEvent(it)) },
+                                onZapClick = { onEvent(OnZapClick(item.tipAddress)) },
                             )
                             LaunchedEffect(Unit) {
                                 onEvent(OnNoteDisplayed(noteId, item.userPubkey))

@@ -17,10 +17,10 @@ class RealLightningInvoiceFetcher @Inject constructor(
     private val lightningInvoiceResponseAdapter =
         moshi.adapter(LightningInvoiceResponse::class.java)
 
-    override suspend fun fetch(url: String, amount: Long): LightningInvoiceResponse {
+    override suspend fun fetch(url: String, millisats: Long): LightningInvoiceResponse {
         val serviceUrl = try {
             url.toHttpUrlOrNull()!!.newBuilder()
-                .addQueryParameter("amount", amount.toString())
+                .addQueryParameter("amount", millisats.toString())
                 .build()
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Invalid lnurl address")

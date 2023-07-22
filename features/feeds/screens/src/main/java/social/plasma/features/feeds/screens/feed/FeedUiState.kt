@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.models.Mention
 import social.plasma.models.NoteId
+import social.plasma.models.TipAddress
 import social.plasma.opengraph.OpenGraphMetadata
 
 data class FeedUiState(
@@ -50,6 +51,8 @@ sealed interface FeedItem {
         val isLiked: Boolean = false,
         val isNip5Valid: suspend (PubKey, String?) -> Boolean = { _, _ -> false },
         val nip5Domain: String? = null,
+        val zapsEnabled: Boolean = false,
+        val tipAddress: TipAddress? = null,
     ) : FeedItem
 }
 

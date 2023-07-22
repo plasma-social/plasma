@@ -44,6 +44,7 @@ import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteReaction
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNoteRepost
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnProfileClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnReplyClick
+import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnZapClick
 import social.plasma.features.feeds.screens.threads.ThreadItem
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiEvent
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiEvent.OnFeedEvent
@@ -122,7 +123,8 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
                                     onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
-                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it))}
+                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it)) },
+                                    onZapClick = { onFeedItemEvent(OnZapClick(item.noteUiModel.tipAddress)) },
                                 )
                                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                                 Spacer(Modifier.height(32.dp))
@@ -167,7 +169,8 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     onRepostClick = { onFeedItemEvent(OnNoteRepost(noteId)) },
                                     getOpenGraphMetadata = getOpenGraphMetadata,
                                     onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
-                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it))}
+                                    onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it)) },
+                                    onZapClick = { onFeedItemEvent(OnZapClick(item.noteUiModel.tipAddress)) }
                                 )
                                 LaunchedEffect(Unit) {
                                     onFeedItemEvent(
