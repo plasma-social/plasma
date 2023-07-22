@@ -218,21 +218,18 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 is ProfileUiEvent.OnZapProfile -> {
                     coroutineScope.launch {
                         val tipAddress = metadata?.tipAddress
-
                         tipAddress ?: return@launch // show error dialog
 
-                        val result = getLightningInvoice.executeSync(
+                        if (event.satsAmount <= 0) return@launch
+
+                        getLightningInvoice.executeSync(
                             GetLightningInvoice.Params(
                                 tipAddress = tipAddress,
                                 amount = BitcoinAmount(sats = event.satsAmount),
                             )
-                        )
-
-                        result.onSuccess { response ->
+                        ).onSuccess { response ->
                             navigator.goTo(ShareLightningInvoiceScreen(response.invoice))
-                        }
-
-                        result.onFailure {
+                        }.onFailure {
                             // TODO show error dialog
                         }
                     }

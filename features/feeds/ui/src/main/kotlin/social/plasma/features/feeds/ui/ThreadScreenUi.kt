@@ -33,8 +33,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnNavEvent
@@ -53,6 +55,8 @@ import social.plasma.features.feeds.ui.notes.NoteFlatCard
 import social.plasma.features.feeds.ui.notes.ThreadNote
 import social.plasma.models.NoteId
 import social.plasma.ui.R
+import social.plasma.ui.overlays.getZapAmount
+import social.plasma.ui.rememberStableCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 class ThreadScreenUi : Ui<ThreadScreenUiState> {
@@ -60,6 +64,7 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
     override fun Content(state: ThreadScreenUiState, modifier: Modifier) {
         val onScreenEvent = state.onEvent
         val getOpenGraphMetadata = state.getOpenGraphMetadata
+        val overlayHost = LocalOverlayHost.current
 
         val onFeedItemEvent: (FeedUiEvent) -> Unit =
             remember(onScreenEvent) { { onScreenEvent(OnFeedEvent(it)) } }
@@ -108,6 +113,7 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                 ) {
 
                     itemsIndexed(pagingLazyItems, key = { _, item -> item.id }) { index, item ->
+                        val coroutineScope = rememberStableCoroutineScope()
 
                         when (item) {
                             is ThreadItem.RootNote -> Column {
@@ -124,7 +130,16 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     getOpenGraphMetadata = getOpenGraphMetadata,
                                     onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
                                     onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it)) },
-                                    onZapClick = { onFeedItemEvent(OnZapClick(item.noteUiModel.tipAddress)) },
+                                    onZapClick = {
+                                        coroutineScope.launch {
+                                            onFeedItemEvent(
+                                                OnZapClick(
+                                                    tipAddress = item.noteUiModel.tipAddress,
+                                                    satAmount = overlayHost.getZapAmount()
+                                                )
+                                            )
+                                        }
+                                    },
                                 )
                                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                                 Spacer(Modifier.height(32.dp))
@@ -170,7 +185,16 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                     getOpenGraphMetadata = getOpenGraphMetadata,
                                     onHashTagClick = { onFeedItemEvent(OnHashTagClick(it)) },
                                     onNestedNavEvent = { onFeedItemEvent(OnNavEvent(it)) },
-                                    onZapClick = { onFeedItemEvent(OnZapClick(item.noteUiModel.tipAddress)) }
+                                    onZapClick = {
+                                        coroutineScope.launch {
+                                            onFeedItemEvent(
+                                                OnZapClick(
+                                                    tipAddress = item.noteUiModel.tipAddress,
+                                                    satAmount = overlayHost.getZapAmount()
+                                                )
+                                            )
+                                        }
+                                    }
                                 )
                                 LaunchedEffect(Unit) {
                                     onFeedItemEvent(

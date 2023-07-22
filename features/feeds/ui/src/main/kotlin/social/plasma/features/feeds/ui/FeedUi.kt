@@ -24,8 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnHashTagClick
@@ -41,6 +43,8 @@ import social.plasma.features.feeds.screens.feed.FeedUiEvent.OnZapClick
 import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.feeds.ui.notes.NoteElevatedCard
 import social.plasma.models.NoteId
+import social.plasma.ui.overlays.getZapAmount
+import social.plasma.ui.rememberStableCoroutineScope
 import javax.inject.Inject
 
 class FeedUi @Inject constructor() : Ui<FeedUiState> {
@@ -59,6 +63,7 @@ fun FeedUiContent(
 ) {
     val onEvent = state.onEvent
     val getOpenGraphMetadata = state.getOpenGraphMetadata
+    val overlayHost = LocalOverlayHost.current
     val pagingLazyItems = state.pagingFlow.collectAsLazyPagingItems()
 
     LaunchedEffect(pagingLazyItems.itemCount) {
@@ -82,6 +87,8 @@ fun FeedUiContent(
             headerContent()
 
             items(pagingLazyItems, key = { it.key }) { item ->
+                val coroutineScope = rememberStableCoroutineScope()
+
                 when (item) {
                     is FeedItem.NoteCard -> {
                         if (!item.hidden) {
@@ -102,7 +109,16 @@ fun FeedUiContent(
                                 getOpenGraphMetadata = getOpenGraphMetadata,
                                 onHashTagClick = { onEvent(OnHashTagClick(it)) },
                                 onNestedNavEvent = { onEvent(OnNavEvent(it)) },
-                                onZapClick = { onEvent(OnZapClick(item.tipAddress)) },
+                                onZapClick = {
+                                    coroutineScope.launch {
+                                        onEvent(
+                                            OnZapClick(
+                                                tipAddress = item.tipAddress,
+                                                satAmount = overlayHost.getZapAmount()
+                                            )
+                                        )
+                                    }
+                                },
                             )
                             LaunchedEffect(Unit) {
                                 onEvent(OnNoteDisplayed(noteId, item.userPubkey))
