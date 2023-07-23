@@ -226,6 +226,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
                             GetLightningInvoice.Params(
                                 tipAddress = tipAddress,
                                 amount = BitcoinAmount(sats = event.satsAmount),
+                                recipient = pubKey,
                             )
                         ).onSuccess { response ->
                             navigator.goTo(ShareLightningInvoiceScreen(response.invoice))

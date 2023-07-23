@@ -14,4 +14,7 @@ data class LightningAddressResponse(
     val callback: String,
     val maxSendable: Long,
     val minSendable: Long,
+    val commentAllowed: Int = 0,
+    val allowsNostr: Boolean = false,
+    val nostrPubkey: String? = null,
 )

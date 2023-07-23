@@ -17,7 +17,10 @@ class RealLightningInvoiceFetcher @Inject constructor(
     private val lightningInvoiceResponseAdapter =
         moshi.adapter(LightningInvoiceResponse::class.java)
 
-    override suspend fun fetch(url: String, millisats: Long): LightningInvoiceResponse {
+    override suspend fun fetch(
+        url: String,
+        millisats: Long,
+    ): LightningInvoiceResponse {
         val serviceUrl = try {
             url.toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("amount", millisats.toString())

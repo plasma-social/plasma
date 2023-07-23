@@ -180,7 +180,9 @@ class FeedPresenter @AssistedInject constructor(
                         getLightningInvoice.executeSync(
                             GetLightningInvoice.Params(
                                 tipAddress,
-                                amount = BitcoinAmount(sats = event.satAmount)
+                                amount = BitcoinAmount(sats = event.satAmount),
+                                event = event.noteId,
+                                recipient = event.pubKey,
                             )
                         ).onSuccess { data ->
                             navigator.goTo(ShareLightningInvoiceScreen(data.invoice))

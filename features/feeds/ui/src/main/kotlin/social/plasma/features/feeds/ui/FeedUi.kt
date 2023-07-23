@@ -114,7 +114,9 @@ fun FeedUiContent(
                                         onEvent(
                                             OnZapClick(
                                                 tipAddress = item.tipAddress,
-                                                satAmount = overlayHost.getZapAmount()
+                                                satAmount = overlayHost.getZapAmount(),
+                                                noteId = noteId,
+                                                pubKey = item.userPubkey,
                                             )
                                         )
                                     }

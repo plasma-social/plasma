@@ -135,7 +135,9 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                             onFeedItemEvent(
                                                 OnZapClick(
                                                     tipAddress = item.noteUiModel.tipAddress,
-                                                    satAmount = overlayHost.getZapAmount()
+                                                    satAmount = overlayHost.getZapAmount(),
+                                                    noteId = noteId,
+                                                    pubKey = item.pubkey,
                                                 )
                                             )
                                         }
@@ -190,7 +192,9 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                                             onFeedItemEvent(
                                                 OnZapClick(
                                                     tipAddress = item.noteUiModel.tipAddress,
-                                                    satAmount = overlayHost.getZapAmount()
+                                                    satAmount = overlayHost.getZapAmount(),
+                                                    noteId = noteId,
+                                                    pubKey = item.pubkey,
                                                 )
                                             )
                                         }

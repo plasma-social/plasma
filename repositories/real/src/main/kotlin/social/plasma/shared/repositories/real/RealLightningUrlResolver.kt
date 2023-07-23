@@ -11,7 +11,7 @@ import social.plasma.shared.repositories.api.LightningAddressResponse
 import java.io.IOException
 import javax.inject.Inject
 
-class RealLightningAddressResolver @Inject constructor(
+class RealLightningUrlResolver @Inject constructor(
     private val okHttpClient: OkHttpClient,
     moshi: Moshi,
 ) : LightningAddressResolver {

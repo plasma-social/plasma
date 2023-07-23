@@ -45,7 +45,7 @@ abstract class RepositoriesModule {
 
     @Binds
     @Singleton
-    internal abstract fun bindsLightningAddressResolver(impl: RealLightningAddressResolver): LightningAddressResolver
+    internal abstract fun bindsLightningAddressResolver(impl: RealLightningUrlResolver): LightningAddressResolver
 
     companion object {
         @Provides
