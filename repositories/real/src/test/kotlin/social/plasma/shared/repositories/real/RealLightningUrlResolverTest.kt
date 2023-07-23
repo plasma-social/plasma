@@ -15,7 +15,7 @@ import social.plasma.shared.repositories.api.LightningAddressResponse
 import java.io.IOException
 
 
-class RealLightningAddressResolverTest {
+class RealLightningUrlResolverTest {
 
     private val server = MockWebServer()
     private val okHttpClient = OkHttpClient.Builder().build()
@@ -23,7 +23,7 @@ class RealLightningAddressResolverTest {
     private val MockWebServer.scheme: String
         get() = "http"
 
-    private val lightningAddressResolver = RealLightningAddressResolver(
+    private val lightningUrlResolver = RealLightningUrlResolver(
         okHttpClient = okHttpClient,
         moshi = moshi,
     )
@@ -38,13 +38,10 @@ class RealLightningAddressResolverTest {
         .build()
 
     @Test
-    fun `resolves a lightning address`() = runTest {
-        server.enqueue(MockResponse().setBody(validLightningAddressResponseJson))
+    fun `resolves a lightning address for a service that supports nostr`() = runTest {
+        server.enqueue(MockResponse().setBody(lightningUrlResponseWithNostr))
 
-
-        val result = lightningAddressResolver.resolve(
-            httpUrl
-        )
+        val result = lightningUrlResolver.resolve(httpUrl)
 
         assertThat(server.takeRequest().path).isEqualTo("/.well-known/lnurlp/test")
         assertThat(result).isEqualTo(
@@ -52,13 +49,35 @@ class RealLightningAddressResolverTest {
                 callback = testLnurl,
                 maxSendable = 100000000000,
                 minSendable = 1000,
+                commentAllowed = 32,
+                allowsNostr = true,
+                nostrPubkey = "be1d89794bf92de5dd64c1e60f6a2c70c140abac9932418fee30c5c637fe9479"
+            )
+        )
+    }
+
+    @Test
+    fun `resolves a lightning url for a service that does not support nostr`() = runTest {
+        server.enqueue(MockResponse().setBody(lightningUrlResponseWithoutNostr))
+
+        val result = lightningUrlResolver.resolve(httpUrl)
+
+        assertThat(server.takeRequest().path).isEqualTo("/.well-known/lnurlp/test")
+        assertThat(result).isEqualTo(
+            LightningAddressResponse(
+                callback = testLnurl,
+                maxSendable = 100000000000,
+                minSendable = 1000,
+                commentAllowed = 32,
+                allowsNostr = false,
+                nostrPubkey = null
             )
         )
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `invalid lightning address returns a failure`() = runTest {
-        lightningAddressResolver.resolve(
+        lightningUrlResolver.resolve(
             HttpUrl.Builder().scheme("http").host(server.hostName).build()
         )
     }
@@ -67,26 +86,28 @@ class RealLightningAddressResolverTest {
     fun `when lightning address resolver call fails, returns a failure`() = runTest {
         server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST))
 
-        lightningAddressResolver.resolve(httpUrl)
+        lightningUrlResolver.resolve(httpUrl)
     }
 
     @Test(expected = IOException::class)
     fun `when lightning address resolver call returns a non-200, returns a failure`() = runTest {
         server.enqueue(MockResponse().setResponseCode(500))
 
-        lightningAddressResolver.resolve(httpUrl)
+        lightningUrlResolver.resolve(httpUrl)
     }
 
     @Test(expected = JsonEncodingException::class)
     fun `when lightning address resolver returns malformed json, returns a failure`() = runTest {
         server.enqueue(MockResponse().setBody("not json"))
 
-        lightningAddressResolver.resolve(httpUrl)
+        lightningUrlResolver.resolve(httpUrl)
     }
 
     companion object {
         const val testLnurl = "api.plasma.social"
-        const val validLightningAddressResponseJson =
+        const val lightningUrlResponseWithoutNostr =
+            "{\"callback\":\"$testLnurl\",\"maxSendable\":100000000000,\"minSendable\":1000,\"metadata\":\"[[\\\"text/plain\\\",\\\"Pay to Wallet of Satoshi user: uglychurch65\\\"],[\\\"text/identifier\\\",\\\"uglychurch65@walletofsatoshi.com\\\"]]\",\"commentAllowed\":32,\"tag\":\"payRequest\"}"
+        const val lightningUrlResponseWithNostr =
             "{\"callback\":\"$testLnurl\",\"maxSendable\":100000000000,\"minSendable\":1000,\"metadata\":\"[[\\\"text/plain\\\",\\\"Pay to Wallet of Satoshi user: uglychurch65\\\"],[\\\"text/identifier\\\",\\\"uglychurch65@walletofsatoshi.com\\\"]]\",\"commentAllowed\":32,\"tag\":\"payRequest\",\"allowsNostr\":true,\"nostrPubkey\":\"be1d89794bf92de5dd64c1e60f6a2c70c140abac9932418fee30c5c637fe9479\"}"
     }
 }

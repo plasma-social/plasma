@@ -4,6 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import social.plasma.nostr.models.RealZapRequestProvider
+import social.plasma.nostr.models.ZapRequestProvider
 import social.plasma.nostr.relay.RealRelayManager
 import social.plasma.nostr.relay.RelayManager
 import social.plasma.nostr.relay.message.EventRefiner
@@ -21,5 +23,8 @@ abstract class NostrModule {
     @Singleton
     @Binds
     internal abstract fun bindsRelayManager(impl: RealRelayManager): RelayManager
+
+    @Binds
+    internal abstract fun bindsZapRequestProvider(impl: RealZapRequestProvider): ZapRequestProvider
 }
 

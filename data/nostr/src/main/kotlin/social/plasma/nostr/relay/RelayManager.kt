@@ -33,6 +33,7 @@ import javax.inject.Singleton
 
 interface RelayManager {
     val relayList: StateFlow<List<Relay>>
+    val relayUrls: StateFlow<List<String>>
     val relayMessages: Flow<RelayMessage>
     val countMessages: Flow<CountRelayMessage>
 
@@ -74,6 +75,10 @@ class RealRelayManager @Inject constructor(
     override val relayList: StateFlow<List<Relay>>
         get() = relays.mapLatest { it.values.toList() }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    override val relayUrls: StateFlow<List<String>> = relayList.mapLatest { relayList ->
+        relayList.map { relay -> relay.url }
+    }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
 
     override val relayMessages: Flow<RelayMessage> = relayList.flatMapLatest { relayList ->
         relayList.map { relay -> relay.relayMessages }.merge()

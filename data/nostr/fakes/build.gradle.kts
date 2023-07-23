@@ -36,6 +36,7 @@ android {
 dependencies {
     implementation(projects.data.nostr)
     implementation(libs.nostrino)
+    implementation(libs.okhttp.core)
     implementation(libs.turbine)
     implementation(libs.coroutines.android)
 }
