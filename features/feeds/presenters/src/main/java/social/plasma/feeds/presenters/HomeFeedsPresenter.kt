@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.slack.circuit.foundation.onNavEvent
+import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
@@ -44,7 +45,7 @@ class HomeFeedsPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): HomeFeedsUiState {
-        val currentUserMetadata by remember { userMetadataFlow }.collectAsState(null)
+        val currentUserMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
         val relayConnectionRatio by remember { connectedRelayRatioFlow }.collectAsState("")
 
         return HomeFeedsUiState(

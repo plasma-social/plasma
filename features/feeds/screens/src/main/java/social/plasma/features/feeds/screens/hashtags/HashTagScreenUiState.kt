@@ -1,11 +1,11 @@
 package social.plasma.features.feeds.screens.hashtags
 
 import com.slack.circuit.runtime.CircuitUiState
-import social.plasma.features.feeds.screens.feed.FeedUiState
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 
 data class HashTagScreenUiState(
     val title: String,
-    val feedState: FeedUiState,
+    val feedState: EventFeedUiState,
     val followButtonUiState: ButtonUiState,
     val onEvent: (HashTagScreenUiEvent) -> Unit,
 ) : CircuitUiState

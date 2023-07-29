@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.interactors.SyncMetadata
 import social.plasma.domain.observers.ObserveNote
 import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.notes.QuotedNoteEvent
-import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
-import social.plasma.features.feeds.screens.notes.QuotedNoteUiState
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteEvent
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteScreen
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteUiState
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.feeds.presenters.feed.NoteCardMapper

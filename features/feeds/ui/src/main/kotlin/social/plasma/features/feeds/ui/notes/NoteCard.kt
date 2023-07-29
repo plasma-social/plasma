@@ -43,7 +43,7 @@ import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.foundation.NavEvent
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteScreen
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention

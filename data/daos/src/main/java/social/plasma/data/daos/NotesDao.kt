@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import social.plasma.models.Event
 import social.plasma.models.NoteWithUser
+import social.plasma.models.events.EventEntity
 
 @Dao
 interface NotesDao {
@@ -19,13 +20,27 @@ interface NotesDao {
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey)")
-    fun observePagedContactsReplies(pubkey: String): PagingSource<Int, NoteWithUser>
+    @Query("SELECT * FROM events WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND kind in (:kinds) ORDER BY created_at DESC")
+    abstract fun observePagedContactsEvents(
+        pubkey: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note),
+    ): PagingSource<Int, EventEntity>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey = :pubkey")
-    fun observePagedUserNotes(pubkey: String): PagingSource<Int, NoteWithUser>
+    @Query("SELECT * FROM events WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND kind in (:kinds) ORDER BY created_at DESC")
+    fun observePagedContactsReplies(
+        pubkey: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+    ): PagingSource<Int, EventEntity>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query("SELECT * FROM events WHERE pubkey = :pubkey AND kind in (:kinds) ORDER BY created_at DESC")
+    fun observePagedUserNotes(
+        pubkey: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+    ): PagingSource<Int, EventEntity>
 
     @Query(
         "SELECT EXISTS(" +
@@ -45,11 +60,14 @@ interface NotesDao {
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
-        "SELECT n.* FROM noteview n " +
+        "SELECT n.* FROM events n " +
                 "LEFT JOIN pubkey_ref pr ON pr.source_event = n.id " +
-                "WHERE pr.pubkey = :pubKey ORDER BY n.created_at DESC"
+                "WHERE pr.pubkey = :pubKey AND n.kind in(:kinds) ORDER BY n.created_at DESC"
     )
-    fun observePagedNotifications(pubKey: String): PagingSource<Int, NoteWithUser>
+    fun observePagedNotifications(
+        pubKey: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+    ): PagingSource<Int, EventEntity>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -73,14 +91,18 @@ interface NotesDao {
     @RewriteQueriesToDropUnusedColumns
     @Query(
         """
-        SELECT * FROM noteview
+        SELECT * FROM events
         INNER JOIN hashtag_ref
-        ON noteview.id = hashtag_ref.source_event
+        ON events.id = hashtag_ref.source_event
         WHERE hashtag_ref.hashtag = :hashtagName
-        ORDER BY noteview.created_at DESC
+        AND events.kind in (:kinds)
+        ORDER BY events.created_at DESC
     """
     )
-    fun observePagedNotesWithHashtag(hashtagName: String): PagingSource<Int, NoteWithUser>
+    fun observePagedNotesWithHashtag(
+        hashtagName: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note),
+    ): PagingSource<Int, EventEntity>
 
     @Query(
         """

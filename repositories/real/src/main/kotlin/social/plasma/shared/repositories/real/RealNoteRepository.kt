@@ -96,25 +96,25 @@ internal class RealNoteRepository @Inject constructor(
         )
     }
 
-    override fun observePagedContactsNotes(): PagingSource<Int, NoteWithUser> {
+    override fun observePagedContactsEvents(): PagingSource<Int, EventEntity> {
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
-        return notesDao.observePagedContactsNotes(pubkey.key.hex())
+        return notesDao.observePagedContactsEvents(pubkey.key.hex())
     }
 
-    override fun observePagedNotifications(): PagingSource<Int, NoteWithUser> {
+    override fun observePagedNotifications(): PagingSource<Int, EventEntity> {
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
         return notesDao.observePagedNotifications(pubkey.key.hex())
     }
 
-    override fun observePagedContactsReplies(): PagingSource<Int, NoteWithUser> {
+    override fun observePagedContactsReplies(): PagingSource<Int, EventEntity> {
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
         return notesDao.observePagedContactsReplies(pubkey.key.hex())
     }
 
-    override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, NoteWithUser> {
+    override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, EventEntity> {
         return notesDao.observePagedUserNotes(pubKey.key.hex())
     }
 
@@ -131,11 +131,7 @@ internal class RealNoteRepository @Inject constructor(
         return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
     }
 
-    override fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
-        return notesDao.observePagedNotesWithContent("%${hashtag.displayName}%")
-    }
-
-    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
+    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity> {
         return notesDao.observePagedNotesWithHashtag(hashtag.name)
     }
 

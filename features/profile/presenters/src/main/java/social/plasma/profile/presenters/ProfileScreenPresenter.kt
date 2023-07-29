@@ -34,12 +34,11 @@ import social.plasma.domain.observers.ObserveFollowingCount
 import social.plasma.domain.observers.ObservePagedProfileFeed
 import social.plasma.domain.observers.ObserveUserIsInContacts
 import social.plasma.domain.observers.ObserveUserMetadata
-import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
-import social.plasma.feeds.presenters.feed.FeedPresenter
+import social.plasma.feeds.presenters.feed.FeedStateProducer
 import social.plasma.models.BitcoinAmount
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.utils.api.NumberFormatter
@@ -57,7 +56,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val numberFormatter: NumberFormatter,
     private val getLightningInvoice: GetLightningInvoice,
     accountStateRepository: AccountStateRepository,
-    feedPresenterFactory: FeedPresenter.Factory,
+    private val feedStateProducer: FeedStateProducer,
     @Assisted private val args: ProfileScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ProfileUiState> {
@@ -76,19 +75,16 @@ class ProfileScreenPresenter @AssistedInject constructor(
             banner = "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
         )
 
-    private val feedsPresenter =
-        feedPresenterFactory.create(
-            navigator,
-            observePagedProfileFeed.flow.onStart {
-                observePagedProfileFeed(
-                    ObservePagedProfileFeed.Params(
-                        pubKey = pubKey,
-                        pagingConfig = PagingConfig(
-                            pageSize = 20,
-                        )
-                    )
+    private val pagingFlow = observePagedProfileFeed.flow.onStart {
+        observePagedProfileFeed(
+            ObservePagedProfileFeed.Params(
+                pubKey = pubKey,
+                pagingConfig = PagingConfig(
+                    pageSize = 20,
                 )
-            })
+            )
+        )
+    }
 
     private val contactsCount = observeFollowingCount.flow.onStart {
         observeFollowingCount(pubKey)
@@ -106,6 +102,8 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): ProfileUiState {
+        val feedState = feedStateProducer(navigator, pagingFlow)
+
         LaunchedEffect(Unit) {
             launch { observeUserMetadata(ObserveUserMetadata.Params(pubKey)) }
             launch { syncProfileData.executeSync(SyncProfileData.Params(pubKey)) }
@@ -160,26 +158,11 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 )
             }
         }
-        val feedState = feedsPresenter.present()
-        val profileFeedState = remember(feedState) {
-            val onFeedEvent = feedState.onEvent
-            feedState.copy(
-                onEvent = { event ->
-                    when (event) {
-                        is FeedUiEvent.OnProfileClick -> {
-                            if (event.pubKey != userData.publicKey) onFeedEvent(event)
-                        }
-
-                        else -> onFeedEvent(event)
-                    }
-                }
-            )
-        }
 
         val coroutineScope = rememberCoroutineScope()
 
         return ProfileUiState.Loaded(
-            feedState = profileFeedState,
+            feedState = feedState,
             statCards = listOf(
                 ProfileStat(
                     label = "Following",

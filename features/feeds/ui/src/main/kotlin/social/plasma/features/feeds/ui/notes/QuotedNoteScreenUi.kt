@@ -4,8 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.slack.circuit.runtime.ui.Ui
-import social.plasma.features.feeds.screens.notes.QuotedNoteEvent
-import social.plasma.features.feeds.screens.notes.QuotedNoteUiState
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteEvent
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteUiState
 
 class QuotedNoteUi : Ui<QuotedNoteUiState> {
     @Composable

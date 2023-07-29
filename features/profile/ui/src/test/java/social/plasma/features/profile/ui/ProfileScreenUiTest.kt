@@ -1,6 +1,5 @@
 package social.plasma.features.profile.ui
 
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.Modifier
 import androidx.paging.PagingData
 import app.cash.nostrino.crypto.PubKey
@@ -12,9 +11,9 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.screens.feed.ContentBlock
 import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.feed.FeedUiState
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.ui.testutils.TestDevice
 import social.plasma.ui.testutils.TestFontScale
@@ -111,11 +110,7 @@ private class ProfileTestCaseProvider : TestParameter.TestParameterValuesProvide
                 userData = userData,
                 statCards = statCards,
                 showLightningIcon = true,
-                feedState = FeedUiState(
-                    userNotesPagingFlow,
-                    onEvent = {},
-                    listState = LazyListState(),
-                    getOpenGraphMetadata = { null }),
+                feedState = EventFeedUiState.Empty,
                 onEvent = {},
             )
         )

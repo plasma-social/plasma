@@ -23,17 +23,15 @@ import social.plasma.domain.interactors.UnfollowHashTag
 import social.plasma.domain.observers.ObserveFollowedHashTags
 import social.plasma.domain.observers.ObservePagedHashTagFeed
 import social.plasma.features.feeds.presenters.R
-import social.plasma.features.feeds.screens.feed.FeedUiEvent
 import social.plasma.features.feeds.screens.hashtags.ButtonUiState
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiState
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
-import social.plasma.feeds.presenters.feed.FeedUiProducer
-import social.plasma.models.HashTag
+import social.plasma.feeds.presenters.feed.FeedStateProducer
 import social.plasma.shared.utils.api.StringManager
 
 class HashTagScreenPresenter @AssistedInject constructor(
-    private val feedUiProducer: FeedUiProducer,
+    private val feedStateProducer: FeedStateProducer,
     observePagedHashTagFeed: ObservePagedHashTagFeed,
     observeFollowedHashTags: ObserveFollowedHashTags,
     private val followHashTag: FollowHashTag,
@@ -66,31 +64,13 @@ class HashTagScreenPresenter @AssistedInject constructor(
             syncHashTagEvents.executeSync(SyncHashTagEvents.Params(args.hashTag))
         }
 
-        val feedState = feedUiProducer(navigator, pagingFlow)
+        val feedState = feedStateProducer(navigator, pagingFlow)
 
         var optimisticFollowState: Boolean? by remember { mutableStateOf(null) }
 
         val currentFollowState by remember { hashtagFollowState }.collectAsState(initial = false)
 
         val followingHashTag = optimisticFollowState ?: currentFollowState
-
-        val hashTagScreenFeedState = remember(feedState) {
-            val onFeedEvent = feedState.onEvent
-            feedState.copy(
-                onEvent = { event ->
-                    when (event) {
-                        // Prevents navigating to the same hashtag screen
-                        is FeedUiEvent.OnHashTagClick -> {
-                            if (HashTag.parse(event.hashTag).name != args.hashTag.name) {
-                                onFeedEvent(event)
-                            }
-                        }
-
-                        else -> onFeedEvent(event)
-                    }
-                }
-            )
-        }
 
         var followButtonEnabled by remember { mutableStateOf(true) }
 
@@ -103,7 +83,7 @@ class HashTagScreenPresenter @AssistedInject constructor(
         val coroutineScope = rememberCoroutineScope()
         return HashTagScreenUiState(
             title = args.hashTag.displayName,
-            feedState = hashTagScreenFeedState,
+            feedState = feedState,
             followButtonUiState = followButtonUiState,
         ) { event ->
             when (event) {
