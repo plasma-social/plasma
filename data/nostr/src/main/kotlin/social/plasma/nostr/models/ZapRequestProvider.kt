@@ -27,7 +27,8 @@ class RealZapRequestProvider @Inject constructor(
         amount: Long,
         eventId: ByteString?,
     ): String {
-        val relayUrls = relayManager.relayUrls.value
+        val relayUrls =
+            relayManager.relayUrls.value // TODO: This should be the recipient's read relays.
 
         val zapRequestEvent = ZapRequest(
             content = "",
