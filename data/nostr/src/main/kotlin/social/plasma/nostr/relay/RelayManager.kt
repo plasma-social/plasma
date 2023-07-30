@@ -78,7 +78,7 @@ class RealRelayManager @Inject constructor(
 
     override val relayUrls: StateFlow<List<String>> = relayList.mapLatest { relayList ->
         relayList.map { relay -> relay.url }
-    }.stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+    }.stateIn(scope, SharingStarted.Eagerly, initialRelayUrls)
 
     override val relayMessages: Flow<RelayMessage> = relayList.flatMapLatest { relayList ->
         relayList.map { relay -> relay.relayMessages }.merge()
