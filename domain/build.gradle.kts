@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
     implementation(libs.nostrino)
+    implementation(libs.timber)
 
     testImplementation(projects.repositories.fakes)
     testImplementation(projects.data.nostr.fakes)
