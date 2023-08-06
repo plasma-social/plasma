@@ -1,7 +1,9 @@
 package social.plasma.domain.interactors
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
@@ -12,6 +14,7 @@ import social.plasma.domain.SubjectInteractor
 import social.plasma.models.Event
 import social.plasma.models.UserMetadataEntity
 import social.plasma.nostr.models.UserMetaData
+import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
@@ -27,8 +30,16 @@ class StoreMetadataEvents @Inject constructor(
     override fun createObservable(params: Flow<Event>): Flow<Any> {
         return params.filter { it.kind == Event.Kind.MetaData }
             .map {
-                userMetaDataAdapter.fromJson(it.content)
-                    ?.toMetadataEntity(it.pubKey.hex(), it.createdAt)
+                try {
+                    userMetaDataAdapter.fromJson(it.content)
+                        ?.toMetadataEntity(it.pubKey.hex(), it.createdAt)
+                } catch (e: JsonDataException) {
+                    Timber.e(e, "Unexpected json metadata: %s")
+                    null
+                }
+            }
+            .catch {
+                Timber.w(it)
             }
             .filterNotNull()
             .onEach {
