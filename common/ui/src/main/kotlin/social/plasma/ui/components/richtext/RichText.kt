@@ -68,7 +68,7 @@ fun RichText(
         mutableStateOf(AnnotatedString(plainText))
     }
 
-    LaunchedEffect(plainText) {
+    LaunchedEffect(plainText, mentions) {
         richText = parser.parse(plainText, mentions)
     }
 

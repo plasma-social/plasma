@@ -25,6 +25,10 @@ class FakeNoteRepository : NoteRepository {
         TODO("Not yet implemented")
     }
 
+    override fun observeEventById(noteId: NoteId): Flow<EventEntity?> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun sendNote(content: String, tags: List<Tag>) {
         sendNoteEvents.add(SendNoteEvent(content, tags))
     }
@@ -52,7 +56,7 @@ class FakeNoteRepository : NoteRepository {
     override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
         return false
     }
-    
+
     override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
@@ -62,6 +66,10 @@ class FakeNoteRepository : NoteRepository {
     }
 
     override fun observePagedContactsEvents(): PagingSource<Int, EventEntity> {
+        TODO("Not yet implemented")
+    }
+
+    override fun observeLikeCount(noteId: NoteId): Flow<Long> {
         TODO("Not yet implemented")
     }
 }

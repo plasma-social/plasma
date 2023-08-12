@@ -51,6 +51,14 @@ internal class RealNoteRepository @Inject constructor(
         }
     }
 
+    override fun observeEventById(noteId: NoteId): Flow<EventEntity?> {
+        return notesDao.observeEventById(noteId.hex).onEach {
+            if (it == null) {
+                refreshNoteById(noteId)
+            }
+        }
+    }
+
     private suspend fun refreshNoteById(noteId: NoteId) {
         val unsubscribeMessage =
             relay.subscribe(ClientMessage.SubscribeMessage(Filter(ids = setOf(noteId.hex))))
@@ -100,6 +108,10 @@ internal class RealNoteRepository @Inject constructor(
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 
         return notesDao.observePagedContactsEvents(pubkey.key.hex())
+    }
+
+    override fun observeLikeCount(noteId: NoteId): Flow<Long> {
+        return notesDao.observeLikeCount(noteId.hex)
     }
 
     override fun observePagedNotifications(): PagingSource<Int, EventEntity> {

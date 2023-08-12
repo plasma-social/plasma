@@ -7,10 +7,15 @@ import com.slack.circuit.runtime.CircuitUiState
 import social.plasma.features.feeds.screens.feed.FeedItem
 import social.plasma.models.NoteId
 
-data class NoteUiState(
-    val noteCard: FeedItem.NoteCard,
-    val onEvent: (NoteUiEvent) -> Unit,
-) : CircuitUiState
+sealed interface NoteUiState : CircuitUiState {
+    object Loading : NoteUiState
+
+    data class Loaded(
+        val noteCard: FeedItem.NoteCard,
+        val onEvent: (NoteUiEvent) -> Unit,
+    ) : NoteUiState
+}
+
 
 sealed interface NoteUiEvent : CircuitUiEvent {
     data class OnProfileClick(val pubKey: PubKey) : NoteUiEvent

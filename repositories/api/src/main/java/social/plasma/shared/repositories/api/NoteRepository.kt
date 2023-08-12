@@ -15,6 +15,8 @@ interface NoteRepository {
 
     fun observeById(noteId: NoteId): Flow<NoteWithUser?>
 
+    fun observeEventById(noteId: NoteId): Flow<EventEntity?>
+
     suspend fun sendNote(content: String, tags: List<Tag>)
 
     fun observePagedNotifications(): PagingSource<Int, EventEntity>
@@ -30,7 +32,8 @@ interface NoteRepository {
 
     fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity>
     fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long>
-    
+
     fun observePagedContactsEvents(): PagingSource<Int, EventEntity>
+    fun observeLikeCount(noteId: NoteId): Flow<Long>
 }
 

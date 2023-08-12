@@ -12,16 +12,17 @@ import social.plasma.models.events.EventEntity
 
 @Dao
 interface NotesDao {
-
     @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND NOT is_reply")
-    fun observePagedContactsNotes(pubkey: String): PagingSource<Int, NoteWithUser>
-
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM events WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND kind in (:kinds) ORDER BY created_at DESC")
-    abstract fun observePagedContactsEvents(
+    @Query(
+        """
+        SELECT * FROM events WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) 
+        AND kind in (:kinds) 
+        AND NOT EXISTS( SELECT 1 from event_ref WHERE source_event = events.id)
+        ORDER BY created_at DESC
+    """
+    )
+    fun observePagedContactsEvents(
         pubkey: String,
         kinds: Set<Int> = setOf(Event.Kind.Note),
     ): PagingSource<Int, EventEntity>
@@ -43,14 +44,21 @@ interface NotesDao {
     ): PagingSource<Int, EventEntity>
 
     @Query(
-        "SELECT EXISTS(" +
-                "SELECT 1 FROM event_ref " +
-                "LEFT JOIN events on event_ref.source_event = events.id " +
-                "WHERE pubkey = :pubkey AND kind = 7 AND target_event = :noteId " +
-                "GROUP BY event_ref.source_event )"
-
+        """
+        SELECT EXISTS(
+            SELECT id FROM events
+            INNER JOIN event_ref ON events.id = event_ref.source_event
+            WHERE event_ref.target_event = :noteId
+            AND events.pubkey = :pubkey
+            AND events.kind = ${Event.Kind.Reaction}
+            LIMIT 1
+        )
+        """
     )
-    suspend fun isNoteLiked(pubkey: String, noteId: String): Boolean
+    suspend fun isNoteLiked(
+        pubkey: String,
+        noteId: String,
+    ): Boolean
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -119,4 +127,17 @@ interface NotesDao {
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM noteview WHERE id = :noteId")
     fun observeById(noteId: String): Flow<NoteWithUser?>
+
+    @Query("SELECT * FROM events WHERE id = :noteId")
+    fun observeEventById(noteId: String): Flow<EventEntity?>
+
+    @Query(
+        """
+        SELECT COUNT(id) FROM events
+        INNER JOIN event_ref ON events.id = event_ref.source_event
+        WHERE event_ref.target_event = :noteId
+        AND events.kind = ${Event.Kind.Reaction}
+    """
+    )
+    fun observeLikeCount(noteId: String): Flow<Long>
 }

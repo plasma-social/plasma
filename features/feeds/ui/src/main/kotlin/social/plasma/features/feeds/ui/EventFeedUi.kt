@@ -35,9 +35,7 @@ import social.plasma.features.feeds.screens.eventfeed.EventFeedUiEvent
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.screens.feeditems.notes.NoteScreen
-import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteScreen
 import social.plasma.models.Event
-import social.plasma.models.NoteId
 
 @Composable
 fun EventFeedUi(
@@ -81,10 +79,10 @@ fun EventFeedUi(
                 } else {
                     // TODO inject screen provider
                     val itemScreen = when (event.kind) {
-                        Event.Kind.Note -> NoteScreen(event)
-                        Event.Kind.Repost -> QuotedNoteScreen(
-                            NoteId(event.id)
-                        ) // TODO repost
+                        Event.Kind.Repost,
+                        Event.Kind.Note,
+                        -> NoteScreen(event)
+
                         else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
                     }
 
@@ -130,7 +128,7 @@ private fun RefreshButton(modifier: Modifier, text: String, onClick: () -> Unit)
 }
 
 @Composable
-private fun LoadingCard(
+internal fun LoadingCard(
     modifier: Modifier = Modifier,
 ) {
     Box(

@@ -1,18 +1,19 @@
 package social.plasma
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import com.slack.circuit.backstack.SaveableBackStack
 import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.CircuitConfig
@@ -29,7 +30,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import social.plasma.common.screens.AndroidScreens
 import social.plasma.features.onboarding.screens.HeadlessAuthenticator
 import social.plasma.features.posting.screens.ComposingScreen
 import social.plasma.ui.theme.PlasmaTheme
@@ -62,11 +62,7 @@ class MainActivity : ComponentActivity() {
                     rememberSaveableBackStack { startScreens.forEach { screen -> push(screen) } }
                 val circuitNavigator = rememberCircuitNavigator(backstack)
 
-                val plasmaNavigator = remember(circuitNavigator) {
-                    PlasmaNavigator(circuitNavigator, openIntent = { itent ->
-                        startActivity(itent)
-                    })
-                }
+                val plasmaNavigator = rememberPlasmaNavigator(circuitNavigator, backstack)
 
                 LaunchedEffect(newScreenRequest.value, circuitNavigator) {
                     val newScreen = newScreenRequest.value
@@ -90,6 +86,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun rememberPlasmaNavigator(
+        circuitNavigator: Navigator,
+        backstack: SaveableBackStack,
+    ): PlasmaNavigator = remember(circuitNavigator, backstack) {
+        PlasmaNavigator(circuitNavigator, backstack) { itent ->
+            startActivity(itent)
         }
     }
 
@@ -123,29 +129,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class PlasmaNavigator(
-    private val circuitNavigator: Navigator,
-    val openIntent: (Intent) -> Unit,
-) : Navigator {
-    override fun goTo(screen: Screen) {
-        when (screen) {
-            is AndroidScreens.ShareLightningInvoiceScreen -> {
-                try {
-                    openIntent(Intent(Intent.ACTION_VIEW, Uri.parse("lightning:${screen.invoice}")))
-                } catch (activityNotFoundException: Exception) {
-                    // TODO show wallet-required dialog
-                }
-            }
-
-            else -> circuitNavigator.goTo(screen)
-        }
-    }
-
-    override fun pop(): Screen? {
-        return circuitNavigator.pop()
-    }
-
-    override fun resetRoot(newRoot: Screen): List<Screen> {
-        return circuitNavigator.resetRoot(newRoot)
-    }
-}
