@@ -1,4 +1,4 @@
-package social.plasma.features.feeds.screens.notes
+package social.plasma.features.feeds.screens.feeditems.quotednotes
 
 import com.slack.circuit.runtime.CircuitUiEvent
 

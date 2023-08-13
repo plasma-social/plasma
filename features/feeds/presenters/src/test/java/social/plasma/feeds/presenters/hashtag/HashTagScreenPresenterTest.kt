@@ -15,7 +15,7 @@ import social.plasma.domain.interactors.UnfollowHashTag
 import social.plasma.domain.observers.ObserveFollowedHashTags
 import social.plasma.domain.observers.ObservePagedHashTagFeed
 import social.plasma.features.feeds.presenters.R
-import social.plasma.features.feeds.screens.feed.FeedUiState
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.screens.hashtags.ButtonUiState
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
@@ -95,7 +95,7 @@ class HashTagScreenPresenterTest {
         args: HashTagFeedScreen = HashTagFeedScreen(hashTag = HashTag.parse("test")),
     ): HashTagScreenPresenter {
         return HashTagScreenPresenter(
-            feedUiProducer = { _, _ -> FeedUiState.Empty },
+            feedStateProducer = { _, _ -> EventFeedUiState.Empty },
             observePagedHashTagFeed = ObservePagedHashTagFeed(noteRepository, FakeLastRequestDao()),
             observeFollowedHashTags = ObserveFollowedHashTags(
                 contactsRepository,

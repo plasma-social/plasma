@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.flowOf
-import social.plasma.features.feeds.screens.feed.FeedUiState
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.screens.hashtags.ButtonUiState
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent
 import social.plasma.features.feeds.screens.hashtags.HashTagScreenUiEvent.OnFollowButtonClick
@@ -58,7 +58,7 @@ class HashTagFeedScreenUi : Ui<HashTagScreenUiState> {
                 )
             }
         ) { paddingValues ->
-            FeedUiContent(
+            EventFeedUi(
                 state = state.feedState,
                 modifier = Modifier
                     .fillMaxSize()
@@ -106,10 +106,11 @@ class HashTagFeedScreenUi : Ui<HashTagScreenUiState> {
 @Composable
 private fun PreviewHashtagFeedScreenUi() {
     PlasmaTheme {
-        val feedState = FeedUiState(
+        val feedState = EventFeedUiState(
             listState = rememberLazyListState(),
-            pagingFlow = flowOf(PagingData.empty()),
-            getOpenGraphMetadata = { null },
+            items = flowOf(PagingData.empty()),
+            displayRefreshButton = false,
+            refreshText = "",
             onEvent = {},
         )
         HashTagFeedScreenUi().Content(

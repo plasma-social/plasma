@@ -53,8 +53,8 @@ import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
-import social.plasma.features.feeds.screens.feed.FeedUiState
-import social.plasma.features.feeds.ui.FeedUiContent
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
+import social.plasma.features.feeds.ui.EventFeedUi
 import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
 import social.plasma.features.profile.screens.ProfileUiEvent.OnZapProfile
@@ -98,7 +98,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
             contentWindowInsets = WindowInsets.navigationBars,
             modifier = modifier,
         ) { paddingValues ->
-            FeedUiContent(
+            EventFeedUi(
                 state = uiState.feedState.copy(displayRefreshButton = false),
                 modifier = Modifier
                     .fillMaxSize()
@@ -365,9 +365,8 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
     ): ProfileUiState =
         Loaded(
             showLightningIcon = true,
-            feedState = FeedUiState(
-                pagingFlow = emptyFlow(),
-                getOpenGraphMetadata = { null },
+            feedState = EventFeedUiState(
+                items = emptyFlow(),
                 refreshText = "Refresh",
                 listState = LazyListState(),
                 displayRefreshButton = false,

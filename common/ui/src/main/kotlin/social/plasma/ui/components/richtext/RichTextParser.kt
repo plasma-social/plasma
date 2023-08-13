@@ -72,8 +72,8 @@ class RichTextParser constructor(
 
             val pubkey = try {
                 PubKey.parse(match.value.removePrefix("nostr:"))
-            } catch (e: IllegalArgumentException) {
-                Timber.w(e)
+            } catch (e: Throwable) {
+                Timber.w(e, "Attempted to parse invalid pubkey: %s", match.value)
                 null
             }
 

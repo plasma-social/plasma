@@ -7,6 +7,7 @@ import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.Tag
+import social.plasma.models.events.EventEntity
 import java.time.Instant
 
 interface NoteRepository {
@@ -14,22 +15,25 @@ interface NoteRepository {
 
     fun observeById(noteId: NoteId): Flow<NoteWithUser?>
 
+    fun observeEventById(noteId: NoteId): Flow<EventEntity?>
+
     suspend fun sendNote(content: String, tags: List<Tag>)
 
-    fun observePagedContactsNotes(): PagingSource<Int, NoteWithUser>
+    fun observePagedNotifications(): PagingSource<Int, EventEntity>
 
-    fun observePagedNotifications(): PagingSource<Int, NoteWithUser>
+    fun observePagedContactsReplies(): PagingSource<Int, EventEntity>
 
-    fun observePagedContactsReplies(): PagingSource<Int, NoteWithUser>
-
-    fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, NoteWithUser>
+    fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, EventEntity>
 
     fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, NoteWithUser>
 
     suspend fun refreshContactsNotes(): List<NoteWithUser>
     suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean
-    fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser>
 
-    fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser>
+    fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity>
     fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long>
+
+    fun observePagedContactsEvents(): PagingSource<Int, EventEntity>
+    fun observeLikeCount(noteId: NoteId): Flow<Long>
 }
+

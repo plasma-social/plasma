@@ -10,6 +10,7 @@ import social.plasma.models.HashTag
 import social.plasma.models.NoteId
 import social.plasma.models.NoteWithUser
 import social.plasma.models.Tag
+import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.api.NoteRepository
 import java.time.Instant
 
@@ -24,23 +25,23 @@ class FakeNoteRepository : NoteRepository {
         TODO("Not yet implemented")
     }
 
+    override fun observeEventById(noteId: NoteId): Flow<EventEntity?> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun sendNote(content: String, tags: List<Tag>) {
         sendNoteEvents.add(SendNoteEvent(content, tags))
     }
 
-    override fun observePagedContactsNotes(): PagingSource<Int, NoteWithUser> {
+    override fun observePagedNotifications(): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
 
-    override fun observePagedNotifications(): PagingSource<Int, NoteWithUser> {
+    override fun observePagedContactsReplies(): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
 
-    override fun observePagedContactsReplies(): PagingSource<Int, NoteWithUser> {
-        TODO("Not yet implemented")
-    }
-
-    override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, NoteWithUser> {
+    override fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
 
@@ -56,15 +57,19 @@ class FakeNoteRepository : NoteRepository {
         return false
     }
 
-    override fun observePagedNotesWithContent(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
-        TODO("Not yet implemented")
-    }
-
-    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, NoteWithUser> {
+    override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
 
     override fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long> {
+        TODO("Not yet implemented")
+    }
+
+    override fun observePagedContactsEvents(): PagingSource<Int, EventEntity> {
+        TODO("Not yet implemented")
+    }
+
+    override fun observeLikeCount(noteId: NoteId): Flow<Long> {
         TODO("Not yet implemented")
     }
 }

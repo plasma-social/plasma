@@ -1,26 +1,27 @@
 package social.plasma.feeds.presenters
 
-import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.cachedIn
 import com.slack.circuit.runtime.CircuitContext
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.Screen
 import com.slack.circuit.runtime.presenter.Presenter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onStart
+import social.plasma.domain.observers.ObservePagedFollowingFeed
+import social.plasma.domain.observers.ObservePagedNotificationsFeed
+import social.plasma.domain.observers.ObservePagedRepliesFeed
 import social.plasma.features.feeds.screens.feed.FeedScreen
 import social.plasma.features.feeds.screens.feed.FeedType
+import social.plasma.features.feeds.screens.feeditems.notes.NoteScreen
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteScreen
 import social.plasma.features.feeds.screens.homefeeds.HomeFeeds
-import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedScreen
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreen
-import social.plasma.feeds.presenters.feed.FeedPresenter
+import social.plasma.feeds.presenters.eventfeed.EventFeedPresenter
 import social.plasma.feeds.presenters.hashtag.HashTagScreenPresenter
+import social.plasma.feeds.presenters.notes.NotePresenter
 import social.plasma.feeds.presenters.notes.QuotedNotePresenter
 import social.plasma.feeds.presenters.thread.ThreadScreenPresenter
-import social.plasma.shared.repositories.api.NoteRepository
 import javax.inject.Inject
 
 class FeedsPresentersFactory @Inject constructor(
@@ -28,10 +29,12 @@ class FeedsPresentersFactory @Inject constructor(
     private val threadScreenPresenter: ThreadScreenPresenter.Factory,
     private val hashTagScreenPresenter: HashTagScreenPresenter.Factory,
     private val notificationScreenPresenter: NotificationsFeedPresenter.Factory,
+    private val noteScreenPresenter: NotePresenter.Factory,
     private val quotedNotePresenter: QuotedNotePresenter.Factory,
-    private val noteRepository: NoteRepository,
-    private val feedPresenter: FeedPresenter.Factory,
-    scope: CoroutineScope,
+    private val feedPresenter: EventFeedPresenter.Factory,
+    private val observePagedFollowingFeed: ObservePagedFollowingFeed,
+    private val observePagedNotificationsFeed: ObservePagedNotificationsFeed,
+    private val observePagedRepliesFeed: ObservePagedRepliesFeed,
 ) : Presenter.Factory {
 
     private val config = PagingConfig(
@@ -41,20 +44,23 @@ class FeedsPresentersFactory @Inject constructor(
         prefetchDistance = 5,
     )
 
-    private val followingFlow = Pager(
-        config = config,
-        pagingSourceFactory = noteRepository::observePagedContactsNotes,
-    ).flow.distinctUntilChanged().cachedIn(scope)
+    private val followingFeed = observePagedFollowingFeed.flow.onStart {
+        observePagedFollowingFeed(
+            ObservePagedFollowingFeed.Params(config)
+        )
+    }
 
-    private val repliesFeed = Pager(
-        config = config,
-        pagingSourceFactory = noteRepository::observePagedContactsReplies,
-    ).flow.distinctUntilChanged().cachedIn(scope)
+    private val repliesFeed = observePagedRepliesFeed.flow.onStart {
+        observePagedRepliesFeed(
+            ObservePagedRepliesFeed.Params(config)
+        )
+    }
 
-    private val notificationsFeed = Pager(
-        config = config,
-        pagingSourceFactory = noteRepository::observePagedNotifications,
-    ).flow.distinctUntilChanged().cachedIn(scope)
+    private val notificationsFeed = observePagedNotificationsFeed.flow.onStart {
+        observePagedNotificationsFeed(
+            ObservePagedNotificationsFeed.Params(config)
+        )
+    }
 
     override fun create(
         screen: Screen,
@@ -68,10 +74,12 @@ class FeedsPresentersFactory @Inject constructor(
             is QuotedNoteScreen -> quotedNotePresenter.create(screen, navigator)
             HomeFeeds -> homeFeedsPresenter.create(navigator)
             is FeedScreen -> when (screen.feedType) {
-                FeedType.Following -> feedPresenter.create(navigator, followingFlow)
+                FeedType.Following -> feedPresenter.create(navigator, followingFeed)
                 FeedType.Replies -> feedPresenter.create(navigator, repliesFeed)
                 FeedType.Notifications -> feedPresenter.create(navigator, notificationsFeed)
             }
+
+            is NoteScreen -> noteScreenPresenter.create(screen, navigator)
 
             else -> null
         }

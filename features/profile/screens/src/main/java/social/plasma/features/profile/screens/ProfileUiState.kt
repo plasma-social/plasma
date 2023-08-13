@@ -2,12 +2,12 @@ package social.plasma.features.profile.screens
 
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.CircuitUiState
-import social.plasma.features.feeds.screens.feed.FeedUiState
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 
 sealed interface ProfileUiState : CircuitUiState {
     object Loading : ProfileUiState
     data class Loaded(
-        val feedState: FeedUiState,
+        val feedState: EventFeedUiState,
         val statCards: List<ProfileStat>,
         val userData: UserData,
         val following: Boolean? = false,

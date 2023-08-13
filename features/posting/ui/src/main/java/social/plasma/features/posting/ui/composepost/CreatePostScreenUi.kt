@@ -3,7 +3,6 @@ package social.plasma.features.posting.ui.composepost
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
-import social.plasma.features.feeds.screens.notes.QuotedNoteScreen
+import social.plasma.features.feeds.screens.feeditems.quotednotes.QuotedNoteScreen
 import social.plasma.features.posting.screens.AutoCompleteSuggestion
 import social.plasma.features.posting.screens.CreatePostUiEvent
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnHashTagSuggestionTapped
@@ -56,7 +55,7 @@ import social.plasma.ui.theme.PlasmaTheme
 import javax.inject.Inject
 
 class CreatePostScreenUi @Inject constructor() : Ui<CreatePostUiState> {
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         state: CreatePostUiState, modifier: Modifier,
