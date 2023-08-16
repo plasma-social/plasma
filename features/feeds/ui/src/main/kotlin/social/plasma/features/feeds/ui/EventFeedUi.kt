@@ -50,49 +50,52 @@ fun EventFeedUi(
 
     val pagingItems = state.items.collectAsLazyPagingItems()
 
-    LaunchedEffect(pagingItems.itemCount) {
-        onEvent(OnFeedCountChange(pagingItems.itemCount))
-    }
-
-    val isLoading by produceState(initialValue = false, pagingItems.itemCount) {
-        delay(300)
+    val showLoading by produceState(initialValue = false, pagingItems.itemCount) {
+        delay(500)
         value = pagingItems.itemCount == 0
     }
 
+    LaunchedEffect(pagingItems.itemCount) {
+        onEvent(OnFeedCountChange(pagingItems.itemCount))
+    }
+    
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        LazyColumn(
-            contentPadding = contentPadding,
-            state = state.listState,
-        ) {
-            headerContent()
+        // due to this bug https://issuetracker.google.com/issues/179397301, we can't show the lazy column while the items are loading
+        if (pagingItems.itemCount != 0) {
+            LazyColumn(
+                contentPadding = contentPadding,
+                state = state.listState,
+            ) {
+                headerContent()
 
-            items(
-                pagingItems.itemCount,
-                contentType = pagingItems.itemContentType { it.kind },
-                key = pagingItems.itemKey { it.id },
-            ) { index ->
-                val event = pagingItems[index]
-                if (event == null) {
-                    LoadingCard(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                } else {
-                    // TODO inject screen provider
-                    val itemScreen = when (event.kind) {
-                        Event.Kind.Repost,
-                        Event.Kind.Note,
-                        -> NoteScreen(event)
+                items(
+                    pagingItems.itemCount,
+                    contentType = pagingItems.itemContentType { it.kind },
+                    key = pagingItems.itemKey { it.id },
+                ) { index ->
+                    val event = pagingItems[index]
+                    if (event == null) {
+                        LoadingCard(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    } else {
+                        // TODO inject screen provider
+                        val itemScreen = when (event.kind) {
+                            Event.Kind.Repost,
+                            Event.Kind.Note,
+                            -> NoteScreen(event)
 
-                        else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
+                            else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
+                        }
+
+                        CircuitContent(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            screen = itemScreen,
+                            onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
+                        )
                     }
-
-                    CircuitContent(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        screen = itemScreen,
-                        onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
-                    )
                 }
             }
         }
@@ -106,7 +109,7 @@ fun EventFeedUi(
             )
         }
 
-        if (isLoading) {
+        if(showLoading) {
             LinearProgressIndicator(
                 trackColor = Color.Transparent,
                 modifier = Modifier

@@ -22,8 +22,8 @@ molecule = "0.7.1"
 moshi = "1.14.0"
 nostrino = "0.0.5"
 okhttp = "5.0.0-alpha.11"
-paging = "3.1.1"
-room = "2.5.1"
+paging = "3.2.0"
+room = "2.5.2"
 rxjava = "2.2.21"
 scarlet = "0.1.12"
 sentry = "6.21.0"
@@ -45,7 +45,7 @@ accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pa
 accompanist-placeholder = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanist" }
 android-material = "com.google.android.material:material:1.9.0"
 android-desugaring = "com.android.tools:desugar_jdk_libs:2.0.3"
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.7.1" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.7.2" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigationcompose = "androidx.hilt:hilt-navigation-compose:1.0.0"
@@ -55,7 +55,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 
 androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 androidx-paging-common = { module = "androidx.paging:paging-common-ktx", version.ref = "paging" }
-androidx-paging-compose = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha19" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version = "3.2.0" }
 
 androidx-room-common = { module = "androidx.room:room-common", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

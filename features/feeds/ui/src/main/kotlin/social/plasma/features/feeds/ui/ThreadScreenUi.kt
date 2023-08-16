@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
+import androidx.paging.compose.itemKey
 import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
@@ -112,10 +112,12 @@ class ThreadScreenUi : Ui<ThreadScreenUiState> {
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
 
-                    itemsIndexed(pagingLazyItems, key = { _, item -> item.id }) { index, item ->
+                    items(
+                        pagingLazyItems.itemCount,
+                        key = pagingLazyItems.itemKey { it.id }) { index ->
                         val coroutineScope = rememberStableCoroutineScope()
 
-                        when (item) {
+                        when (val item = pagingLazyItems[index]) {
                             is ThreadItem.RootNote -> Column {
                                 val noteId = remember { NoteId(item.id) }
                                 rootIndex = index
