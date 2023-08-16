@@ -36,7 +36,7 @@ fun ImageCarousel(
                     .fillMaxWidth()
                     .aspectRatio(4 / 3f),
                 imageUrl = imageUrls[it],
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Crop,
             )
         }
 

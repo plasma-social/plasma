@@ -9,6 +9,7 @@ import social.plasma.models.NoteId
 
 sealed interface NoteUiState : CircuitUiState {
     object Loading : NoteUiState
+    object NotFound : NoteUiState
 
     data class Loaded(
         val noteCard: FeedItem.NoteCard,

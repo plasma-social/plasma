@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -36,19 +37,41 @@ fun ZoomableImage(
     options: ImageRequest.Builder.() -> Unit = {},
 ) {
 
-    var showFullImage by remember { mutableStateOf(false) }
-
-    AsyncImage(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable { showFullImage = true },
-        model = ImageRequest.Builder(LocalContext.current)
+    val context = LocalContext.current
+    val model = remember(options, imageUrl) {
+        ImageRequest.Builder(context)
             .data(imageUrl)
             .apply(options)
-            .build(),
-        contentScale = contentScale,
-        contentDescription = null
-    )
+            .build()
+    }
+
+    var showFullImage by remember { mutableStateOf(false) }
+    var isError by remember { mutableStateOf(false) }
+
+    if (isError) {
+        Box(
+            modifier = modifier
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Default.ErrorOutline, null, tint = MaterialTheme.colorScheme.error)
+
+        }
+    } else {
+        AsyncImage(
+            modifier = modifier
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.background)
+                .clickable { showFullImage = true },
+            model = model,
+            onError = {
+                isError = model.error == null
+            },
+            contentScale = contentScale,
+            contentDescription = null,
+        )
+    }
 
     if (showFullImage) {
         Dialog(

@@ -3,9 +3,9 @@ package social.plasma.onboarding.presenters
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.slack.circuit.foundation.onNavEvent
+import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
@@ -22,7 +22,8 @@ class HomePresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): HomeUiState {
-        var navigationInFlight by remember { mutableStateOf(false) }
+        var navigationInFlight by rememberRetained { mutableStateOf(false) }
+
         return HomeUiState { event ->
             when (event) {
                 OnFabClick -> {

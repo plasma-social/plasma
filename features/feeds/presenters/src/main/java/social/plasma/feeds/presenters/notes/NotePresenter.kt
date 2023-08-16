@@ -17,10 +17,12 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import okio.ByteString.Companion.toByteString
@@ -60,6 +62,7 @@ import social.plasma.shared.utils.api.InstantFormatter
 import social.plasma.shared.utils.api.StringManager
 import timber.log.Timber
 import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 class NotePresenter @AssistedInject constructor(
     private val contentParser: NoteContentParser,
@@ -81,16 +84,35 @@ class NotePresenter @AssistedInject constructor(
     override fun present(): NoteUiState {
         val eventPubkeyMetadata = observeEventPubkeyMetadata()
         val note = observeNoteEvent()
+
+        val noteNotFound by produceState(initialValue = false, note) {
+            delay(fetchNoteTimeOut)
+            value = note == null
+        }
+
         val notePubkey = observeNotePubkey(note)
 
         // In most cases, this will be the same was eventPubkeyMetadata.
         // However, it could be different if this note is a repost.
         val notePubkeyMetadata = observeNotePubkeyMetadata(notePubkey, eventPubkeyMetadata)
 
-        return if (notePubkey == null || note == null) {
+        val noteContent by produceState<List<ContentBlock>?>(
+            null, note
+        ) {
+            value = note?.let {
+                contentParser.parseNote(
+                    note.content,
+                    note.tags.toIndexedMap()
+                )
+            }
+        }
+
+        return if (noteNotFound) {
+            NoteUiState.NotFound
+        } else if (notePubkey == null || note == null || noteContent == null) {
             NoteUiState.Loading
         } else {
-            buildNoteUi(note, notePubkey, notePubkeyMetadata, eventPubkeyMetadata)
+            buildNoteUi(note, notePubkey, notePubkeyMetadata, eventPubkeyMetadata, noteContent!!)
         }
     }
 
@@ -100,6 +122,7 @@ class NotePresenter @AssistedInject constructor(
         notePubkey: PubKey,
         notePubkeyMetadata: UserMetadataEntity?,
         eventPubkeyMetadata: UserMetadataEntity?,
+        noteContent: List<ContentBlock>,
     ): NoteUiState.Loaded {
         val myPubkey = remember { PubKey(accountStateRepository.getPublicKey()!!.toByteString()) }
 
@@ -111,12 +134,6 @@ class NotePresenter @AssistedInject constructor(
             noteRepository.observeLikeCount(NoteId(note.id))
         }.collectAsState(initial = 0)
 
-        val noteContent: List<ContentBlock> by produceState(emptyList(), note) {
-            value = contentParser.parseNote(
-                note.content,
-                note.tags.toIndexedMap()
-            )
-        }
 
         val cardLabel by produceState<String?>(initialValue = null, note) {
             value = buildBannerLabel(note.tags)
@@ -143,11 +160,6 @@ class NotePresenter @AssistedInject constructor(
             note,
             eventPubkeyMetadata
         ) {
-            Timber.d(
-                "Header content for owner %s, %s",
-                args.eventEntity.pubkey,
-                eventPubkeyMetadata
-            )
             value = if (args.eventEntity.kind == Event.Kind.Repost) {
                 val pubkey = PubKey(args.eventEntity.pubkey.decodeHex())
                 val userFacingName = eventPubkeyMetadata?.userFacingName
@@ -272,6 +284,7 @@ class NotePresenter @AssistedInject constructor(
 
             if (repostedEventId != null) {
                 noteRepository.observeEventById(NoteId(repostedEventId))
+                    .timeout(fetchNoteTimeOut)
                     .map { it?.toEventModel() }
                     .filterNotNull()
             } else {
@@ -335,7 +348,7 @@ class NotePresenter @AssistedInject constructor(
             for (tag in tags) {
                 val pubkey = PubKey(tag[1].decodeHex())
                 val userNameDeferred = async {
-                    userMetaDataRepository.observeUserMetaData(pubkey).firstOrNull()?.name
+                    userMetaDataRepository.observeUserMetaData(pubkey).firstOrNull()?.userFacingName
                         ?: pubkey.shortBech32()
                 }
 
@@ -354,7 +367,8 @@ class NotePresenter @AssistedInject constructor(
                     val pubkey = PubKey(tag[1].decodeHex())
 
                     val userName =
-                        (userMetaDataRepository.observeUserMetaData(pubkey).firstOrNull()?.name
+                        (userMetaDataRepository.observeUserMetaData(pubkey)
+                            .firstOrNull()?.userFacingName
                             ?: pubkey.shortBech32())
 
 
@@ -383,6 +397,10 @@ class NotePresenter @AssistedInject constructor(
                 else -> null
             }
         }.filterNotNull().toMap()
+    }
+
+    companion object {
+        private val fetchNoteTimeOut = 5.seconds
     }
 
 

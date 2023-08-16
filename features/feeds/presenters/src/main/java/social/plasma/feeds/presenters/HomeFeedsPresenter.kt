@@ -3,7 +3,6 @@ package social.plasma.feeds.presenters
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import com.slack.circuit.foundation.onNavEvent
 import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
@@ -46,29 +45,33 @@ class HomeFeedsPresenter @AssistedInject constructor(
     @Composable
     override fun present(): HomeFeedsUiState {
         val currentUserMetadata by rememberRetained { userMetadataFlow }.collectAsState(null)
-        val relayConnectionRatio by remember { connectedRelayRatioFlow }.collectAsState("")
+        val relayConnectionRatio by rememberRetained { connectedRelayRatioFlow }.collectAsState("")
 
-        return HomeFeedsUiState(
-            title = stringManager[R.string.feeds],
-            relayConnectionRatio = relayConnectionRatio,
-            toolbarAvatar = currentUserMetadata?.picture,
-        ) { event ->
-            when (event) {
-                is HomeFeedsUiEvent.OnToolbarAvatarTapped -> {
-                    currentUserMetadata?.pubkey?.let {
-                        navigator.goTo(ProfileScreen(it))
+        val state = rememberRetained(currentUserMetadata, relayConnectionRatio) {
+            HomeFeedsUiState(
+                title = stringManager[R.string.feeds],
+                relayConnectionRatio = relayConnectionRatio,
+                toolbarAvatar = currentUserMetadata?.picture,
+            ) { event ->
+                when (event) {
+                    is HomeFeedsUiEvent.OnToolbarAvatarTapped -> {
+                        currentUserMetadata?.pubkey?.let {
+                            navigator.goTo(ProfileScreen(it))
+                        }
                     }
-                }
 
-                is HomeFeedsUiEvent.OnRelayInfoTapped -> {
-                    navigator.goTo(RelayListScreen)
-                }
+                    is HomeFeedsUiEvent.OnRelayInfoTapped -> {
+                        navigator.goTo(RelayListScreen)
+                    }
 
-                is HomeFeedsUiEvent.ChildNav -> {
-                    navigator.onNavEvent(event.navEvent)
+                    is HomeFeedsUiEvent.ChildNav -> {
+                        navigator.onNavEvent(event.navEvent)
+                    }
                 }
             }
         }
+
+        return state
     }
 
 
