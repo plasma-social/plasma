@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    api(projects.common.screens)
     api(projects.data.models)
     api(projects.data.opengraph)
     implementation(libs.circuit.core)

@@ -1,9 +1,9 @@
 package social.plasma.features.profile.screens
 
-import com.slack.circuit.runtime.Screen
 import kotlinx.parcelize.Parcelize
+import social.plasma.common.screens.StandaloneScreen
 
 @Parcelize
 data class ProfileScreen(
     val pubKeyHex: String,
-) : Screen
+) : StandaloneScreen

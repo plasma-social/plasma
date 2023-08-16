@@ -1,15 +1,15 @@
 package social.plasma.features.posting.screens
 
 import android.os.Parcelable
-import com.slack.circuit.runtime.Screen
 import kotlinx.parcelize.Parcelize
+import social.plasma.common.screens.StandaloneScreen
 import social.plasma.models.NoteId
 
 @Parcelize
 data class ComposingScreen(
     val content: String = "",
     val noteType: NoteType = NoteType.NewPost,
-) : Screen {
+) : StandaloneScreen {
     sealed interface NoteType : Parcelable {
 
         @Parcelize

@@ -1,5 +1,6 @@
 package social.plasma
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -41,9 +42,6 @@ class MainActivity : ComponentActivity() {
     lateinit var circuitConfig: CircuitConfig
 
     @Inject
-    lateinit var syncManager: SyncManager
-
-    @Inject
     @ActivityRetainedScoped
     lateinit var coroutineScope: CoroutineScope
 
@@ -53,8 +51,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val startScreens: List<Screen> =
-            listOf(HeadlessAuthenticator(exitScreen = getStartingScreen(intent)))
+        val startScreens: List<Screen> = intent.startingScreens ?: listOf(
+            HeadlessAuthenticator(
+                exitScreen = getStartingScreen(intent)
+            )
+        )
 
         setContent {
             PlasmaTheme(dynamicStatusBar = true) {
@@ -89,12 +90,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val Intent.startingScreens
+        get() = getParcelableArrayListExtra<Screen>(
+            EXTRA_STARTING_SCREENS
+        )
+
     @Composable
     private fun rememberPlasmaNavigator(
         circuitNavigator: Navigator,
         backstack: SaveableBackStack,
     ): PlasmaNavigator = remember(circuitNavigator, backstack) {
-        PlasmaNavigator(circuitNavigator, backstack) { itent ->
+        PlasmaNavigator(this, circuitNavigator, backstack) { itent ->
             startActivity(itent)
         }
     }
@@ -125,6 +131,16 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         if (isChangingConfigurations.not()) {
             coroutineScope.cancel()
+        }
+    }
+
+    companion object {
+        private const val EXTRA_STARTING_SCREENS = "screens"
+
+        fun getStartIntent(activity: Activity, screen: Screen): Intent {
+            return Intent(activity, MainActivity::class.java).apply {
+                putExtra(EXTRA_STARTING_SCREENS, arrayListOf(screen))
+            }
         }
     }
 }

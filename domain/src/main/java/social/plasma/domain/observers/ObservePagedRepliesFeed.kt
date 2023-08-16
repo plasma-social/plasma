@@ -3,9 +3,7 @@ package social.plasma.domain.observers
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import androidx.paging.map
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -16,7 +14,6 @@ import javax.inject.Inject
 
 class ObservePagedRepliesFeed @Inject constructor(
     private val noteRepository: NoteRepository,
-    private val scope: CoroutineScope,
 ) : PagingInteractor<ObservePagedRepliesFeed.Params, EventModel>() {
 
 
@@ -28,7 +25,7 @@ class ObservePagedRepliesFeed @Inject constructor(
             it.map { entity ->
                 entity.toEventModel()
             }
-        }.cachedIn(scope)
+        }
     }
 
     data class Params(

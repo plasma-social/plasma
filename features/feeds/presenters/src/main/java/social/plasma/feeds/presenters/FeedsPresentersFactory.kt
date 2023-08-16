@@ -38,10 +38,9 @@ class FeedsPresentersFactory @Inject constructor(
 ) : Presenter.Factory {
 
     private val config = PagingConfig(
-        pageSize = 20,
-        jumpThreshold = 10,
-        enablePlaceholders = true,
-        prefetchDistance = 5,
+        pageSize = 50,
+        jumpThreshold = 20,
+        maxSize = 1000,
     )
 
     private val followingFeed = observePagedFollowingFeed.flow.onStart {
