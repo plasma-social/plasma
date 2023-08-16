@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
+import androidx.paging.compose.itemKey
 import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.delay
@@ -86,10 +86,10 @@ fun FeedUiContent(
 
             headerContent()
 
-            items(pagingLazyItems, key = { it.key }) { item ->
+            items(pagingLazyItems.itemCount, key = pagingLazyItems.itemKey { it.key }) { index ->
                 val coroutineScope = rememberStableCoroutineScope()
 
-                when (item) {
+                when (val item = pagingLazyItems[index]) {
                     is FeedItem.NoteCard -> {
                         if (!item.hidden) {
                             val noteId = NoteId(item.id)
