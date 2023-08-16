@@ -79,21 +79,26 @@ class EventFeedPresenter @AssistedInject constructor(
 
         val coroutineScope = rememberCoroutineScope()
 
-        return EventFeedUiState(
-            listState = listState,
-            items = pagingData,
-            displayRefreshButton = unseenItemCount > 0,
-            refreshText = refreshText,
-        ) { event ->
-            when (event) {
-                is EventFeedUiEvent.OnFeedCountChange -> currentFeedItemCount = event.itemCount
-                EventFeedUiEvent.OnRefreshButtonClick -> coroutineScope.launch {
-                    listState.scrollToItem(0)
-                }
 
-                is EventFeedUiEvent.OnChildNavEvent -> navigator.onNavEvent(event.navEvent)
+        val state = rememberRetained(listState, pagingData, unseenItemCount, refreshText) {
+            EventFeedUiState(
+                listState = listState,
+                items = pagingData,
+                displayRefreshButton = unseenItemCount > 0,
+                refreshText = refreshText,
+            ) { event ->
+                when (event) {
+                    is EventFeedUiEvent.OnFeedCountChange -> currentFeedItemCount = event.itemCount
+                    EventFeedUiEvent.OnRefreshButtonClick -> coroutineScope.launch {
+                        listState.scrollToItem(0)
+                    }
+
+                    is EventFeedUiEvent.OnChildNavEvent -> navigator.onNavEvent(event.navEvent)
+                }
             }
         }
+
+        return state
     }
 
     companion object {

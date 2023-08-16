@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -131,14 +133,15 @@ private fun RefreshButton(modifier: Modifier, text: String, onClick: () -> Unit)
 internal fun LoadingCard(
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Card(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(16 / 9f)
             .placeholder(
                 true,
                 color = MaterialTheme.colorScheme.surface,
-                highlight = PlaceholderHighlight.shimmer(MaterialTheme.colorScheme.surfaceVariant)
+                highlight = PlaceholderHighlight.shimmer(MaterialTheme.colorScheme.background),
+                shape = CardDefaults.shape,
             ),
-    )
+    ) {}
 }

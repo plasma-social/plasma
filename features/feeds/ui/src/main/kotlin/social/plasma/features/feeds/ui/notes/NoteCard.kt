@@ -1,10 +1,10 @@
 package social.plasma.features.feeds.ui.notes
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -114,7 +113,7 @@ fun NoteElevatedCard(
 
 @Composable
 fun EmbeddedNoteCard(
-    uiModel: FeedItem.NoteCard?,
+    uiModel: FeedItem.NoteCard,
     modifier: Modifier = Modifier,
     onNoteClick: (NoteId) -> Unit,
     onAvatarClick: (() -> Unit)?,
@@ -125,35 +124,23 @@ fun EmbeddedNoteCard(
             contentColor = MaterialTheme.colorScheme.onSurface,
         )
     ) {
-        if (uiModel == null) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(54.dp)
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Column {
-                NoteCardHeader(
-                    uiModel,
-                    onAvatarClick,
-                    onProfileClick = { },
-                    onNoteClick = onNoteClick,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                    onHashTagClick = { },
-                )
-                NoteContent(
-                    uiModel,
-                    onProfileClick = { },
-                    onNoteClick = onNoteClick,
-                    getOpenGraphMetadata = { null },
-                    onHashTagClick = { },
-                )
-            }
+        Column {
+            NoteCardHeader(
+                uiModel,
+                onAvatarClick,
+                onProfileClick = { },
+                onNoteClick = onNoteClick,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                onHashTagClick = { },
+            )
+            NoteContent(
+                uiModel,
+                onProfileClick = { },
+                onNoteClick = onNoteClick,
+                getOpenGraphMetadata = { null },
+                onHashTagClick = { },
+            )
         }
-
     }
 }
 
@@ -315,9 +302,11 @@ private fun NoteContent(
 
                 is ContentBlock.Image -> {
                     ZoomableImage(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(4 / 3f),
                         imageUrl = it.imageUrl,
-                        contentScale = ContentScale.FillWidth,
+                        contentScale = ContentScale.Crop,
                     )
                 }
 
@@ -583,7 +572,7 @@ private fun PreviewEmbeddedCard() {
 private fun PreviewLoadingEmbeddedCard() {
     PlasmaTheme {
         EmbeddedNoteCard(
-            uiModel = null,
+            uiModel = NoteCardFakes.fakeUiModel,
             onNoteClick = {},
             onAvatarClick = {},
         )
