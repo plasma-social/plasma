@@ -1,7 +1,7 @@
 package social.plasma.features.discovery.screens.relaylist
 
-import com.slack.circuit.runtime.Screen
 import kotlinx.parcelize.Parcelize
+import social.plasma.common.screens.StandaloneScreen
 
 @Parcelize
-object RelayListScreen : Screen
+object RelayListScreen : StandaloneScreen

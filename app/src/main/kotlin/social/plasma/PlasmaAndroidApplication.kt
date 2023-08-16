@@ -27,6 +27,9 @@ class PlasmaAndroidApplication : Application(), ImageLoaderFactory, Configuratio
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var syncManager: SyncManager
+
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {

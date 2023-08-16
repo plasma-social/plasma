@@ -1,5 +1,6 @@
 package social.plasma
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.slack.circuit.backstack.SaveableBackStack
@@ -7,8 +8,10 @@ import com.slack.circuit.foundation.screen
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.Screen
 import social.plasma.common.screens.AndroidScreens
+import social.plasma.common.screens.StandaloneScreen
 
 class PlasmaNavigator(
+    private val activity: Activity,
     private val circuitNavigator: Navigator,
     private val backstack: SaveableBackStack,
     val openIntent: (Intent) -> Unit,
@@ -30,7 +33,10 @@ class PlasmaNavigator(
                     return
                 }
 
-                circuitNavigator.goTo(screen)
+                when (screen) {
+                    is StandaloneScreen -> openIntent(MainActivity.getStartIntent(activity, screen))
+                    else -> circuitNavigator.goTo(screen)
+                }
             }
         }
     }

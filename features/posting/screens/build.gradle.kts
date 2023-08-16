@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    api(projects.common.screens)
+    
     implementation(projects.data.models)
     implementation(libs.circuit.core)
     implementation(libs.compose.runtime)
