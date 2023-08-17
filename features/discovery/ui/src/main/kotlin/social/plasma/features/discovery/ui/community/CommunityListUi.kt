@@ -45,7 +45,7 @@ class CommunityListUi : Ui<CommunityListUiState> {
                     )
                 }
             }
-            items(state.followedHashTags, key = { it }) { hashtag ->
+            items(state.followedHashTags) { hashtag ->
                 CircuitContent(
                     screen = CommunityListItemScreen(hashtag),
                     onNavEvent = { onEvent(OnChildNavEvent(it)) },

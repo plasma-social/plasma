@@ -101,8 +101,10 @@ class NotePresenter @AssistedInject constructor(
         ) {
             value = note?.let {
                 contentParser.parseNote(
-                    note.content,
-                    note.tags.toIndexedMap()
+                    note = note.content,
+                    mentions = note.tags.toIndexedMap(),
+                    tags = note.tags,
+                    kind = note.kind,
                 )
             }
         }

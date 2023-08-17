@@ -24,7 +24,7 @@ interface NotesDao {
     )
     fun observePagedContactsEvents(
         pubkey: String,
-        kinds: Set<Int> = setOf(Event.Kind.Note),
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Audio),
     ): PagingSource<Int, EventEntity>
 
     @Transaction
@@ -32,7 +32,7 @@ interface NotesDao {
     @Query("SELECT * FROM events WHERE pubkey IN (SELECT pubkey FROM contacts WHERE owner = :pubkey) AND kind in (:kinds) ORDER BY created_at DESC")
     fun observePagedContactsReplies(
         pubkey: String,
-        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost, Event.Kind.Audio),
     ): PagingSource<Int, EventEntity>
 
     @Transaction
@@ -40,7 +40,7 @@ interface NotesDao {
     @Query("SELECT * FROM events WHERE pubkey = :pubkey AND kind in (:kinds) ORDER BY created_at DESC")
     fun observePagedUserNotes(
         pubkey: String,
-        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost, Event.Kind.Audio),
     ): PagingSource<Int, EventEntity>
 
     @Query(

@@ -58,7 +58,7 @@ fun EventFeedUi(
     LaunchedEffect(pagingItems.itemCount) {
         onEvent(OnFeedCountChange(pagingItems.itemCount))
     }
-    
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -85,6 +85,7 @@ fun EventFeedUi(
                         val itemScreen = when (event.kind) {
                             Event.Kind.Repost,
                             Event.Kind.Note,
+                            Event.Kind.Audio,
                             -> NoteScreen(event)
 
                             else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
@@ -109,7 +110,7 @@ fun EventFeedUi(
             )
         }
 
-        if(showLoading) {
+        if (showLoading) {
             LinearProgressIndicator(
                 trackColor = Color.Transparent,
                 modifier = Modifier
