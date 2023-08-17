@@ -1,5 +1,6 @@
 package social.plasma.ui.components
 
+import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,13 +15,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.video.VideoSize
+import androidx.lifecycle.Lifecycle
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 
 @Composable
+@SuppressLint("UnsafeOptInUsageError")
 fun InlineMediaPlayer(
     videoUrl: String,
     modifier: Modifier = Modifier,
@@ -56,7 +59,7 @@ fun InlineMediaPlayer(
             .fillMaxWidth()
             .aspectRatio(aspectRatio),
         factory = { context ->
-            StyledPlayerView(context).apply {
+            PlayerView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -77,6 +80,22 @@ fun InlineMediaPlayer(
                 exoPlayer.release()
             }
             player = null
+        }
+    }
+
+    ActivityLifecycleEvents { event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                if (isPlaying) {
+                    player?.play()
+                }
+            }
+
+            Lifecycle.Event.ON_STOP -> {
+                player?.pause()
+            }
+
+            else -> Unit
         }
     }
 }

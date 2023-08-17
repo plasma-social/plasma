@@ -70,6 +70,7 @@ dependencies {
 
     implementation(libs.exoplayer.core)
     implementation(libs.exoplayer.ui)
+    implementation(libs.exoplayer.hls)
 
     implementation(libs.nostrino)
 

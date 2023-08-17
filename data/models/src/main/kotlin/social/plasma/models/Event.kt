@@ -27,6 +27,7 @@ data class Event(
     fun <T : Any> typed(data: T) = TypedEvent(id, pubKey, createdAt, kind, tags, data, sig)
 
     object Kind {
+        const val Audio: Int = 1808
         const val Repost: Int = 6
         const val MetaData = 0
         const val Note = 1

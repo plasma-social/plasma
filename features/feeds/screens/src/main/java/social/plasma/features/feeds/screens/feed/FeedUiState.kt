@@ -62,6 +62,8 @@ sealed interface ContentBlock {
 
     data class Video(val videoUrl: String) : ContentBlock
 
+    data class Audio(val audioUrl: String) : ContentBlock
+
     data class Carousel(val imageUrls: List<String>) : ContentBlock
 
     data class Text(val content: String, val mentions: Map<Int, Mention>) : ContentBlock

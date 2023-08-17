@@ -52,6 +52,7 @@ import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.GetOpenGraphMetadata
 import social.plasma.ui.components.ImageCarousel
 import social.plasma.ui.components.InlineMediaPlayer
+import social.plasma.ui.components.MusicPlayer
 import social.plasma.ui.components.Nip5Badge
 import social.plasma.ui.components.OpenGraphPreviewCard
 import social.plasma.ui.components.ZoomableImage
@@ -329,6 +330,8 @@ private fun NoteContent(
                     screen = QuotedNoteScreen(it.noteId),
                     onNavEvent = onNestedNavEvent
                 )
+
+                is ContentBlock.Audio -> MusicPlayer(audioUrl = it.audioUrl)
             }
         }
     }

@@ -1,6 +1,7 @@
 package social.plasma.feeds.presenters.feed
 
 import social.plasma.features.feeds.screens.feed.ContentBlock
+import social.plasma.models.Event
 import social.plasma.models.Mention
 import social.plasma.models.NoteId
 import social.plasma.models.crypto.Bech32
@@ -15,7 +16,12 @@ class NoteContentParser @Inject constructor() {
     private val noteQuoteRegex = Regex("(nostr:note)[\\da-z]{1,83}")
 
 
-    fun parseNote(note: String, mentions: Map<Int, Mention>): List<ContentBlock> {
+    fun parseNote(
+        note: String,
+        mentions: Map<Int, Mention>,
+        tags: List<List<String>> = emptyList(),
+        kind: Int = Event.Kind.Note,
+    ): List<ContentBlock> {
         // TODO parse these as part of the text parsing, so we can do a single pass on the note content
         val imageUrls = note.parseImageUrls()
         val videoUrls = note.parseVideoUrls()
@@ -41,12 +47,20 @@ class NoteContentParser @Inject constructor() {
             ContentBlock.UrlPreview(it)
         }
 
+        val stemstrBlocks = if (kind == Event.Kind.Audio) {
+            val audioUrl =
+                tags.firstOrNull { it.firstOrNull() == KEY_STREAM_URL && it.size > 1 }?.get(1)
+            audioUrl?.let {
+                ContentBlock.Audio(it)
+            }
+        } else null
+
         val contentBlocks = listOf(
             ContentBlock.Text(
                 noteTextContent,
                 mentions,
             )
-        ) + noteQuoteBlocks + urlPreviewBlocks + imageContent + videoBlocks
+        ) + noteQuoteBlocks + urlPreviewBlocks + imageContent + videoBlocks + stemstrBlocks
 
         return contentBlocks.filterNotNull()
     }
@@ -63,3 +77,5 @@ class NoteContentParser @Inject constructor() {
     private fun String.parseNoteQuotes(): Set<String> =
         noteQuoteRegex.findAll(this).map { it.value }.toSet()
 }
+
+private const val KEY_STREAM_URL = "stream_url"
