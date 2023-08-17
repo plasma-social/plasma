@@ -47,11 +47,15 @@ class NoteContentParser @Inject constructor() {
             ContentBlock.UrlPreview(it)
         }
 
-        val stemstrBlocks = if (kind == Event.Kind.Audio) {
+        val audioBlocks = if (kind == Event.Kind.Audio) {
             val audioUrl =
                 tags.firstOrNull { it.firstOrNull() == KEY_STREAM_URL && it.size > 1 }?.get(1)
+            val waveformDataString =
+                tags.firstOrNull { it.firstOrNull() == KEY_WAVEFORM && it.size > 1 }?.get(1)
+            val waveFormDataIntArray = parseWaveformData(waveformDataString)
+
             audioUrl?.let {
-                ContentBlock.Audio(it)
+                ContentBlock.Audio(it, waveFormDataIntArray)
             }
         } else null
 
@@ -60,9 +64,20 @@ class NoteContentParser @Inject constructor() {
                 noteTextContent,
                 mentions,
             )
-        ) + noteQuoteBlocks + urlPreviewBlocks + imageContent + videoBlocks + stemstrBlocks
+        ) + noteQuoteBlocks + urlPreviewBlocks + imageContent + videoBlocks + audioBlocks
 
         return contentBlocks.filterNotNull()
+    }
+
+    private fun parseWaveformData(waveformDataString: String?): List<Int>? {
+        if (waveformDataString == null) return null
+
+        val sanitizedString = waveformDataString.replace("[\\[\\]\\s]".toRegex(), "")
+        return try {
+            sanitizedString.split(",").map { it.toInt() }
+        } catch (e: NumberFormatException) {
+            null
+        }
     }
 
     private fun String.parseImageUrls(): Set<String> =
@@ -79,3 +94,4 @@ class NoteContentParser @Inject constructor() {
 }
 
 private const val KEY_STREAM_URL = "stream_url"
+private const val KEY_WAVEFORM = "waveform"

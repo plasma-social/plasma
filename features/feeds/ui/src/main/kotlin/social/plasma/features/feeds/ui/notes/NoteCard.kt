@@ -331,7 +331,15 @@ private fun NoteContent(
                     onNavEvent = onNestedNavEvent
                 )
 
-                is ContentBlock.Audio -> MusicPlayer(audioUrl = it.audioUrl)
+                is ContentBlock.Audio -> OutlinedCard {
+                    MusicPlayer(
+                        audioUrl = it.audioUrl,
+                        waveform = it.waveform,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+                    )
+                }
             }
         }
     }
