@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,17 +26,25 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import social.plasma.ui.theme.PlasmaTheme
 
 @Composable
@@ -46,37 +55,36 @@ fun MusicPlayer(
     waveform: List<Int>? = null,
 ) {
     val currentContext = LocalContext.current
-    var shouldAutoplay: Boolean by rememberSaveable { mutableStateOf(false) }
+    val player: Player =
+        remember { ExoPlayer.Builder(currentContext).build() } // TODO use single instance
+
     var playbackPosition by rememberSaveable { mutableLongStateOf(0L) }
+    var durationMillis by rememberSaveable { mutableLongStateOf(0L) }
+
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            playbackPosition = player.currentPosition
+            delay(100)
+        }
+    }
+
     var isAudioPlaying by remember {
         mutableStateOf(false)
     }
-
-    val player: Player =
-        remember { ExoPlayer.Builder(currentContext).build() } // TODO use single instance
 
     DisposableEffect(player, audioUrl) {
         player.apply {
             setMediaItem(MediaItem.fromUri(audioUrl))
             seekTo(playbackPosition)
-            playWhenReady = shouldAutoplay
             prepare()
         }
         onDispose {
-            playbackPosition = player.currentPosition
-            shouldAutoplay = player.isPlaying
             player.release()
         }
     }
 
     ActivityLifecycleEvents { event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                if (shouldAutoplay) {
-                    player.play()
-                }
-            }
-
             Lifecycle.Event.ON_STOP -> {
                 player.pause()
             }
@@ -99,6 +107,10 @@ fun MusicPlayer(
                         player.pause()
                     }
 
+                    Player.STATE_READY -> {
+                        durationMillis = player.duration
+                    }
+
                     else -> Unit
                 }
             }
@@ -110,13 +122,20 @@ fun MusicPlayer(
         }
     }
 
-    MusicPlayerView(isAudioPlaying, togglePlay = {
-        if (isAudioPlaying) {
-            player.pause()
-        } else {
-            player.play()
-        }
-    }, modifier, waveform)
+    MusicPlayerView(
+        isPlaying = isAudioPlaying,
+        togglePlay = {
+            if (isAudioPlaying) {
+                player.pause()
+            } else {
+                player.play()
+            }
+        },
+        modifier = modifier,
+        waveform = waveform,
+        durationMillis = durationMillis,
+        playbackPosition = playbackPosition,
+    )
 }
 
 @Composable
@@ -125,6 +144,8 @@ fun MusicPlayerView(
     togglePlay: () -> Unit,
     modifier: Modifier,
     waveform: List<Int>? = null,
+    durationMillis: Long,
+    playbackPosition: Long,
 ) {
     val playIcon = rememberVectorPainter(image = Icons.Default.PlayCircle)
     val pauseIcon = rememberVectorPainter(image = Icons.Default.PauseCircle)
@@ -147,9 +168,12 @@ fun MusicPlayerView(
 
         waveform?.let {
             WaveformGraph(
-                waveform = waveform, modifier = Modifier
+                waveform = waveform,
+                modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
+                durationMillis = durationMillis,
+                playbackPosition = playbackPosition,
             )
         }
     }
@@ -157,26 +181,108 @@ fun MusicPlayerView(
 
 
 @Composable
-fun WaveformGraph(waveform: List<Int>, modifier: Modifier = Modifier) {
-    val maxAmplitude = waveform.maxOrNull() ?: 1
-    val color = MaterialTheme.colorScheme.primary
+fun WaveformGraph(
+    modifier: Modifier = Modifier,
+    waveform: List<Int>,
+    durationMillis: Long,
+    playbackPosition: Long,
+    playedColor: Color = MaterialTheme.colorScheme.primary,
+    unPlayedColor: Color = Color.LightGray,
+) {
+    require(waveform.isNotEmpty()) { "Waveform cannot be empty" }
+    require(playbackPosition >= 0) { "Playback position ($playbackPosition) cannot be negative" }
+    require(durationMillis >= 0) { "Duration ($durationMillis) cannot be negative" }
+
+    if (durationMillis == 0L) return
+
+    val cornerRadius = with(LocalDensity.current) { CornerRadius(2.dp.toPx()) }
+
+    val maxAmplitude = (waveform.maxOrNull() ?: 1).toFloat()
+    val playbackProgress = (playbackPosition.toFloat() / durationMillis).coerceIn(0f, 1f)
 
     Canvas(modifier) {
-        val barWidth = size.width / (waveform.size * 1.5f)  // 1 bar + 0.5 bar gap
-        val horizontalGap = barWidth / 2
+        val drawYStartPoint = size.height / 2
+        val barAndGapWidth = size.width / waveform.size
+        val barWidth = barAndGapWidth * (2f / 3f)
 
         for (i in waveform.indices) {
-            val barHeight = (waveform[i] / maxAmplitude.toFloat()) * size.height / 2
-            val xOffset = (i * (barWidth + horizontalGap)) + (barWidth / 2)
-            val start = Offset(x = xOffset, y = size.height / 2 - barHeight)
-            val end = Offset(x = xOffset, y = size.height / 2 + barHeight)
-            drawLine(
-                color = color,
-                start = start,
-                end = end,
-                strokeWidth = barWidth,
-                cap = StrokeCap.Round,
-            )
+            val barHeight = (waveform[i] / maxAmplitude) * size.height
+            val fractionOfWaveform = i.toFloat() / waveform.size
+
+            val isCurrentBarBeingPlayed =
+                fractionOfWaveform < playbackProgress && (fractionOfWaveform + 1f / waveform.size) > playbackProgress
+            val playedRatio = when {
+                isCurrentBarBeingPlayed -> (playbackProgress - fractionOfWaveform) * waveform.size
+                fractionOfWaveform < playbackProgress -> 1f
+                else -> 0f
+            }
+
+            if (fractionOfWaveform <= playbackProgress) {
+                val playedWidth = barWidth * playedRatio
+
+                if (playedRatio < 1f) {
+
+                    Path().apply {
+                        val rect = Rect(
+                            offset = Offset(
+                                x = i * barAndGapWidth,
+                                y = drawYStartPoint - barHeight / 2
+                            ),
+                            size = Size(width = playedWidth, height = barHeight),
+                        )
+
+                        val roundRect = RoundRect(
+                            rect = rect,
+                            topLeft = cornerRadius,
+                            topRight = CornerRadius.Zero,
+                            bottomLeft = cornerRadius,
+                            bottomRight = CornerRadius.Zero,
+                        )
+
+                        addRoundRect(roundRect)
+                        drawPath(this, playedColor)
+                    }
+
+                    Path().apply {
+                        val rect = Rect(
+                            offset = Offset(
+                                x = i * barAndGapWidth + playedWidth,
+                                y = drawYStartPoint - barHeight / 2
+                            ),
+                            size = Size(width = barWidth - playedWidth, height = barHeight),
+                        )
+
+                        val roundRect = RoundRect(
+                            rect = rect,
+                            topLeft = CornerRadius.Zero,
+                            topRight = cornerRadius,
+                            bottomLeft = CornerRadius.Zero,
+                            bottomRight = cornerRadius,
+                        )
+
+                        addRoundRect(roundRect)
+                        drawPath(this, unPlayedColor)
+                    }
+                } else {
+                    drawRoundRect(
+                        color = playedColor,
+                        topLeft = Offset(
+                            x = i * barAndGapWidth,
+                            y = drawYStartPoint - barHeight / 2
+                        ),
+                        size = Size(width = barWidth, height = barHeight),
+                        cornerRadius = cornerRadius,
+                    )
+                }
+            } else {
+                // The bar hasn't been reached yet, draw it with the start color
+                drawRoundRect(
+                    color = unPlayedColor,
+                    topLeft = Offset(x = i * barAndGapWidth, y = drawYStartPoint - barHeight / 2),
+                    size = Size(width = barWidth, height = barHeight),
+                    cornerRadius = cornerRadius,
+                )
+            }
         }
     }
 }
@@ -192,6 +298,8 @@ fun MusicPlayerPreview() {
                 .padding(4.dp),
             togglePlay = {},
             waveform = waveform,
+            durationMillis = 5000,
+            playbackPosition = 2000,
         )
     }
 }
@@ -201,11 +309,13 @@ fun MusicPlayerPreview() {
 fun WaveformGraphPreview() {
 
     WaveformGraph(
+        waveform = waveform,
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(6.5f)
             .padding(4.dp),
-        waveform = waveform,
+        durationMillis = 100,
+        playbackPosition = 51,
     )
 }
 

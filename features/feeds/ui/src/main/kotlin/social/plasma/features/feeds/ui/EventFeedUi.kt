@@ -62,41 +62,38 @@ fun EventFeedUi(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        // due to this bug https://issuetracker.google.com/issues/179397301, we can't show the lazy column while the items are loading
-        if (pagingItems.itemCount != 0) {
-            LazyColumn(
-                contentPadding = contentPadding,
-                state = state.listState,
-            ) {
-                headerContent()
+        LazyColumn(
+            contentPadding = contentPadding,
+            state = state.listState,
+        ) {
+            headerContent()
 
-                items(
-                    pagingItems.itemCount,
-                    contentType = pagingItems.itemContentType { it.kind },
-                    key = pagingItems.itemKey { it.id },
-                ) { index ->
-                    val event = pagingItems[index]
-                    if (event == null) {
-                        LoadingCard(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    } else {
-                        // TODO inject screen provider
-                        val itemScreen = when (event.kind) {
-                            Event.Kind.Repost,
-                            Event.Kind.Note,
-                            Event.Kind.Audio,
-                            -> NoteScreen(event)
+            items(
+                pagingItems.itemCount,
+                contentType = pagingItems.itemContentType { it.kind },
+                key = pagingItems.itemKey { it.id },
+            ) { index ->
+                val event = pagingItems[index]
+                if (event == null) {
+                    LoadingCard(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                } else {
+                    // TODO inject screen provider
+                    val itemScreen = when (event.kind) {
+                        Event.Kind.Repost,
+                        Event.Kind.Note,
+                        Event.Kind.Audio,
+                        -> NoteScreen(event)
 
-                            else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
-                        }
-
-                        CircuitContent(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            screen = itemScreen,
-                            onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
-                        )
+                        else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
                     }
+
+                    CircuitContent(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        screen = itemScreen,
+                        onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
+                    )
                 }
             }
         }
