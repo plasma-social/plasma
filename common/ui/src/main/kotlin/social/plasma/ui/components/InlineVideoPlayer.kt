@@ -43,6 +43,8 @@ fun InlineMediaPlayer(
             addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(size: VideoSize) {
                     super.onVideoSizeChanged(size)
+                    if (size.height <= 0 || size.width <= 0) return
+
                     aspectRatio = size.width / size.height.toFloat()
                 }
             })
