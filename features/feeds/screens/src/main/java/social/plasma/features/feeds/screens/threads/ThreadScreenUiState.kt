@@ -1,34 +1,10 @@
 package social.plasma.features.feeds.screens.threads
 
-import androidx.paging.PagingData
-import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.CircuitUiState
-import kotlinx.coroutines.flow.Flow
-import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.opengraph.OpenGraphMetadata
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 
 data class ThreadScreenUiState(
     val title: String,
-    val pagingFlow: Flow<PagingData<ThreadItem>>,
-    val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata?,
+    val eventFeedUiState: EventFeedUiState,
     val onEvent: (ThreadScreenUiEvent) -> Unit,
-) : CircuitUiState {
-}
-
-sealed interface ThreadItem {
-    val id: String
-    val pubkey: PubKey
-
-    data class RootNote(
-        val noteUiModel: FeedItem.NoteCard,
-        override val id: String = noteUiModel.id,
-        override val pubkey: PubKey = noteUiModel.userPubkey,
-    ) : ThreadItem
-
-    data class LeafNote(
-        val noteUiModel: FeedItem.NoteCard,
-        override val id: String = noteUiModel.id,
-        override val pubkey: PubKey = noteUiModel.userPubkey,
-        val showConnector: Boolean = true,
-    ) : ThreadItem
-}
+) : CircuitUiState

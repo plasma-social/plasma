@@ -63,7 +63,7 @@ class HashTagFeedScreenUi : Ui<HashTagScreenUiState> {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(bottom = 8.dp),
+                contentPadding = PaddingValues(8.dp),
             )
         }
     }
@@ -111,6 +111,7 @@ private fun PreviewHashtagFeedScreenUi() {
             items = flowOf(PagingData.empty()),
             displayRefreshButton = false,
             refreshText = "",
+            screenProvider = { TODO() },
             onEvent = {},
         )
         HashTagFeedScreenUi().Content(

@@ -25,7 +25,7 @@ interface NoteRepository {
 
     fun observePagedUserNotes(pubKey: PubKey): PagingSource<Int, EventEntity>
 
-    fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, NoteWithUser>
+    fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, EventEntity>
 
     suspend fun refreshContactsNotes(): List<NoteWithUser>
     suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean

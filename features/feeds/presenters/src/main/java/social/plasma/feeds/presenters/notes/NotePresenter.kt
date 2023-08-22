@@ -197,7 +197,8 @@ class NotePresenter @AssistedInject constructor(
                 timePosted = instantFormatter.getRelativeTime(Instant.ofEpochSecond(note.createdAt)),
                 zapsEnabled = notePubkeyMetadata?.tipAddress != null,
                 isNip5Valid = { _, _ -> isNip5Valid }, // TODO change to variable
-            )
+            ),
+            style = args.style,
         )
         { event ->
             when (event) {
