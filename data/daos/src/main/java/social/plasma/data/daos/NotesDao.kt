@@ -10,6 +10,8 @@ import social.plasma.models.Event
 import social.plasma.models.NoteWithUser
 import social.plasma.models.events.EventEntity
 
+private const val THREAD_DEPTH_LIMIT = 100
+
 @Dao
 interface NotesDao {
     @Transaction
@@ -77,16 +79,36 @@ interface NotesDao {
         kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
     ): PagingSource<Int, EventEntity>
 
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
     @Query(
-        "SELECT * FROM noteview WHERE kind = ${Event.Kind.Note} AND (" +
-                "id in(SELECT source_event FROM event_ref WHERE target_event = :noteId) " +
-                "OR id = :noteId " +
-                "OR id in(SELECT target_event FROM event_ref WHERE source_event = :noteId)" +
-                ") ORDER BY created_at"
+        """
+        WITH RECURSIVE RecursiveEvents AS (
+            SELECT target_event AS event_id, 1 AS level
+            FROM event_ref
+            WHERE source_event = :noteId
+        
+            UNION ALL
+        
+            SELECT er.target_event, re.level + 1
+            FROM event_ref er
+            JOIN RecursiveEvents re ON er.source_event = re.event_id
+            WHERE re.level < $THREAD_DEPTH_LIMIT  
+        )
+
+        SELECT *
+        FROM events
+        WHERE kind in (:kinds)
+        AND (
+            id IN (SELECT event_id FROM RecursiveEvents) -- notes before the selected leaf
+            OR id = :noteId -- The selected leaf of the thread
+            OR id IN (SELECT source_event FROM event_ref WHERE target_event = :noteId) -- notes that reply to the selected leaf
+        )
+        ORDER BY created_at
+    """
     )
-    fun observePagedThreadNotes(noteId: String): PagingSource<Int, NoteWithUser>
+    fun observePagedThreadNotes(
+        noteId: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Audio),
+    ): PagingSource<Int, EventEntity>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -141,3 +163,4 @@ interface NotesDao {
     )
     fun observeLikeCount(noteId: String): Flow<Long>
 }
+

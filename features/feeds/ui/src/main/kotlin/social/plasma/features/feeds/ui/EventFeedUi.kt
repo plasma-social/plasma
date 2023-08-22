@@ -1,11 +1,12 @@
 package social.plasma.features.feeds.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,15 +38,17 @@ import kotlinx.coroutines.delay
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiEvent
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiEvent.OnFeedCountChange
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
-import social.plasma.features.feeds.screens.feeditems.notes.NoteScreen
-import social.plasma.models.Event
 
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EventFeedUi(
     modifier: Modifier,
     state: EventFeedUiState,
-    contentPadding: PaddingValues = PaddingValues(vertical = 8.dp),
+    contentPadding: PaddingValues = PaddingValues(vertical = 8.dp, horizontal = 8.dp),
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     headerContent: LazyListScope.() -> Unit = {},
+    itemContainer: @Composable LazyListScope.(@Composable () -> Unit) -> Unit = { it() },
 ) {
     val onEvent = state.onEvent
 
@@ -65,6 +69,7 @@ fun EventFeedUi(
         LazyColumn(
             contentPadding = contentPadding,
             state = state.listState,
+            verticalArrangement = verticalArrangement,
         ) {
             headerContent()
 
@@ -74,26 +79,20 @@ fun EventFeedUi(
                 key = pagingItems.itemKey { it.id },
             ) { index ->
                 val event = pagingItems[index]
-                if (event == null) {
-                    LoadingCard(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                } else {
-                    // TODO inject screen provider
-                    val itemScreen = when (event.kind) {
-                        Event.Kind.Repost,
-                        Event.Kind.Note,
-                        Event.Kind.Audio,
-                        -> NoteScreen(event)
+                this@LazyColumn.itemContainer {
+                    if (event == null) {
+                        LoadingCard(
+                            modifier = Modifier.animateItemPlacement()
+                        )
+                    } else {
+                        val itemScreen = remember(event) { state.screenProvider(event) }
 
-                        else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
+                        CircuitContent(
+                            modifier = Modifier.animateItemPlacement(),
+                            screen = itemScreen,
+                            onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
+                        )
                     }
-
-                    CircuitContent(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        screen = itemScreen,
-                        onNavEvent = { onEvent(EventFeedUiEvent.OnChildNavEvent(it)) },
-                    )
                 }
             }
         }

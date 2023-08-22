@@ -130,7 +130,7 @@ internal class RealNoteRepository @Inject constructor(
         return notesDao.observePagedUserNotes(pubKey.key.hex())
     }
 
-    override fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, NoteWithUser> {
+    override fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, EventEntity> {
         return notesDao.observePagedThreadNotes(noteId.hex)
     }
 

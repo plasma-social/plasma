@@ -45,7 +45,7 @@ class FakeNoteRepository : NoteRepository {
         TODO("Not yet implemented")
     }
 
-    override fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, NoteWithUser> {
+    override fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, EventEntity> {
         TODO("Not yet implemented")
     }
 

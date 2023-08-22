@@ -13,6 +13,7 @@ import com.slack.circuit.foundation.onNavEvent
 import com.slack.circuit.retained.produceRetainedState
 import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.Screen
 import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -22,6 +23,8 @@ import kotlinx.coroutines.launch
 import social.plasma.features.feeds.presenters.R
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiEvent
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
+import social.plasma.features.feeds.screens.feeditems.notes.NoteScreen
+import social.plasma.models.Event
 import social.plasma.models.EventModel
 import social.plasma.shared.utils.api.StringManager
 import kotlin.math.min
@@ -30,13 +33,16 @@ class EventFeedPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     @Assisted private val navigator: Navigator,
     @Assisted private val pagingData: Flow<PagingData<EventModel>>,
+    @Assisted private val screenProvider: EventFeedUiScreenProvider,
 ) : Presenter<EventFeedUiState> {
 
     @Composable
     override fun present(): EventFeedUiState {
+        val coroutineScope = rememberCoroutineScope()
+
         val listState = rememberLazyListState()
 
-        val currentVisibleIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+        val currentVisibleIndex by rememberRetained { derivedStateOf { listState.firstVisibleItemIndex } }
 
         var currentFeedItemCount by rememberRetained { mutableStateOf(0) }
 
@@ -76,29 +82,23 @@ class EventFeedPresenter @AssistedInject constructor(
                 )
             }
         }
-
-        val coroutineScope = rememberCoroutineScope()
-
-
-        val state = rememberRetained(listState, pagingData, unseenItemCount, refreshText) {
-            EventFeedUiState(
-                listState = listState,
-                items = pagingData,
-                displayRefreshButton = unseenItemCount > 0,
-                refreshText = refreshText,
-            ) { event ->
-                when (event) {
-                    is EventFeedUiEvent.OnFeedCountChange -> currentFeedItemCount = event.itemCount
-                    EventFeedUiEvent.OnRefreshButtonClick -> coroutineScope.launch {
-                        listState.scrollToItem(0)
-                    }
-
-                    is EventFeedUiEvent.OnChildNavEvent -> navigator.onNavEvent(event.navEvent)
+       
+        return EventFeedUiState(
+            listState = listState,
+            items = pagingData,
+            displayRefreshButton = unseenItemCount > 0,
+            refreshText = refreshText,
+            screenProvider = screenProvider,
+        ) { event ->
+            when (event) {
+                is EventFeedUiEvent.OnFeedCountChange -> currentFeedItemCount = event.itemCount
+                EventFeedUiEvent.OnRefreshButtonClick -> coroutineScope.launch {
+                    listState.scrollToItem(0)
                 }
+
+                is EventFeedUiEvent.OnChildNavEvent -> navigator.onNavEvent(event.navEvent)
             }
         }
-
-        return state
     }
 
     companion object {
@@ -110,7 +110,25 @@ class EventFeedPresenter @AssistedInject constructor(
         fun create(
             navigator: Navigator,
             pagingData: Flow<PagingData<EventModel>>,
+            screenProvider: (EventModel) -> Screen = EventFeedDefaults.defaultScreenProvider,
         ): EventFeedPresenter
     }
 
 }
+
+object EventFeedDefaults {
+    val noteCardKinds = setOf(
+        Event.Kind.Repost,
+        Event.Kind.Note,
+        Event.Kind.Audio,
+    )
+
+    val defaultScreenProvider = { event: EventModel ->
+        when (event.kind) {
+            in noteCardKinds -> NoteScreen(event)
+            else -> throw IllegalArgumentException("Unknown event kind: ${event.kind}")
+        }
+    }
+}
+
+typealias EventFeedUiScreenProvider = (EventModel) -> Screen

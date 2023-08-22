@@ -13,6 +13,7 @@ sealed interface NoteUiState : CircuitUiState {
 
     data class Loaded(
         val noteCard: FeedItem.NoteCard,
+        val style: NoteScreen.NoteStyle = NoteScreen.NoteStyle.ElevatedCard,
         val onEvent: (NoteUiEvent) -> Unit,
     ) : NoteUiState
 }

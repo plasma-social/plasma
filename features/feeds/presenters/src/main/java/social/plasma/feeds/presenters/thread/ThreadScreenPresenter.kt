@@ -2,40 +2,35 @@ package social.plasma.feeds.presenters.thread
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.paging.PagingConfig
-import androidx.paging.map
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import social.plasma.domain.interactors.SyncThreadEvents
 import social.plasma.domain.observers.ObservePagedThreadFeed
+import social.plasma.domain.observers.toEventModel
 import social.plasma.features.feeds.presenters.R
-import social.plasma.features.feeds.screens.feed.FeedItem
-import social.plasma.features.feeds.screens.threads.ThreadItem
+import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.screens.threads.ThreadScreen
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiEvent
 import social.plasma.features.feeds.screens.threads.ThreadScreenUiState
-import social.plasma.feeds.presenters.feed.FeedPresenter
-import social.plasma.opengraph.OpenGraphMetadata
-import social.plasma.opengraph.OpenGraphParser
+import social.plasma.feeds.presenters.feed.ThreadFeedStateProducer
+import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.utils.api.StringManager
-import timber.log.Timber
-import java.net.MalformedURLException
-import java.net.URL
 
 class ThreadScreenPresenter @AssistedInject constructor(
-    feedPresenterFactory: FeedPresenter.Factory,
+    private val feedStateProducerFactory: ThreadFeedStateProducer.Factory,
+    private val noteRepository: NoteRepository,
     private val observePagedThreadFeed: ObservePagedThreadFeed,
     private val syncThreadEvents: SyncThreadEvents,
     private val stringManager: StringManager,
-    private val openGraphParser: OpenGraphParser,
     @Assisted private val args: ThreadScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ThreadScreenUiState> {
@@ -50,58 +45,31 @@ class ThreadScreenPresenter @AssistedInject constructor(
         )
     }
 
-    private val feedPresenter = feedPresenterFactory.create(navigator, pagingFlow)
-    private val getOpenGraphMetadata: suspend (String) -> OpenGraphMetadata? =
-        {
-            try {
-                openGraphParser.parse(URL(it))
-            } catch (e: MalformedURLException) {
-                Timber.w(e)
-                null
-            }
-        }
-
     @Composable
     override fun present(): ThreadScreenUiState {
         LaunchedEffect(Unit) {
             syncThreadEvents.executeSync(SyncThreadEvents.Params(args.noteId))
         }
 
-        val feedPresenterState = feedPresenter.present()
+        val anchorNote by remember {
+            noteRepository.observeEventById(args.noteId).map { it?.toEventModel() }
+        }.collectAsState(initial = null)
 
-        val pagingFlow by produceState(
-            initialValue = emptyFlow(),
-            feedPresenterState.pagingFlow
-        ) {
-            var rootAdded = false
-            value = feedPresenterState.pagingFlow.map { pagingData ->
-                pagingData.map { feedItem ->
-                    when (feedItem) {
-                        is FeedItem.NoteCard -> {
-                            if (feedItem.id == args.noteId.hex) {
-                                ThreadItem.RootNote(
-                                    noteUiModel = feedItem
-                                ).also { rootAdded = true }
-                            } else {
-                                ThreadItem.LeafNote(
-                                    noteUiModel = feedItem,
-                                    showConnector = !rootAdded,
-                                )
-                            }
-                        }
-                    }
-                }
+
+        val feedStateProducer = remember(anchorNote) {
+            anchorNote?.let {
+                feedStateProducerFactory.create(eventModel = it)
             }
         }
 
+        val feedUiState = feedStateProducer?.invoke(navigator, pagingFlow)
+
         return ThreadScreenUiState(
             title = stringManager[R.string.thread],
-            pagingFlow = pagingFlow,
-            getOpenGraphMetadata = getOpenGraphMetadata,
+            eventFeedUiState = feedUiState ?: EventFeedUiState.Empty,
         ) { event ->
             when (event) {
                 ThreadScreenUiEvent.OnBackClick -> navigator.pop()
-                is ThreadScreenUiEvent.OnFeedEvent -> feedPresenterState.onEvent(event.feedUiEvent)
             }
         }
     }

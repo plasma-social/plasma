@@ -2,15 +2,15 @@ package social.plasma.opengraph
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import java.net.URL
 import kotlin.coroutines.EmptyCoroutineContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class OpenGraphParserTest {
     @Test
+    @Ignore("Cant run on CI")
     fun `can parse from twitter`() = runTest {
         val metadata = ogParser().parse(URL("https://twitter.com/jack/status/20"))
 

@@ -56,8 +56,6 @@ import kotlinx.coroutines.launch
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
 import social.plasma.features.feeds.ui.EventFeedUi
 import social.plasma.features.profile.screens.ProfileUiEvent
-import social.plasma.features.profile.screens.ProfileUiEvent.OnNavigateBack
-import social.plasma.features.profile.screens.ProfileUiEvent.OnZapProfile
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
 import social.plasma.features.profile.screens.ProfileUiState.Loading
@@ -104,30 +102,35 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentPadding = PaddingValues(bottom = 8.dp),
-            ) {
-                item("appbar") {
-                    ProfileAppBar(
-                        onNavigateBack = { onEvent(OnNavigateBack) },
-                        userData = uiState.userData,
-                        onZap = { sats -> onEvent(OnZapProfile(sats)) },
-                        showLightningIcon = uiState.showLightningIcon,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                headerContent = {
+                    item("appbar") {
+                        ProfileAppBar(
+                            onNavigateBack = { onEvent(ProfileUiEvent.OnNavigateBack) },
+                            userData = uiState.userData,
+                            onZap = { sats -> onEvent(ProfileUiEvent.OnZapProfile(sats)) },
+                            showLightningIcon = uiState.showLightningIcon,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                item("bio") {
-                    ProfileBio(userData = uiState.userData,
-                        isNip5Valid = uiState.isNip5Valid,
-                        following = uiState.following,
-                        onFollowClick = withHapticFeedBack {
-                            onEvent(ProfileUiEvent.OnFollowButtonClicked)
-                        })
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
+                    item("bio") {
+                        ProfileBio(userData = uiState.userData,
+                            isNip5Valid = uiState.isNip5Valid,
+                            following = uiState.following,
+                            onFollowClick = withHapticFeedBack {
+                                onEvent(ProfileUiEvent.OnFollowButtonClicked)
+                            })
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
 
-                item("stats") {
-                    ProfileStatsRow(uiState.statCards)
-                    Spacer(modifier = Modifier.height(32.dp))
+                    item("stats") {
+                        ProfileStatsRow(uiState.statCards)
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                }
+            ) { feedItem ->
+                Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    feedItem()
                 }
             }
 
@@ -326,7 +329,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
     @Composable
     private fun ProfileStatsRow(statCards: List<Loaded.ProfileStat>) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 8.dp)
         ) {
             statCards.forEachIndexed { index, (label, value) ->
                 StatCard(modifier = Modifier.weight(1f), label = label, value = value)
@@ -370,6 +373,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
                 refreshText = "Refresh",
                 listState = LazyListState(),
                 displayRefreshButton = false,
+                screenProvider = { TODO() },
                 onEvent = {}
             ),
             statCards = listOf(
