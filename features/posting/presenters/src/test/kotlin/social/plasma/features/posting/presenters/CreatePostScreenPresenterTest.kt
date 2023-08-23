@@ -23,10 +23,10 @@ import social.plasma.features.posting.screens.CreatePostUiEvent.OnNoteChange
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnSubmitPost
 import social.plasma.features.posting.screens.CreatePostUiEvent.OnUserSuggestionTapped
 import social.plasma.models.NoteId
-import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
 import social.plasma.models.TagSuggestion
 import social.plasma.models.UserMetadataEntity
+import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
@@ -241,16 +241,15 @@ class CreatePostScreenPresenterTest {
         }
     }
 
-    private fun createNoteEntity(): NoteView {
-        return NoteView(
+    private fun createNoteEntity(): EventEntity {
+        return EventEntity(
             id = "test",
             content = "test",
-            reactionCount = 0,
-            isReply = false,
             createdAt = Instant.now().epochSecond,
             kind = 1,
             pubkey = pubKey.hex(),
             tags = emptyList(),
+            sig = "",
         )
     }
 

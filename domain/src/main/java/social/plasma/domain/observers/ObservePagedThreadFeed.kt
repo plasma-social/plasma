@@ -31,6 +31,5 @@ class ObservePagedThreadFeed @Inject constructor(
         val noteId: NoteId,
         override val pagingConfig: PagingConfig,
         val initialKey: Int? = null,
-    ) : Parameters<EventModel> {
-    }
+    ) : Parameters<EventModel>
 }

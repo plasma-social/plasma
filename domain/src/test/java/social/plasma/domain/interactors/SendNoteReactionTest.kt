@@ -19,8 +19,8 @@ import social.plasma.domain.InvokeStatus
 import social.plasma.domain.InvokeSuccess
 import social.plasma.models.Event
 import social.plasma.models.NoteId
-import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
+import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
@@ -127,18 +127,16 @@ class SendNoteReactionTest {
     private fun createNote(
         id: String = NOTE_ID.hex,
         pubKey: String = PUBKEY.key.hex(),
-        isReply: Boolean = false,
         tags: List<List<String>> = emptyList(),
     ) = NoteWithUser(
-        userMetadataEntity = null, noteEntity = NoteView(
+        userMetadataEntity = null, noteEntity = EventEntity(
             id = id,
-            "",
-            Instant.now().epochSecond,
-            isReply = isReply,
+            content = "",
+            createdAt = Instant.now().epochSecond,
             pubkey = pubKey,
             tags = tags,
-            reactionCount = 0,
             kind = 1,
+            sig = "",
         )
     )
 
