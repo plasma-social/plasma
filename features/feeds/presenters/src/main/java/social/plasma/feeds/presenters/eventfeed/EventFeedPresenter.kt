@@ -5,13 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.paging.PagingData
 import com.slack.circuit.foundation.onNavEvent
 import com.slack.circuit.retained.produceRetainedState
-import com.slack.circuit.retained.rememberRetained
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.Screen
 import com.slack.circuit.runtime.presenter.Presenter
@@ -42,9 +42,9 @@ class EventFeedPresenter @AssistedInject constructor(
 
         val listState = rememberLazyListState()
 
-        val currentVisibleIndex by rememberRetained { derivedStateOf { listState.firstVisibleItemIndex } }
+        val currentVisibleIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
-        var currentFeedItemCount by rememberRetained { mutableStateOf(0) }
+        var currentFeedItemCount by remember { mutableStateOf(0) }
 
         val initialFeedCount by produceRetainedState(
             initialValue = 0,
@@ -60,7 +60,7 @@ class EventFeedPresenter @AssistedInject constructor(
             }
         }
 
-        val unseenItemCount by produceRetainedState(
+        val unseenItemCount by produceState(
             initialValue = 0,
             currentVisibleIndex,
             currentFeedItemCount,
@@ -82,7 +82,7 @@ class EventFeedPresenter @AssistedInject constructor(
                 )
             }
         }
-       
+
         return EventFeedUiState(
             listState = listState,
             items = pagingData,
