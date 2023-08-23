@@ -62,9 +62,8 @@ interface NotesDao {
         noteId: String,
     ): Boolean
 
-    @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE id = :noteId")
+    @Query("SELECT * FROM events WHERE id = :noteId")
     suspend fun getById(noteId: String): NoteWithUser?
 
     @Transaction
@@ -113,13 +112,6 @@ interface NotesDao {
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
-        "SELECT n.* FROM noteview n WHERE content LIKE :query AND kind = ${Event.Kind.Note} AND NOT is_reply"
-    )
-    fun observePagedNotesWithContent(query: String): PagingSource<Int, NoteWithUser>
-
-    @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query(
         """
         SELECT * FROM events
         INNER JOIN hashtag_ref
@@ -145,9 +137,8 @@ interface NotesDao {
     )
     fun observeHashTagNoteCount(hashtag: String, since: Long): Flow<Long>
 
-    @Transaction
     @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT * FROM noteview WHERE id = :noteId")
+    @Query("SELECT * FROM events WHERE id = :noteId")
     fun observeById(noteId: String): Flow<NoteWithUser?>
 
     @Query("SELECT * FROM events WHERE id = :noteId")

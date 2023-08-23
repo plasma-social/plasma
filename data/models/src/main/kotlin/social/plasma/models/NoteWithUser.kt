@@ -2,10 +2,11 @@ package social.plasma.models
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import social.plasma.models.events.EventEntity
 
 data class NoteWithUser(
     @Embedded
-    val noteEntity: NoteView,
+    val noteEntity: EventEntity,
 
     @Relation(
         parentColumn = "pubkey",

@@ -14,9 +14,9 @@ import social.plasma.domain.InvokeSuccess
 import social.plasma.models.EventTag
 import social.plasma.models.HashTag
 import social.plasma.models.NoteId
-import social.plasma.models.NoteView
 import social.plasma.models.NoteWithUser
 import social.plasma.models.PubKeyTag
+import social.plasma.models.events.EventEntity
 import social.plasma.shared.repositories.fakes.FakeNoteRepository
 import java.time.Instant
 
@@ -154,7 +154,6 @@ class SendNoteTest {
                 listOf("p", "762a3c15c6fa90911bf13d50fc3a29f1663dc1f04b4397a89eef604f622ecd60"),
                 listOf("p", "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2"),
             ),
-            isReply = true,
         )
 
         sendNote(
@@ -202,18 +201,16 @@ class SendNoteTest {
     private fun createNote(
         id: String = NOTE_ID.hex,
         pubKey: String = PUBKEY.key.hex(),
-        isReply: Boolean = false,
         tags: List<List<String>> = emptyList(),
     ) = NoteWithUser(
-        userMetadataEntity = null, noteEntity = NoteView(
+        userMetadataEntity = null, noteEntity = EventEntity(
             id = id,
-            "",
-            Instant.now().epochSecond,
-            isReply = isReply,
+            content = "",
+            createdAt = Instant.now().epochSecond,
             pubkey = pubKey,
             tags = tags,
-            reactionCount = 0,
             kind = 1,
+            sig = "",
         )
     )
 
