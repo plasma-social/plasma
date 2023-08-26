@@ -65,7 +65,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
     private val metadataInitialState =
         ProfileUiState.Loaded.UserData(
-            petName = args.pubKeyHex,
+            displayName = args.pubKeyHex,
             username = null,
             about = null,
             nip5Identifier = null,
@@ -145,7 +145,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
         val userData by produceState(initialValue = metadataInitialState, metadata) {
             metadata?.let {
                 value = ProfileUiState.Loaded.UserData(
-                    petName = metadata!!.displayName ?: pubKey.shortBech32(),
+                    displayName = metadata!!.displayName ?: pubKey.shortBech32(),
                     banner = metadata!!.banner
                         ?: "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
                     website = metadata!!.website,

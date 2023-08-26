@@ -23,7 +23,7 @@ sealed interface ProfileUiState : CircuitUiState {
         data class UserData(
             val banner: String,
             val website: String?,
-            val petName: String,
+            val displayName: String,
             val username: String?,
             val publicKey: PubKey,
             val about: String?,
