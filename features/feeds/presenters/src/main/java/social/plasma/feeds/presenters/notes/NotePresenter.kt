@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
-import okio.ByteString.Companion.toByteString
 import shortBech32
 import social.plasma.common.screens.AndroidScreens
 import social.plasma.domain.interactors.GetLightningInvoice
@@ -55,7 +54,6 @@ import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
 import social.plasma.models.UserMetadataEntity
-import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.repositories.api.NoteRepository
 import social.plasma.shared.repositories.api.UserMetadataRepository
 import social.plasma.shared.utils.api.InstantFormatter
@@ -70,7 +68,6 @@ class NotePresenter @AssistedInject constructor(
     private val repostNote: RepostNote,
     private val stringManager: StringManager,
     private val userMetaDataRepository: UserMetadataRepository,
-    private val accountStateRepository: AccountStateRepository,
     private val noteRepository: NoteRepository,
     private val getLightningInvoice: GetLightningInvoice,
     private val sendNoteReaction: SendNoteReaction,
@@ -126,11 +123,9 @@ class NotePresenter @AssistedInject constructor(
         eventPubkeyMetadata: UserMetadataEntity?,
         noteContent: List<ContentBlock>,
     ): NoteUiState.Loaded {
-        val myPubkey = remember { PubKey(accountStateRepository.getPublicKey()!!.toByteString()) }
-
-        val isNoteLiked by produceState(initialValue = false, note) {
-            value = noteRepository.isNoteLiked(myPubkey, NoteId(note.id))
-        }
+        val isNoteLiked by remember(note.id) { noteRepository.isNoteLiked(NoteId(note.id)) }.collectAsState(
+            initial = false
+        )
 
         val likeCount by remember {
             noteRepository.observeLikeCount(NoteId(note.id))

@@ -28,7 +28,7 @@ interface NoteRepository {
     fun observePagedThreadNotes(noteId: NoteId): PagingSource<Int, EventEntity>
 
     suspend fun refreshContactsNotes(): List<NoteWithUser>
-    suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean
+    fun isNoteLiked(noteId: NoteId): Flow<Boolean>
 
     fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity>
     fun observeHashTagNoteCount(hashtag: HashTag, since: Instant?): Flow<Long>
