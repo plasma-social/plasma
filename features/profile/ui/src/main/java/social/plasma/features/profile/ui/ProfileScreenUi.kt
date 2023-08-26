@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import app.cash.nostrino.crypto.PubKey
 import coil.compose.AsyncImage
+import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuit.overlay.LocalOverlayHost
 import com.slack.circuit.runtime.ui.Ui
 import kotlinx.coroutines.flow.emptyFlow
@@ -72,6 +74,7 @@ import social.plasma.ui.components.withHapticFeedBack
 import social.plasma.ui.overlays.getZapAmount
 import social.plasma.ui.rememberStableCoroutineScope
 import social.plasma.ui.theme.PlasmaTheme
+import java.util.UUID
 import javax.inject.Inject
 
 class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
@@ -276,20 +279,22 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        userData.petName,
+                        userData.displayName,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium,
                     )
                     userData.username?.let {
                         Text(
                             it,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
 
                 AnimatedContent(targetState = following, label = "") { isFollowing ->
                     when (isFollowing) {
@@ -349,7 +354,9 @@ private fun PreviewProfile(
     @PreviewParameter(ProfilePreviewProvider::class) uiState: ProfileUiState,
 ) {
     PlasmaTheme {
-        ProfileScreenUi().Content(state = uiState, modifier = Modifier)
+        ContentWithOverlays {
+            ProfileScreenUi().Content(state = uiState, modifier = Modifier)
+        }
     }
 }
 
@@ -359,12 +366,14 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
         createFakeProfile(nip5 = null),
         createFakeProfile(username = null),
         createFakeProfile(username = null, nip5 = null),
+        createFakeProfile(displayName = UUID.randomUUID().toString().repeat(10)),
         Loading,
     )
 
     private fun createFakeProfile(
         nip5: String? = "plasma.social",
         username: String? = "@satoshi",
+        displayName: String = "Satoshi Nakamoto",
     ): ProfileUiState =
         Loaded(
             showLightningIcon = true,
@@ -392,7 +401,7 @@ class ProfilePreviewProvider : PreviewParameterProvider<ProfileUiState> {
             ),
             userData = Loaded.UserData(
                 nip5Identifier = nip5,
-                petName = "Satoshi",
+                displayName = displayName,
                 username = username,
                 publicKey = PubKey.parse("npub1jem3jmdve9h94snjkuf5egagk7uupgxtu0eru33mzyms8ctzlk9sjhk73a"),
                 about = "Developer @ a peer-to-peer electronic cash system",
