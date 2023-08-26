@@ -5,6 +5,7 @@ import app.cash.nostrino.crypto.PubKey
 import app.cash.turbine.Turbine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.getAndUpdate
 import social.plasma.models.HashTag
 import social.plasma.models.NoteId
@@ -53,8 +54,8 @@ class FakeNoteRepository : NoteRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
-        return false
+    override fun isNoteLiked(noteId: NoteId): Flow<Boolean> {
+        return flowOf(false)
     }
 
     override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity> {

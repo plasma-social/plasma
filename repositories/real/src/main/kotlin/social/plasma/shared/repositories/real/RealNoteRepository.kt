@@ -4,12 +4,15 @@ import androidx.paging.PagingSource
 import app.cash.nostrino.crypto.PubKey
 import app.cash.nostrino.crypto.SecKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import social.plasma.data.daos.EventsDao
 import social.plasma.data.daos.NotesDao
@@ -67,10 +70,7 @@ internal class RealNoteRepository @Inject constructor(
             .filter { it.subscriptionId == unsubscribeMessage.subscriptionId }
             .onEach { relayMessage ->
                 eventsDao.insert(listOf(relayMessage.event.toEventEntity()))
-            }
-            .onCompletion { relay.unsubscribe(unsubscribeMessage) }
-            .flowOn(ioDispatcher)
-            .first()
+            }.onCompletion { relay.unsubscribe(unsubscribeMessage) }.flowOn(ioDispatcher).first()
     }
 
     private fun Event.toEventEntity() = EventEntity(
@@ -98,9 +98,7 @@ internal class RealNoteRepository @Inject constructor(
         )
 
         relay.sendNote(
-            content,
-            tags = nostrTags,
-            secKey = secKey
+            content, tags = nostrTags, secKey = secKey
         )
     }
 
@@ -139,8 +137,13 @@ internal class RealNoteRepository @Inject constructor(
         return emptyList()
     }
 
-    override suspend fun isNoteLiked(byPubKey: PubKey, noteId: NoteId): Boolean {
-        return notesDao.isNoteLiked(byPubKey.key.hex(), noteId.hex)
+    override fun isNoteLiked(noteId: NoteId): Flow<Boolean> = flow {
+        val pubKey = getPublicKeySuspended()
+        emitAll(notesDao.isNoteLiked(pubKey, noteId.hex))
+    }
+
+    private suspend fun getPublicKeySuspended(): String = withContext(ioDispatcher) {
+        PubKey(accountStateRepository.getPublicKey()!!.toByteString()).hex()
     }
 
     override fun observePagedHashTagNotes(hashtag: HashTag): PagingSource<Int, EventEntity> {

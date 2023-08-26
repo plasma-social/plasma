@@ -15,8 +15,8 @@ android {
         applicationId = "social.plasma"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 27
-        versionName = "0.0.27"
+        versionCode = 28
+        versionName = "0.0.28"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -57,10 +57,10 @@ interface NotesDao {
         )
         """
     )
-    suspend fun isNoteLiked(
+    fun isNoteLiked(
         pubkey: String,
         noteId: String,
-    ): Boolean
+    ): Flow<Boolean>
 
     @RewriteQueriesToDropUnusedColumns
     @Query("SELECT * FROM events WHERE id = :noteId")
