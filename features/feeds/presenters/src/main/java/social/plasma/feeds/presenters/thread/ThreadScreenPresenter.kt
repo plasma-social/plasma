@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.paging.PagingConfig
 import com.slack.circuit.runtime.Navigator
@@ -13,6 +14,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import social.plasma.data.daos.NotesDao
 import social.plasma.domain.interactors.SyncThreadEvents
 import social.plasma.domain.observers.ObservePagedThreadFeed
 import social.plasma.domain.observers.toEventModel
@@ -29,24 +31,36 @@ class ThreadScreenPresenter @AssistedInject constructor(
     private val feedStateProducerFactory: ThreadFeedStateProducer.Factory,
     private val noteRepository: NoteRepository,
     private val observePagedThreadFeed: ObservePagedThreadFeed,
+    private val notesDao: NotesDao,
     private val syncThreadEvents: SyncThreadEvents,
     private val stringManager: StringManager,
     @Assisted private val args: ThreadScreen,
     @Assisted private val navigator: Navigator,
 ) : Presenter<ThreadScreenUiState> {
-    private val pagingFlow = observePagedThreadFeed.flow.onStart {
-        observePagedThreadFeed(
-            ObservePagedThreadFeed.Params(
-                noteId = args.noteId,
-                pagingConfig = PagingConfig(
-                    pageSize = 10,
-                )
-            )
-        )
-    }
+
 
     @Composable
     override fun present(): ThreadScreenUiState {
+        val initialScrollIndex by produceState<Int?>(initialValue = null) {
+            value = notesDao.getThreadNoteIndex(args.noteId.hex).dec().coerceAtLeast(0)
+        }
+
+        val pagingFlow = remember(initialScrollIndex) {
+            val initialKey = initialScrollIndex ?: return@remember observePagedThreadFeed.flow
+
+            observePagedThreadFeed.flow.onStart {
+                observePagedThreadFeed(
+                    ObservePagedThreadFeed.Params(
+                        noteId = args.noteId,
+                        pagingConfig = PagingConfig(
+                            pageSize = 20,
+                        ),
+                        initialKey = initialKey,
+                    )
+                )
+            }
+        }
+
         LaunchedEffect(Unit) {
             syncThreadEvents.executeSync(SyncThreadEvents.Params(args.noteId))
         }
@@ -56,10 +70,13 @@ class ThreadScreenPresenter @AssistedInject constructor(
         }.collectAsState(initial = null)
 
 
-        val feedStateProducer = remember(anchorNote) {
-            anchorNote?.let {
-                feedStateProducerFactory.create(eventModel = it)
-            }
+        val feedStateProducer = remember(anchorNote, initialScrollIndex) {
+            if (anchorNote == null || initialScrollIndex == null) return@remember null
+
+            feedStateProducerFactory.create(
+                eventModel = anchorNote!!,
+                initialIndex = initialScrollIndex!!
+            )
         }
 
         val feedUiState = feedStateProducer?.invoke(navigator, pagingFlow)
