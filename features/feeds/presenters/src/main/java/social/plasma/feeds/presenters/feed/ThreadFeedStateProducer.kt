@@ -17,6 +17,7 @@ import social.plasma.models.EventModel
 class ThreadFeedStateProducer @AssistedInject constructor(
     private val feedPresenterFactory: EventFeedPresenter.Factory,
     @Assisted private val anchorNote: EventModel,
+    @Assisted private val initialIndex: Int,
 ) : FeedStateProducer {
 
     private val screenProvider: (EventModel) -> Screen = { model ->
@@ -48,13 +49,15 @@ class ThreadFeedStateProducer @AssistedInject constructor(
     ): EventFeedUiState = feedPresenterFactory.create(
         navigator,
         pagingFlow,
-        screenProvider = screenProvider
+        screenProvider = screenProvider,
+        initialIndex = initialIndex,
     ).present()
 
     @AssistedFactory
     interface Factory {
         fun create(
             eventModel: EventModel,
+            initialIndex: Int = 0,
         ): ThreadFeedStateProducer
     }
 }

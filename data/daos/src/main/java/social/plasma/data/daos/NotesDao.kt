@@ -109,6 +109,36 @@ interface NotesDao {
         kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Audio),
     ): PagingSource<Int, EventEntity>
 
+    @Query(
+        """
+            WITH RECURSIVE RecursiveEvents AS (
+                SELECT target_event AS event_id, 1 AS level
+                FROM event_ref
+                WHERE source_event = :noteId
+            
+                UNION ALL
+            
+                SELECT er.target_event, re.level + 1
+                FROM event_ref er
+                JOIN RecursiveEvents re ON er.source_event = re.event_id
+                WHERE re.level < $THREAD_DEPTH_LIMIT  
+            )
+    
+            SELECT COUNT(*)
+            FROM events
+            WHERE kind in (:kinds)
+            AND (
+                id IN (SELECT event_id FROM RecursiveEvents) -- notes before the selected leaf
+            )
+            ORDER BY created_at
+    """
+    )
+    // Returns the index of the note in a thread, starting from 0. If the note doesn't exist, returns 0
+    suspend fun getThreadNoteIndex(
+        noteId: String,
+        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Audio),
+    ): Int
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(

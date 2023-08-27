@@ -34,13 +34,14 @@ class EventFeedPresenter @AssistedInject constructor(
     @Assisted private val navigator: Navigator,
     @Assisted private val pagingData: Flow<PagingData<EventModel>>,
     @Assisted private val screenProvider: EventFeedUiScreenProvider,
+    @Assisted private val initialIndex: Int,
 ) : Presenter<EventFeedUiState> {
 
     @Composable
     override fun present(): EventFeedUiState {
         val coroutineScope = rememberCoroutineScope()
 
-        val listState = rememberLazyListState()
+        val listState =  rememberLazyListState(initialIndex)
 
         val currentVisibleIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
@@ -111,6 +112,7 @@ class EventFeedPresenter @AssistedInject constructor(
             navigator: Navigator,
             pagingData: Flow<PagingData<EventModel>>,
             screenProvider: (EventModel) -> Screen = EventFeedDefaults.defaultScreenProvider,
+            initialIndex: Int = 0,
         ): EventFeedPresenter
     }
 
