@@ -1,6 +1,7 @@
 package social.plasma.feeds.presenters
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,11 +18,13 @@ import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiEve
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiEvent.OnToolbarAvatarTapped
 import social.plasma.features.feeds.screens.notifications.NotificationsFeedUiState
 import social.plasma.features.profile.screens.ProfileScreen
+import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.utils.api.StringManager
 
 class NotificationsFeedPresenter @AssistedInject constructor(
     private val stringManager: StringManager,
     private val observeCurrentUserMetadata: ObserveCurrentUserMetadata,
+    private val accountStateRepository: AccountStateRepository,
     @Assisted private val navigator: Navigator,
 ) : Presenter<NotificationsFeedUiState> {
 
@@ -32,6 +35,15 @@ class NotificationsFeedPresenter @AssistedInject constructor(
     @Composable
     override fun present(): NotificationsFeedUiState {
         val currentUserMetadata by remember { userMetadataFlow }.collectAsState(null)
+
+        DisposableEffect(Unit) {
+            accountStateRepository.updateLastNotificationSeen()
+
+            onDispose {
+                // clears any notifications that may have arrived after the notification screen was opened
+                accountStateRepository.updateLastNotificationSeen()
+            }
+        }
 
         return NotificationsFeedUiState(
             title = stringManager[R.string.notifications],

@@ -12,6 +12,8 @@ import social.plasma.models.events.EventEntity
 
 private const val THREAD_DEPTH_LIMIT = 100
 
+private val notificationKinds = setOf(Event.Kind.Note, Event.Kind.Repost)
+
 @Dao
 interface NotesDao {
     @Transaction
@@ -66,17 +68,29 @@ interface NotesDao {
     @Query("SELECT * FROM events WHERE id = :noteId")
     suspend fun getById(noteId: String): NoteWithUser?
 
-    @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
         "SELECT n.* FROM events n " +
                 "LEFT JOIN pubkey_ref pr ON pr.source_event = n.id " +
-                "WHERE pr.pubkey = :pubKey AND n.kind in(:kinds) ORDER BY n.created_at DESC"
+                "WHERE pr.pubkey = :pubKey AND n.kind in(:kinds) AND n.pubkey != :pubKey  " +
+                "ORDER BY n.created_at DESC"
     )
     fun observePagedNotifications(
         pubKey: String,
-        kinds: Set<Int> = setOf(Event.Kind.Note, Event.Kind.Repost),
+        kinds: Set<Int> = notificationKinds,
     ): PagingSource<Int, EventEntity>
+
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "SELECT n.* FROM events n " +
+                "LEFT JOIN pubkey_ref pr ON pr.source_event = n.id " +
+                "WHERE pr.pubkey = :pubKey AND n.kind in(:kinds) AND n.pubkey != :pubKey " +
+                "ORDER BY n.created_at DESC"
+    )
+    fun observeMostRecentNotification(
+        pubKey: String,
+        kinds: Set<Int> = notificationKinds,
+    ): Flow<EventEntity?>
 
     @Query(
         """

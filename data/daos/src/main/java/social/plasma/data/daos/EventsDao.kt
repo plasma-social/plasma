@@ -33,7 +33,7 @@ abstract class EventsDao {
 
             val pubkeyReferences = async {
                 events.flatMap { event ->
-                    event.tags.filter { it.firstOrNull() == "p" }.map {
+                    event.tags.filter { it.firstOrNull() == "p" && it.size > 1 }.map {
                         PubkeyReferenceEntity(
                             event.id,
                             pubkey = it[1],

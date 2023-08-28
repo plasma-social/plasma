@@ -1,6 +1,7 @@
 package social.plasma.shared.repositories.api
 
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 interface AccountStateRepository {
     val isLoggedIn: Flow<Boolean>
@@ -14,4 +15,8 @@ interface AccountStateRepository {
     fun getPublicKey(): ByteArray?
 
     fun getSecretKey(): ByteArray?
+
+    fun observeLastNotificationSeenTimestamp(): Flow<Instant>
+
+    fun updateLastNotificationSeen()
 }

@@ -35,5 +35,6 @@ interface NoteRepository {
 
     fun observePagedContactsEvents(): PagingSource<Int, EventEntity>
     fun observeLikeCount(noteId: NoteId): Flow<Long>
+    fun observeMostRecentNotification(pubkey: PubKey): Flow<EventEntity?>
 }
 

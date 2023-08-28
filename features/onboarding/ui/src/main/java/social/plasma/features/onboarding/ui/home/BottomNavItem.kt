@@ -11,4 +11,5 @@ data class BottomNavItem(
     val screen: Screen,
     @DrawableRes val icon: Int,
     @StringRes val label: Int,
+    val showBadge: Boolean = false,
 ) : Parcelable
