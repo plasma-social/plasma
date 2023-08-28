@@ -16,6 +16,7 @@ import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
@@ -32,6 +33,7 @@ import social.plasma.domain.interactors.SyncProfileData
 import social.plasma.domain.interactors.UnfollowPubkey
 import social.plasma.domain.observers.ObserveFollowingCount
 import social.plasma.domain.observers.ObservePagedProfileFeed
+import social.plasma.domain.observers.ObserveRelayCount
 import social.plasma.domain.observers.ObserveUserIsInContacts
 import social.plasma.domain.observers.ObserveUserMetadata
 import social.plasma.features.profile.screens.ProfileScreen
@@ -45,6 +47,7 @@ import social.plasma.shared.utils.api.NumberFormatter
 
 class ProfileScreenPresenter @AssistedInject constructor(
     private val observeFollowingCount: ObserveFollowingCount,
+    private val observeRelayCount: ObserveRelayCount,
     private val observeUserMetadata: ObserveUserMetadata,
     private val observePagedProfileFeed: ObservePagedProfileFeed,
     private val syncProfileData: SyncProfileData,
@@ -88,7 +91,11 @@ class ProfileScreenPresenter @AssistedInject constructor(
 
     private val contactsCount = observeFollowingCount.flow.onStart {
         observeFollowingCount(pubKey)
-    }
+    }.map { numberFormatter.format(it) }
+
+    private val relayCountFlow = observeRelayCount.flow.onStart {
+        observeRelayCount(pubKey)
+    }.map { numberFormatter.format(it) }
 
     private val userIsInMyContacts = observeUserIsInContacts.flow.onStart {
         observeUserIsInContacts(
@@ -110,11 +117,10 @@ class ProfileScreenPresenter @AssistedInject constructor(
         }
 
         val metadata by remember { observeUserMetadata.flow }.collectAsState(initial = null)
-        val followingCount by contactsCount.collectAsState(initial = 0)
-        val formattedFollowingCount = remember(followingCount) {
-            numberFormatter.format(followingCount)
-        }
-        val followerCount by produceState(initialValue = "\uD83E\uDD37") {
+        val followingCount by contactsCount.collectAsState(initial = "0")
+        val relayCount by relayCountFlow.collectAsState(initial = "0")
+
+        val followerCount by produceState(initialValue = "?") {
             val countResult = getPubkeyFollowerCount.executeSync(
                 GetPubkeyFollowerCount.Params(pubKey)
             )
@@ -166,7 +172,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
             statCards = listOf(
                 ProfileStat(
                     label = "Following",
-                    value = formattedFollowingCount,
+                    value = followingCount,
                 ),
                 ProfileStat(
                     label = "Followers",
@@ -174,7 +180,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 ),
                 ProfileStat(
                     label = "Relays",
-                    value = "11"
+                    value = relayCount,
                 )
             ),
             following = isProfileFollowedByMe,
