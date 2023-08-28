@@ -5,10 +5,11 @@ import android.util.Base64
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.Flow
 import social.plasma.shared.utils.api.Preference
 
 class ByteArrayPreference @AssistedInject constructor(
-    @Assisted private val key: String,
+    @Assisted override val key: String,
     private val sharedPreferences: SharedPreferences,
 ) : Preference<ByteArray> {
 
@@ -25,6 +26,10 @@ class ByteArrayPreference @AssistedInject constructor(
     override fun set(value: ByteArray) {
         val base64 = Base64.encodeToString(value, Base64.NO_WRAP)
         sharedPreferences.edit().putString(key, base64).apply()
+    }
+
+    override fun observe(default: ByteArray?): Flow<ByteArray?> {
+        return createObservable(sharedPreferences, default)
     }
 
     @AssistedFactory

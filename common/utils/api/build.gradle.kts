@@ -31,4 +31,6 @@ android {
     }
 }
 
-dependencies {}
+dependencies {
+    api(libs.coroutines.android)
+}

@@ -73,6 +73,10 @@ class FakeNoteRepository : NoteRepository {
     override fun observeLikeCount(noteId: NoteId): Flow<Long> {
         TODO("Not yet implemented")
     }
+
+    override fun observeMostRecentNotification(pubkey: PubKey): Flow<EventEntity?> {
+        return flowOf(null)
+    }
 }
 
 data class SendNoteEvent(

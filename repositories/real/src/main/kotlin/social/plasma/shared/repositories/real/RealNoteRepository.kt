@@ -112,6 +112,10 @@ internal class RealNoteRepository @Inject constructor(
         return notesDao.observeLikeCount(noteId.hex)
     }
 
+    override fun observeMostRecentNotification(pubkey: PubKey): Flow<EventEntity?> {
+        return notesDao.observeMostRecentNotification(pubkey.key.hex())
+    }
+
     override fun observePagedNotifications(): PagingSource<Int, EventEntity> {
         val pubkey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
 

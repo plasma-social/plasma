@@ -7,24 +7,23 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import social.plasma.shared.utils.api.Preference
 
-class StringPreference @AssistedInject constructor(
+class LongPreference @AssistedInject constructor(
     @Assisted override val key: String,
     private val sharedPreferences: SharedPreferences,
-) : Preference<String> {
-    override fun get(default: String?): String? = sharedPreferences.getString(key, default)
+) : Preference<Long> {
+    override fun get(default: Long?): Long = sharedPreferences.getLong(key, default ?: 0L)
 
     override fun isSet(): Boolean = sharedPreferences.contains(key)
 
     override fun remove() = sharedPreferences.edit().remove(key).apply()
 
-    override fun set(value: String) = sharedPreferences.edit().putString(key, value).apply()
+    override fun set(value: Long) =
+        sharedPreferences.edit().putLong(key, value).apply()
 
-    override fun observe(default: String?): Flow<String?> {
-        return createObservable(sharedPreferences, default)
-    }
+    override fun observe(default: Long?): Flow<Long?> = createObservable(sharedPreferences, default)
 
     @AssistedFactory
-    interface StringPreferenceFactory {
-        fun create(key: String): StringPreference
+    interface LongPreferenceFactory {
+        fun create(key: String): LongPreference
     }
 }

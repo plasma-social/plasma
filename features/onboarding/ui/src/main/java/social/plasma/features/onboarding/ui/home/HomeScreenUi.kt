@@ -1,5 +1,6 @@
 package social.plasma.features.onboarding.ui.home
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +46,7 @@ import social.plasma.ui.R as ComponentsR
 class HomeScreenUi : Ui<HomeUiState> {
     @Composable
     override fun Content(state: HomeUiState, modifier: Modifier) {
-        val bottomNavItems = remember {
+        val bottomNavItems = remember(state.showNotificationsBadge) {
             listOf(
                 BottomNavItem(
                     HomeFeeds,
@@ -57,7 +61,8 @@ class HomeScreenUi : Ui<HomeUiState> {
                 BottomNavItem(
                     NotificationsFeedScreen,
                     ComponentsR.drawable.ic_plasma_notifications_outline,
-                    R.string.notifications
+                    R.string.notifications,
+                    showBadge = state.showNotificationsBadge,
                 ),
             )
         }
@@ -109,6 +114,7 @@ class HomeScreenUi : Ui<HomeUiState> {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomNavigationBar(
     barNavItems: List<BottomNavItem>,
@@ -127,12 +133,27 @@ private fun BottomNavigationBar(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                     ),
-                    selected = selectedItem == item,
+                    selected = selectedItem.screen == item.screen,
                     onClick = {
                         onSelectItem(item)
                     },
                     label = { Text(stringResource(item.label)) },
-                    icon = { Icon(painterResource(item.icon), stringResource(item.label)) },
+                    icon = {
+                        BadgedBox(
+                            badge = {
+                                AnimatedContent(
+                                    targetState = item.showBadge,
+                                    label = "${item.label}-badge}"
+                                ) { showBadge ->
+                                    if (showBadge) {
+                                        Badge()
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(painterResource(item.icon), stringResource(item.label))
+                        }
+                    },
                 )
             }
         }

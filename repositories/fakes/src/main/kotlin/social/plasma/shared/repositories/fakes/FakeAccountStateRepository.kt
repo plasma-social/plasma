@@ -2,8 +2,10 @@ package social.plasma.shared.repositories.fakes
 
 import app.cash.nostrino.crypto.SecKeyGenerator
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.models.crypto.Bech32
 import social.plasma.shared.repositories.api.AccountStateRepository
+import java.time.Instant
 
 class FakeAccountStateRepository(
     private var secretKey: ByteArray? = null,
@@ -30,4 +32,11 @@ class FakeAccountStateRepository(
     override fun getPublicKey(): ByteArray? = publicKey
 
     override fun getSecretKey(): ByteArray? = secretKey
+    override fun observeLastNotificationSeenTimestamp(): Flow<Instant> {
+        return emptyFlow()
+    }
+
+    override fun updateLastNotificationSeen() {
+        TODO("Not yet implemented")
+    }
 }
