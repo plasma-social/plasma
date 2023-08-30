@@ -65,6 +65,7 @@ interface NotesDao {
     ): Flow<Boolean>
 
     @RewriteQueriesToDropUnusedColumns
+    @Transaction
     @Query("SELECT * FROM events WHERE id = :noteId")
     suspend fun getById(noteId: String): NoteWithUser?
 
@@ -182,6 +183,7 @@ interface NotesDao {
     fun observeHashTagNoteCount(hashtag: String, since: Long): Flow<Long>
 
     @RewriteQueriesToDropUnusedColumns
+    @Transaction
     @Query("SELECT * FROM events WHERE id = :noteId")
     fun observeById(noteId: String): Flow<NoteWithUser?>
 

@@ -45,7 +45,7 @@ class CommunityListUi : Ui<CommunityListUiState> {
                     )
                 }
             }
-            items(state.followedHashTags) { hashtag ->
+            items(state.followedHashTags, key = { item -> "followed-${item.name}"}) { hashtag ->
                 CircuitContent(
                     screen = CommunityListItemScreen(hashtag),
                     onNavEvent = { onEvent(OnChildNavEvent(it)) },
@@ -63,7 +63,7 @@ class CommunityListUi : Ui<CommunityListUiState> {
                 }
             }
 
-            items(state.recommendedHashTags, key = { it }) { hashtag ->
+            items(state.recommendedHashTags, key = { "recommended-${it.name}" }) { hashtag ->
                 CircuitContent(
                     screen = CommunityListItemScreen(hashtag),
                     onNavEvent = { onEvent(OnChildNavEvent(it)) },

@@ -24,6 +24,8 @@ class ObserveFollowedHashTags @Inject constructor(
                 tagList.map { tag ->
                     HashTag.parse(tag[1])
                 }
+            }.map { tagList ->
+                tagList.sortedBy { tag -> tag.name }
             }
     }
 }

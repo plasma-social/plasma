@@ -1,5 +1,6 @@
 package social.plasma.data.daos.fakes
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import social.plasma.data.daos.HashtagDao
 
@@ -15,7 +16,7 @@ class FakeHashTagDao : HashtagDao {
         return popularHashTags.value
     }
 
-    override suspend fun getCommunityLatestPubkeys(hashTag: String, limit: Int): List<String> {
+    override fun observeCommunityLatestPictures(hashTag: String, limit: Int): Flow<List<String>> {
         TODO("Not yet implemented")
     }
 }
