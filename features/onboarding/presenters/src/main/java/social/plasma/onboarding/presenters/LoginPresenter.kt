@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import dagger.assisted.Assisted
@@ -21,8 +23,10 @@ class LoginPresenter @AssistedInject constructor(
     private val accountStateRepository: AccountStateRepository,
     @Assisted private val navigator: Navigator,
 ) : Presenter<LoginUiState> {
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun present(): LoginUiState {
+        val keyboardController = LocalSoftwareKeyboardController.current
         var inputText by rememberSaveable { mutableStateOf("") }
         val decodedKey by produceState<ByteArray?>(initialValue = null, inputText) {
             value = if (inputText.startsWith(nsecPrefix)) {
@@ -44,7 +48,10 @@ class LoginPresenter @AssistedInject constructor(
             when (event) {
                 LoginUiEvent.OnClearInput -> inputText = ""
                 is LoginUiEvent.OnInputChange -> inputText = event.value
-                LoginUiEvent.OnLogin -> onLogin(inputText, decodedKey)
+                LoginUiEvent.OnLogin -> {
+                    keyboardController?.hide()
+                    onLogin(inputText, decodedKey)
+                }
             }
         }
     }

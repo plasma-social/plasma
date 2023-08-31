@@ -7,6 +7,7 @@ import social.plasma.features.discovery.screens.search.SearchBarUiState
 import social.plasma.features.discovery.screens.search.SearchSuggestionGroup
 import social.plasma.features.discovery.screens.search.SearchUiState
 import social.plasma.features.discovery.screens.search.UserSearchItem
+import social.plasma.models.Nip5Status
 
 internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiState> {
     private val searchSuggestionItems = listOf(
@@ -14,8 +15,7 @@ internal class SearchScreenPreviewProvider : PreviewParameterProvider<SearchUiSt
             pubKeyHex = "test",
             title = "John",
             imageUrl = null,
-            nip5Identifier = null,
-            isNip5Valid = null,
+            nip5Status = Nip5Status.Missing,
         ),
         HashTagSearchSuggestionItem(
             icon = SuggestionIcon.Recent,

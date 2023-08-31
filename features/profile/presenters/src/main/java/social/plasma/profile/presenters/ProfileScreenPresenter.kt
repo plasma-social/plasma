@@ -28,7 +28,6 @@ import social.plasma.domain.interactors.FollowPubkey
 import social.plasma.domain.interactors.GetLightningInvoice
 import social.plasma.domain.interactors.GetNip5Status
 import social.plasma.domain.interactors.GetPubkeyFollowerCount
-import social.plasma.domain.interactors.Nip5Status
 import social.plasma.domain.interactors.SyncProfileData
 import social.plasma.domain.interactors.UnfollowPubkey
 import social.plasma.domain.observers.ObserveFollowingCount
@@ -40,8 +39,10 @@ import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded.ProfileStat
+import social.plasma.features.profile.screens.ProfileUiState.Loaded.UserData
 import social.plasma.feeds.presenters.feed.FeedStateProducer
 import social.plasma.models.BitcoinAmount
+import social.plasma.models.Nip5Status
 import social.plasma.shared.repositories.api.AccountStateRepository
 import social.plasma.shared.utils.api.NumberFormatter
 
@@ -66,17 +67,16 @@ class ProfileScreenPresenter @AssistedInject constructor(
     private val myPubKey = PubKey(accountStateRepository.getPublicKey()?.toByteString()!!)
     private val pubKey = PubKey(args.pubKeyHex.decodeHex())
 
-    private val metadataInitialState =
-        ProfileUiState.Loaded.UserData(
-            displayName = args.pubKeyHex,
-            username = null,
-            about = null,
-            nip5Identifier = null,
-            avatarUrl = null,
-            publicKey = pubKey,
-            website = null,
-            banner = "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
-        )
+    private val metadataInitialState = UserData(
+        displayName = args.pubKeyHex,
+        username = null,
+        about = null,
+        nip5Identifier = null,
+        avatarUrl = null,
+        publicKey = pubKey,
+        website = null,
+        banner = "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
+    )
 
     private val pagingFlow = observePagedProfileFeed.flow.onStart {
         observePagedProfileFeed(
@@ -138,19 +138,26 @@ class ProfileScreenPresenter @AssistedInject constructor(
             optimisticFollowState ?: isProfileInMyContacts
         }
 
-        val isNip5Valid by produceState(initialValue = false, metadata) {
-            val status = getNip5Status.executeSync(
-                GetNip5Status.Params(
-                    pubKey = pubKey,
-                    identifier = metadata?.nip05
-                )
-            )
-            value = status == Nip5Status.Valid
+        val nip5Status by produceState<Nip5Status>(initialValue = Nip5Status.Missing, metadata) {
+            val nip5Indentifier = metadata?.nip05?.takeIf { it.isNotBlank() }
+
+            if (nip5Indentifier == null) {
+                value = Nip5Status.Missing
+            } else {
+                value = Nip5Status.Set.Loading(nip5Indentifier)
+                value =
+                    getNip5Status.executeSync(
+                        GetNip5Status.Params(
+                            pubKey,
+                            nip5Indentifier
+                        )
+                    )
+            }
         }
 
         val userData by produceState(initialValue = metadataInitialState, metadata) {
             metadata?.let {
-                value = ProfileUiState.Loaded.UserData(
+                value = UserData(
                     displayName = metadata!!.displayName ?: pubKey.shortBech32(),
                     banner = metadata!!.banner
                         ?: "https://pbs.twimg.com/media/FnbPBoKWYAAc0-F?format=jpg&name=4096x4096",
@@ -158,7 +165,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
                     username = metadata!!.name?.let { "@$it" },
                     about = metadata!!.about,
                     nip5Identifier = metadata!!.nip05,
-                    nip5Domain = metadata!!.nip05?.split("@")?.getOrNull(1),
+                    nip5Domain = metadata!!.nip05,
                     avatarUrl = metadata!!.picture ?: "",
                     publicKey = pubKey,
                 )
@@ -184,7 +191,7 @@ class ProfileScreenPresenter @AssistedInject constructor(
                 )
             ),
             following = isProfileFollowedByMe,
-            isNip5Valid = isNip5Valid,
+            nip5Status = nip5Status,
             userData = userData,
             showLightningIcon = metadata?.lud06 != null || metadata?.lud16 != null
         ) { event ->

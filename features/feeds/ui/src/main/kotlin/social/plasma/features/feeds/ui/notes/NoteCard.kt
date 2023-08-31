@@ -23,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -462,10 +461,6 @@ private fun NoteCardHeader(
     modifier: Modifier = Modifier,
     onHashTagClick: (String) -> Unit,
 ) {
-    val isNip5Valid by produceState(initialValue = false, uiModel.nip5Identifier) {
-        value = uiModel.isNip5Valid(uiModel.userPubkey, uiModel.nip5Identifier)
-    }
-
     uiModel.headerContent?.let {
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
             RichText(
@@ -517,11 +512,7 @@ private fun NoteCardHeader(
                 )
             }
 
-            if (isNip5Valid) {
-                uiModel.nip5Domain?.let {
-                    Nip5Badge(it)
-                }
-            }
+            Nip5Badge(uiModel.nip5Status)
         }
     }
 }

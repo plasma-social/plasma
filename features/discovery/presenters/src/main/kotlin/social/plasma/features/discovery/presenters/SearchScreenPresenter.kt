@@ -114,8 +114,7 @@ class SearchScreenPresenter @AssistedInject constructor(
                     pubKeyHex = it.pubKey.hex(),
                     imageUrl = it.imageUrl,
                     title = it.title,
-                    nip5Identifier = it.nip5Identifier,
-                    isNip5Valid = it.isNip5Valid,
+                    nip5Status = it.nip5Status,
                 )
             }
         }
