@@ -2,8 +2,6 @@ package social.plasma.nostr.relay
 
 import android.net.Uri
 import app.cash.nostrino.crypto.SecKey
-import com.tinder.scarlet.Scarlet
-import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import social.plasma.data.daos.RelayInfoDao
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
@@ -54,8 +51,6 @@ interface RelayManager {
 
 @Singleton
 class RealRelayManager @Inject constructor(
-    private val okHttpClient: OkHttpClient,
-    private val scarletBuilder: Scarlet.Builder,
     private val relayInfoDao: RelayInfoDao,
     @Named("default-relay-list") initialRelayUrls: List<String>,
 ) : RelayManager {
@@ -151,9 +146,7 @@ class RealRelayManager @Inject constructor(
                 write = relayInfo.write
             )
             relays.update { currentRelays -> currentRelays + (relayInfo.url to relay) }
-            if (relay.connectionStatus.value.status == Relay.Status.Initial) {
-                scope.launch { relay.connect() }
-            }
+            relay.connect()
         }
         return relay
     }
@@ -166,9 +159,6 @@ class RealRelayManager @Inject constructor(
     ): RelayImpl =
         RelayImpl(
             url = url,
-            service = scarletBuilder.webSocketFactory(okHttpClient.newWebSocketFactory(url))
-                .build().create(),
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             canRead = read,
             canWrite = write,
             supportedNips = supportedNips,
