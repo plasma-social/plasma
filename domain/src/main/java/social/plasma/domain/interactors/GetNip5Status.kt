@@ -4,6 +4,7 @@ import app.cash.nostrino.crypto.PubKey
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import social.plasma.domain.ResultInteractor
+import social.plasma.models.Nip5Status
 import social.plasma.shared.repositories.api.Nip5Validator
 import javax.inject.Inject
 import javax.inject.Named
@@ -21,7 +22,7 @@ class GetNip5Status @Inject constructor(
         val parts = params.identifier.split("@")
 
         if (parts.size != 2) {
-            return@withContext Nip5Status.Invalid
+            return@withContext Nip5Status.Set.Invalid(params.identifier)
         }
 
         val name = parts[0]
@@ -35,25 +36,16 @@ class GetNip5Status @Inject constructor(
                 .encodedPath("/.well-known/nostr.json")
                 .build()
         } catch (e: IllegalArgumentException) {
-            return@withContext Nip5Status.Invalid
+            return@withContext Nip5Status.Set.Invalid(params.identifier)
         }
 
         val isValid = nip5Validator.isValid(serverUrl = httpUrl, name = name, pubKeyHex = pubKeyHex)
 
         if (isValid) {
-            return@withContext Nip5Status.Valid
+            return@withContext Nip5Status.Set.Valid(params.identifier)
         } else {
-            return@withContext Nip5Status.Invalid
+            return@withContext Nip5Status.Set.Invalid(params.identifier)
         }
     }
 }
 
-sealed interface Nip5Status {
-    object Valid : Nip5Status
-
-    object Missing : Nip5Status
-
-    object Invalid : Nip5Status
-
-    fun isValid() = this == Valid
-}

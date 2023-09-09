@@ -3,6 +3,7 @@ package social.plasma.features.profile.screens
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.CircuitUiState
 import social.plasma.features.feeds.screens.eventfeed.EventFeedUiState
+import social.plasma.models.Nip5Status
 
 sealed interface ProfileUiState : CircuitUiState {
     object Loading : ProfileUiState
@@ -11,7 +12,7 @@ sealed interface ProfileUiState : CircuitUiState {
         val statCards: List<ProfileStat>,
         val userData: UserData,
         val following: Boolean? = false,
-        val isNip5Valid: Boolean = false,
+        val nip5Status: Nip5Status = Nip5Status.Missing,
         val showLightningIcon: Boolean = false,
         val onEvent: (ProfileUiEvent) -> Unit,
     ) : ProfileUiState {

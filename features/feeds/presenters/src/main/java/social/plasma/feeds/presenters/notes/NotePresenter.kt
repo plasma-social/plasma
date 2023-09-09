@@ -29,7 +29,6 @@ import shortBech32
 import social.plasma.common.screens.AndroidScreens
 import social.plasma.domain.interactors.GetLightningInvoice
 import social.plasma.domain.interactors.GetNip5Status
-import social.plasma.domain.interactors.Nip5Status
 import social.plasma.domain.interactors.RepostNote
 import social.plasma.domain.interactors.SendNoteReaction
 import social.plasma.domain.interactors.SyncMetadata
@@ -50,6 +49,7 @@ import social.plasma.models.Event
 import social.plasma.models.EventModel
 import social.plasma.models.HashTag
 import social.plasma.models.Mention
+import social.plasma.models.Nip5Status
 import social.plasma.models.NoteId
 import social.plasma.models.NoteMention
 import social.plasma.models.ProfileMention
@@ -136,19 +136,24 @@ class NotePresenter @AssistedInject constructor(
             value = buildBannerLabel(note.tags)
         }
 
-        val isNip5Valid by produceState(
-            initialValue = false,
+        val nip5Status by produceState<Nip5Status>(
+            initialValue = Nip5Status.Missing,
             notePubkey,
             notePubkeyMetadata
         ) {
-            value = when (getNip5Status.executeSync(
-                GetNip5Status.Params(
-                    notePubkey,
-                    notePubkeyMetadata?.nip05
-                )
-            )) {
-                Nip5Status.Invalid, Nip5Status.Missing -> false
-                Nip5Status.Valid -> true
+            val nip5Indentifier = notePubkeyMetadata?.nip05?.takeIf { it.isNotBlank() }
+
+            if (nip5Indentifier == null) {
+                value = Nip5Status.Missing
+            } else {
+                value = Nip5Status.Set.Loading(nip5Indentifier)
+                value =
+                    getNip5Status.executeSync(
+                        GetNip5Status.Params(
+                            notePubkey,
+                            nip5Indentifier
+                        )
+                    )
             }
         }
 
@@ -188,10 +193,9 @@ class NotePresenter @AssistedInject constructor(
                 likeCount = likeCount.toInt(),
                 avatarUrl = notePubkeyMetadata?.picture,
                 nip5Identifier = notePubkeyMetadata?.nip05,
-                nip5Domain = notePubkeyMetadata?.nip05?.split("@")?.getOrNull(1),
                 timePosted = instantFormatter.getRelativeTime(Instant.ofEpochSecond(note.createdAt)),
                 zapsEnabled = notePubkeyMetadata?.tipAddress != null,
-                isNip5Valid = { _, _ -> isNip5Valid }, // TODO change to variable
+                nip5Status = nip5Status,
             ),
             style = args.style,
         )

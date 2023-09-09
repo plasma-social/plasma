@@ -61,6 +61,7 @@ import social.plasma.features.profile.screens.ProfileUiEvent
 import social.plasma.features.profile.screens.ProfileUiState
 import social.plasma.features.profile.screens.ProfileUiState.Loaded
 import social.plasma.features.profile.screens.ProfileUiState.Loading
+import social.plasma.models.Nip5Status
 import social.plasma.ui.R
 import social.plasma.ui.components.ConfirmationDialog
 import social.plasma.ui.components.Nip5Badge
@@ -118,8 +119,8 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
 
                     item("bio") {
                         ProfileBio(userData = uiState.userData,
-                            isNip5Valid = uiState.isNip5Valid,
                             following = uiState.following,
+                            nip5Status = uiState.nip5Status,
                             onFollowClick = withHapticFeedBack {
                                 onEvent(ProfileUiEvent.OnFollowButtonClicked)
                             })
@@ -268,7 +269,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
     @Composable
     private fun ProfileBio(
         userData: Loaded.UserData,
-        isNip5Valid: Boolean,
+        nip5Status: Nip5Status,
         following: Boolean?,
         onFollowClick: () -> Unit,
     ) {
@@ -316,13 +317,7 @@ class ProfileScreenUi @Inject constructor() : Ui<ProfileUiState> {
 
             }
 
-            if (isNip5Valid) {
-                userData.nip5Domain?.let {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Nip5Badge(identifier = it)
-                }
-            }
+            Nip5Badge(nip5Status, modifier = Modifier.padding(top = 8.dp))
 
             userData.about?.let {
                 Spacer(modifier = Modifier.height(8.dp))

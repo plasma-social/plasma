@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.decodeHex
 import social.plasma.domain.SubjectInteractor
+import social.plasma.models.Nip5Status
 import social.plasma.models.TagSuggestion
 import social.plasma.shared.repositories.api.UserMetadataRepository
 import javax.inject.Inject
@@ -43,7 +44,8 @@ class GetUserSuggestions @Inject constructor(
                         imageUrl = userEntity.picture,
                         title = userEntity.userFacingName,
                         nip5Identifier = userEntity.nip05,
-                        isNip5Valid = null,
+                        nip5Status = userEntity.nip05?.takeIf { it.isNotBlank() }
+                            ?.let { Nip5Status.Set.Loading(it) } ?: Nip5Status.Missing
                     )
                 }
 
@@ -75,11 +77,11 @@ class GetUserSuggestions @Inject constructor(
                             suggestion.pubKey,
                             nip5Identifier
                         )
-                    ).isValid()
+                    )
 
                     synchronized(tagSuggestionsMap) {
                         tagSuggestionsMap[suggestion.pubKey] =
-                            suggestion.copy(isNip5Valid = nip5Status)
+                            suggestion.copy(nip5Status = nip5Status)
                     }
 
                     send(tagSuggestionsMap.values.toList())

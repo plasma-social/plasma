@@ -27,6 +27,7 @@ import social.plasma.features.discovery.screens.search.UserSearchItem
 import social.plasma.features.feeds.screens.threads.HashTagFeedScreen
 import social.plasma.features.profile.screens.ProfileScreen
 import social.plasma.models.HashTag
+import social.plasma.models.Nip5Status
 import social.plasma.models.UserMetadataEntity
 import social.plasma.shared.repositories.fakes.FakeAccountStateRepository
 import social.plasma.shared.repositories.fakes.FakeNip5Validator
@@ -283,8 +284,7 @@ class SearchScreenPresenterTest {
                         pubKeyHex = "test",
                         imageUrl = null,
                         title = "test",
-                        nip5Identifier = null,
-                        isNip5Valid = null,
+                        nip5Status = Nip5Status.Missing,
                     )
                 )
             )

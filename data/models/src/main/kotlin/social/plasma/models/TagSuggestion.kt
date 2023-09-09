@@ -7,5 +7,5 @@ data class TagSuggestion(
     val imageUrl: String?,
     val title: String,
     val nip5Identifier: String?,
-    val isNip5Valid: Boolean?,
+    val nip5Status: Nip5Status,
 )

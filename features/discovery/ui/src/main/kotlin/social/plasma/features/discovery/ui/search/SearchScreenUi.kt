@@ -250,10 +250,7 @@ fun UserSearchSuggestionItem(suggestion: UserSearchItem, onEvent: (SearchUiEvent
             Text(suggestion.title)
         },
         supportingContent = {
-            suggestion.nip5Identifier?.takeIf { it.isNotEmpty() }
-                ?.let {
-                    Nip5Badge(identifier = it, nip5Valid = suggestion.isNip5Valid)
-                }
+            Nip5Badge(suggestion.nip5Status)
         },
         leadingContent = {
             Avatar(

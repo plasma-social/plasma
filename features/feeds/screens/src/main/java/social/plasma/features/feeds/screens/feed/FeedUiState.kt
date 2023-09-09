@@ -5,8 +5,8 @@ import androidx.paging.PagingData
 import app.cash.nostrino.crypto.PubKey
 import com.slack.circuit.runtime.CircuitUiState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import social.plasma.models.Mention
+import social.plasma.models.Nip5Status
 import social.plasma.models.NoteId
 import social.plasma.models.TipAddress
 import social.plasma.opengraph.OpenGraphMetadata
@@ -18,16 +18,7 @@ data class FeedUiState(
     val listState: LazyListState,
     val displayRefreshButton: Boolean = false,
     val onEvent: (FeedUiEvent) -> Unit,
-) : CircuitUiState {
-    companion object {
-        val Empty = FeedUiState(
-            pagingFlow = emptyFlow(),
-            getOpenGraphMetadata = { null },
-            listState = LazyListState(),
-            onEvent = {},
-        )
-    }
-}
+) : CircuitUiState
 
 sealed interface FeedItem {
     val key: String
@@ -49,8 +40,7 @@ sealed interface FeedItem {
         val userPubkey: PubKey,
         val hidden: Boolean = false,
         val isLiked: Boolean = false,
-        val isNip5Valid: suspend (PubKey, String?) -> Boolean = { _, _ -> false },
-        val nip5Domain: String? = null,
+        val nip5Status: Nip5Status = Nip5Status.Missing,
         val zapsEnabled: Boolean = false,
         val tipAddress: TipAddress? = null,
     ) : FeedItem
