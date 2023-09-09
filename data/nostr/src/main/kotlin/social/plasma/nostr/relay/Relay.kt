@@ -2,7 +2,6 @@ package social.plasma.nostr.relay
 
 import app.cash.nostrino.crypto.SecKey
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import social.plasma.nostr.relay.message.ClientMessage.EventMessage
 import social.plasma.nostr.relay.message.ClientMessage.SubscribeMessage
 import social.plasma.nostr.relay.message.ClientMessage.UnsubscribeMessage
@@ -14,7 +13,7 @@ interface Relay {
     val supportedNips: Set<Nip>
     val url: String
 
-    val connectionStatus: StateFlow<RelayStatus>
+    val connectionStatus: Flow<RelayStatus>
 
     val relayMessages: Flow<RelayMessage>
 
