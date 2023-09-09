@@ -19,7 +19,6 @@ import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.CircuitConfig
 import com.slack.circuit.foundation.NavigableCircuitContent
-import com.slack.circuit.foundation.NavigatorDefaults
 import com.slack.circuit.foundation.push
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuit.overlay.ContentWithOverlays
@@ -80,7 +79,6 @@ class MainActivity : ComponentActivity() {
                                 NavigableCircuitContent(
                                     plasmaNavigator,
                                     backstack,
-                                    decoration = NavigatorDefaults.EmptyDecoration
                                 )
                             }
                         }

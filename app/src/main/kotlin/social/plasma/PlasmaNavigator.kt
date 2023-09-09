@@ -8,7 +8,7 @@ import com.slack.circuit.foundation.screen
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.Screen
 import social.plasma.common.screens.AndroidScreens
-import social.plasma.common.screens.StandaloneScreen
+import social.plasma.features.onboarding.screens.home.HomeScreen
 
 class PlasmaNavigator(
     private val activity: Activity,
@@ -33,10 +33,12 @@ class PlasmaNavigator(
                     return
                 }
 
-                when (screen) {
-                    is StandaloneScreen -> openIntent(MainActivity.getStartIntent(activity, screen))
-                    else -> circuitNavigator.goTo(screen)
+                if (currentScreen == HomeScreen) {
+                    return openIntent(MainActivity.getStartIntent(activity, screen))
                 }
+
+
+                circuitNavigator.goTo(screen)
             }
         }
     }
