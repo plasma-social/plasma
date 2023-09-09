@@ -44,11 +44,6 @@ class CommunityListItemPresenter @AssistedInject constructor(
         )
     }
 
-    private val avatarListFlow = observeCommunityAvatars.flow.onStart {
-        observeCommunityAvatars(ObserveCommunityAvatars.Params(limit = 6, args.hashtag))
-    }
-
-
     @Composable
     override fun present(): CommunityListItemUiState {
         val trailingText by produceState(initialValue = "") {
@@ -69,9 +64,12 @@ class CommunityListItemPresenter @AssistedInject constructor(
             }
         }
 
-
         val captionText by remember { captionTextFlow }.collectAsState(initial = "")
-        val avatarList by remember { avatarListFlow }.collectAsState(initial = emptyList())
+        val avatarList by remember {
+            observeCommunityAvatars.flow.onStart {
+                observeCommunityAvatars(ObserveCommunityAvatars.Params(limit = 6, args.hashtag))
+            }
+        }.collectAsState(initial = emptyList())
 
         return CommunityListItemUiState(
             name = args.hashtag.displayName,

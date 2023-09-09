@@ -28,12 +28,15 @@ class CommunityListPresenter @AssistedInject constructor(
                 observeFollowedHashTags(Unit)
             }
     private val recommendedHashTags = listOf(
+        HashTag.parse("art"),
+        HashTag.parse("bitcoin"),
         HashTag.parse("coffeechain"),
-        HashTag.parse("foodchain"),
         HashTag.parse("foodstr"),
         HashTag.parse("grownostr"),
+        HashTag.parse("nostr"),
         HashTag.parse("plasma"),
         HashTag.parse("plebchain"),
+        HashTag.parse("tunestr"),
         HashTag.parse("zap"),
     )
 
